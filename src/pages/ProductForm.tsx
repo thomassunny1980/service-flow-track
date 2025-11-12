@@ -22,7 +22,7 @@ const productSchema = z.object({
   product_name: z.string().trim().min(1, "Product name is required").max(200),
   serial_number: z.string().trim().max(100).optional().or(z.literal("")),
   customer_name: z.string().trim().min(1, "Customer name is required").max(200),
-  customer_contact: z.string().trim().max(100).optional().or(z.literal("")),
+  customer_contact: z.string().trim().min(1, "Customer mobile number is required").max(100),
   status: z.enum([
     "received",
     "in_progress",
@@ -118,6 +118,40 @@ const ProductForm = () => {
           throw new Error("User not authenticated");
         }
 
+        // Create customer account if customer_contact (mobile) is provided
+        let customerId: string | null = null;
+        if (productData.customer_contact) {
+          try {
+            const { data: sessionData } = await supabase.auth.getSession();
+            const token = sessionData.session?.access_token;
+            
+            if (token) {
+              const response = await fetch(
+                `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-customer`,
+                {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                  },
+                  body: JSON.stringify({
+                    mobile: productData.customer_contact,
+                    fullName: productData.customer_name,
+                  }),
+                }
+              );
+
+              if (response.ok) {
+                const data = await response.json();
+                customerId = data.customerId;
+              }
+            }
+          } catch (err) {
+            console.error('Failed to create customer account:', err);
+            // Continue without customer_id if customer creation fails
+          }
+        }
+
         const { error } = await supabase.from("products").insert({
           product_name: productData.product_name,
           serial_number: productData.serial_number,
@@ -129,10 +163,18 @@ const ProductForm = () => {
           external_sent_date: productData.external_sent_date,
           external_expected_return: productData.external_expected_return,
           created_by: user.id,
+          customer_id: customerId,
         });
 
         if (error) throw error;
-        toast.success("Product created successfully");
+        
+        if (customerId) {
+          toast.success(`Product created! Customer login: ${productData.customer_contact}@customer.local / Password: 123456`, {
+            duration: 10000,
+          });
+        } else {
+          toast.success("Product created successfully");
+        }
       }
 
       navigate("/products");
@@ -210,15 +252,21 @@ const ProductForm = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="customer_contact">Customer Contact</Label>
+                  <Label htmlFor="customer_contact">Customer Mobile Number *</Label>
                   <Input
                     id="customer_contact"
+                    type="tel"
+                    placeholder="Mobile number for customer login"
                     value={formData.customer_contact}
                     onChange={(e) =>
                       setFormData({ ...formData, customer_contact: e.target.value })
                     }
+                    required
                     maxLength={100}
                   />
+                  <p className="text-xs text-muted-foreground">
+                    Customer will receive login credentials automatically
+                  </p>
                 </div>
               </div>
 
