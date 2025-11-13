@@ -23,6 +23,8 @@ Deno.serve(async (req) => {
 
     // Verify the request is from an authenticated admin user
     const authHeader = req.headers.get('Authorization');
+    console.log('Auth header present:', !!authHeader);
+    
     if (!authHeader) {
       throw new Error('Missing authorization header');
     }
@@ -30,15 +32,20 @@ Deno.serve(async (req) => {
     const token = authHeader.replace('Bearer ', '');
     const { data: { user }, error: userError } = await anonClient.auth.getUser(token);
 
+    console.log('User validation:', { userId: user?.id, error: userError?.message });
+
     if (userError || !user) {
+      console.error('Auth error:', userError);
       throw new Error('Unauthorized');
     }
 
     // Check if user is admin
-    const { data: roles } = await anonClient
+    const { data: roles, error: rolesError } = await anonClient
       .from('user_roles')
       .select('role')
       .eq('user_id', user.id);
+
+    console.log('Roles check:', { roles, rolesError: rolesError?.message });
 
     const isAdmin = roles?.some(r => r.role === 'admin');
     if (!isAdmin) {
