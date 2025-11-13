@@ -58,7 +58,9 @@ const Dashboard = () => {
 
       setCounts(newCounts);
     } catch (error) {
-      console.error("Error fetching status counts:", error);
+      if (import.meta.env.DEV) {
+        console.error("Error fetching status counts:", error);
+      }
     } finally {
       setLoading(false);
     }

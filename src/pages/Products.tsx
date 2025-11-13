@@ -55,7 +55,9 @@ const Products = () => {
       if (error) throw error;
       setProducts(data || []);
     } catch (error) {
-      console.error("Error fetching products:", error);
+      if (import.meta.env.DEV) {
+        console.error("Error fetching products:", error);
+      }
     } finally {
       setLoading(false);
     }

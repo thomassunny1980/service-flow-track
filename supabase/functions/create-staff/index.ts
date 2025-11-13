@@ -60,6 +60,26 @@ Deno.serve(async (req) => {
       throw new Error('Role must be either admin or staff');
     }
 
+    // Server-side password validation for security
+    if (password.length < 12) {
+      throw new Error('Password must be at least 12 characters long');
+    }
+    if (password.length > 72) {
+      throw new Error('Password must not exceed 72 characters');
+    }
+    if (!/[A-Z]/.test(password)) {
+      throw new Error('Password must contain at least one uppercase letter');
+    }
+    if (!/[a-z]/.test(password)) {
+      throw new Error('Password must contain at least one lowercase letter');
+    }
+    if (!/[0-9]/.test(password)) {
+      throw new Error('Password must contain at least one number');
+    }
+    if (!/[^A-Za-z0-9]/.test(password)) {
+      throw new Error('Password must contain at least one special character');
+    }
+
     // Create new user
     const { data: newUser, error: createError } = await supabaseClient.auth.admin.createUser({
       email,

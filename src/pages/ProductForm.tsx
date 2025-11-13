@@ -81,7 +81,9 @@ const ProductForm = () => {
         external_expected_return: data.external_expected_return || "",
       });
     } catch (error) {
-      console.error("Error fetching product:", error);
+      if (import.meta.env.DEV) {
+        console.error("Error fetching product:", error);
+      }
       toast.error("Failed to load product");
     }
   };

@@ -65,7 +65,9 @@ const ProductDetail = () => {
       if (error) throw error;
       setProduct(data);
     } catch (error) {
-      console.error("Error fetching product:", error);
+      if (import.meta.env.DEV) {
+        console.error("Error fetching product:", error);
+      }
       toast.error("Failed to load product");
     } finally {
       setLoading(false);
@@ -107,7 +109,9 @@ const ProductDetail = () => {
         setRemarks([]);
       }
     } catch (error) {
-      console.error("Error fetching remarks:", error);
+      if (import.meta.env.DEV) {
+        console.error("Error fetching remarks:", error);
+      }
     }
   };
 

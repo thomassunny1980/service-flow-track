@@ -27,7 +27,13 @@ import { z } from "zod";
 const userSchema = z.object({
   email: z.string().trim().email("Invalid email address").max(255),
   fullName: z.string().trim().min(2, "Name must be at least 2 characters").max(100),
-  password: z.string().min(6, "Password must be at least 6 characters").max(72),
+  password: z.string()
+    .min(12, "Password must be at least 12 characters")
+    .max(72, "Password must not exceed 72 characters")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number")
+    .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
   role: z.enum(["admin", "staff"]),
 });
 
@@ -82,7 +88,9 @@ const UserManagement = () => {
         setUsers([]);
       }
     } catch (error) {
-      console.error("Error fetching users:", error);
+      if (import.meta.env.DEV) {
+        console.error("Error fetching users:", error);
+      }
       toast.error("Failed to load users");
     }
   };
@@ -212,7 +220,7 @@ const UserManagement = () => {
                     }
                     required
                     maxLength={72}
-                    placeholder="Min. 6 characters"
+                    placeholder="Min. 12 characters, mix of upper/lower/number/special"
                   />
                 </div>
                 <div className="space-y-2">
