@@ -11,6 +11,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -21,7 +28,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "sonner";
-import { UserPlus, Trash2 } from "lucide-react";
+import { UserPlus, Trash2, Pencil } from "lucide-react";
 import { z } from "zod";
 
 const userSchema = z.object({
@@ -54,6 +61,13 @@ const UserManagement = () => {
     email: "",
     fullName: "",
     password: "",
+    role: "staff",
+  });
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<UserRole | null>(null);
+  const [editFormData, setEditFormData] = useState({
+    email: "",
+    fullName: "",
     role: "staff",
   });
 
@@ -141,6 +155,82 @@ const UserManagement = () => {
         toast.error(error.errors[0].message);
       } else {
         toast.error(error.message || "Failed to create user");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditUser = (user: UserRole) => {
+    setEditingUser(user);
+    setEditFormData({
+      email: user.profiles?.email || "",
+      fullName: user.profiles?.full_name || "",
+      role: user.role as "admin" | "staff",
+    });
+    setEditDialogOpen(true);
+  };
+
+  const handleUpdateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      
+      if (!token) {
+        throw new Error("Not authenticated");
+      }
+
+      if (!editingUser) {
+        throw new Error("No user selected");
+      }
+
+      // Validate email if changed
+      if (editFormData.email && editFormData.email !== editingUser.profiles?.email) {
+        const emailSchema = z.string().trim().email("Invalid email address").max(255);
+        emailSchema.parse(editFormData.email);
+      }
+
+      // Validate full name if changed
+      if (editFormData.fullName && editFormData.fullName !== editingUser.profiles?.full_name) {
+        const nameSchema = z.string().trim().min(2, "Name must be at least 2 characters").max(100);
+        nameSchema.parse(editFormData.fullName);
+      }
+
+      // Call edge function to update user
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/edit-staff`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            userId: editingUser.user_id,
+            email: editFormData.email !== editingUser.profiles?.email ? editFormData.email : undefined,
+            fullName: editFormData.fullName !== editingUser.profiles?.full_name ? editFormData.fullName : undefined,
+            role: editFormData.role !== editingUser.role ? editFormData.role : undefined,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to update user");
+      }
+
+      toast.success("User updated successfully!");
+      setEditDialogOpen(false);
+      setEditingUser(null);
+      fetchUsers();
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+      } else {
+        toast.error(error.message || "Failed to update user");
       }
     } finally {
       setLoading(false);
@@ -273,13 +363,22 @@ const UserManagement = () => {
                       </TableCell>
                       <TableCell className="capitalize">{user.role}</TableCell>
                       <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDeleteUser(user.user_id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleEditUser(user)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDeleteUser(user.user_id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -288,6 +387,70 @@ const UserManagement = () => {
             </CardContent>
           </Card>
         </div>
+
+        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit User</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleUpdateUser} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="editFullName">Full Name</Label>
+                <Input
+                  id="editFullName"
+                  value={editFormData.fullName}
+                  onChange={(e) =>
+                    setEditFormData({ ...editFormData, fullName: e.target.value })
+                  }
+                  required
+                  maxLength={100}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="editEmail">Email</Label>
+                <Input
+                  id="editEmail"
+                  type="email"
+                  value={editFormData.email}
+                  onChange={(e) =>
+                    setEditFormData({ ...editFormData, email: e.target.value })
+                  }
+                  required
+                  maxLength={255}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="editRole">Role</Label>
+                <Select
+                  value={editFormData.role}
+                  onValueChange={(value) =>
+                    setEditFormData({ ...editFormData, role: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="staff">Staff</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex gap-2">
+                <Button type="submit" disabled={loading}>
+                  {loading ? "Updating..." : "Update User"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setEditDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
     </Layout>
   );
