@@ -15,6 +15,37 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Create a client for validating the user token
+    const anonClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+    );
+
+    // Verify the request is from an authenticated admin user
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      throw new Error('Missing authorization header');
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: userError } = await anonClient.auth.getUser(token);
+
+    if (userError || !user) {
+      throw new Error('Unauthorized');
+    }
+
+    // Check if user is admin
+    const { data: roles } = await anonClient
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id);
+
+    const isAdmin = roles?.some(r => r.role === 'admin');
+    if (!isAdmin) {
+      throw new Error('Only admins can create staff accounts');
+    }
+
+    // Create a service role client for admin operations
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
@@ -25,30 +56,6 @@ Deno.serve(async (req) => {
         }
       }
     );
-
-    // Verify the request is from an authenticated admin user
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      throw new Error('Missing authorization header');
-    }
-
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
-
-    if (userError || !user) {
-      throw new Error('Unauthorized');
-    }
-
-    // Check if user is admin
-    const { data: roles } = await supabaseClient
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id);
-
-    const isAdmin = roles?.some(r => r.role === 'admin');
-    if (!isAdmin) {
-      throw new Error('Only admins can create staff accounts');
-    }
 
     const { email, password, fullName, role }: CreateStaffRequest = await req.json();
 
