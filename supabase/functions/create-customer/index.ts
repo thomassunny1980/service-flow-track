@@ -54,32 +54,45 @@ Deno.serve(async (req) => {
       throw new Error('Mobile and fullName are required');
     }
 
-    const customerEmail = `${mobile}@customer.local`;
-
-    // Check if customer already exists
-    const { data: existingUser } = await supabaseClient.auth.admin.listUsers();
-    const existing = existingUser?.users.find(u => u.email === customerEmail);
-
-    if (existing) {
-      // Customer already exists, return their ID
-      return new Response(
-        JSON.stringify({ customerId: existing.id, existed: true }),
-        {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200,
-        }
-      );
+    // Validate mobile number format (digits only)
+    if (!/^[0-9]{10,15}$/.test(mobile)) {
+      throw new Error('Mobile number must be 10-15 digits');
     }
 
-    // Create new customer user
+    const customerEmail = `${mobile}@customer.local`;
+
+    // Generate secure random password for this customer
+    const passwordArray = new Uint8Array(16);
+    crypto.getRandomValues(passwordArray);
+    const securePassword = Array.from(passwordArray, byte => 
+      byte.toString(36).padStart(2, '0')
+    ).join('').slice(0, 12);
+
+    // Try to create new customer user
     const { data: newUser, error: createError } = await supabaseClient.auth.admin.createUser({
       email: customerEmail,
-      password: '123456',
+      password: securePassword,
       email_confirm: true,
       user_metadata: {
         full_name: fullName,
       },
     });
+
+    // If user already exists, find and return their ID
+    if (createError && createError.message?.includes('already registered')) {
+      const { data: users } = await supabaseClient.auth.admin.listUsers();
+      const existingUser = users?.users.find(u => u.email === customerEmail);
+      
+      if (existingUser) {
+        return new Response(
+          JSON.stringify({ customerId: existingUser.id, existed: true }),
+          {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 200,
+          }
+        );
+      }
+    }
 
     if (createError) {
       throw createError;
@@ -102,7 +115,11 @@ Deno.serve(async (req) => {
     });
 
     return new Response(
-      JSON.stringify({ customerId: newUser.user.id, existed: false }),
+      JSON.stringify({ 
+        customerId: newUser.user.id, 
+        existed: false,
+        tempPassword: securePassword 
+      }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
