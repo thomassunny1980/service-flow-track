@@ -43,6 +43,7 @@ interface UserRole {
   role: string;
   profiles?: {
     full_name: string;
+    email: string;
   };
 }
 
@@ -74,13 +75,13 @@ const UserManagement = () => {
         const userIds = data.map(u => u.user_id);
         const { data: profilesData } = await supabase
           .from("profiles")
-          .select("id, full_name")
+          .select("id, full_name, email")
           .in("id", userIds);
         
         // Merge the data
         const usersWithProfiles = data.map(user => ({
           ...user,
-          profiles: profilesData?.find(p => p.id === user.user_id) || { full_name: "Unknown" }
+          profiles: profilesData?.find(p => p.id === user.user_id) || { full_name: "Unknown", email: "" }
         }));
         
         setUsers(usersWithProfiles);
@@ -256,6 +257,7 @@ const UserManagement = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
                     <TableHead>Role</TableHead>
                     <TableHead className="w-[100px]">Actions</TableHead>
                   </TableRow>
@@ -265,6 +267,9 @@ const UserManagement = () => {
                     <TableRow key={user.id}>
                       <TableCell>
                         {user.profiles?.full_name || "Unknown"}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {user.profiles?.email || "N/A"}
                       </TableCell>
                       <TableCell className="capitalize">{user.role}</TableCell>
                       <TableCell>
