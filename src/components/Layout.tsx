@@ -15,6 +15,7 @@ const Layout = ({ children }: LayoutProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -34,11 +35,30 @@ const Layout = ({ children }: LayoutProps) => {
       
       if (!session) {
         navigate("/auth");
+      } else {
+        checkUserRole(session.user.id);
       }
     });
 
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  const checkUserRole = async (userId: string) => {
+    try {
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .eq("role", "admin")
+        .maybeSingle();
+      
+      setIsAdmin(!!data);
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error("Error checking user role:", error);
+      }
+    }
+  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -67,9 +87,11 @@ const Layout = ({ children }: LayoutProps) => {
                 <Link to="/products">
                   <Button variant="ghost">Products</Button>
                 </Link>
-                <Link to="/users">
-                  <Button variant="ghost">Users</Button>
-                </Link>
+                {isAdmin && (
+                  <Link to="/users">
+                    <Button variant="ghost">Users</Button>
+                  </Link>
+                )}
               </div>
             </div>
             
@@ -103,11 +125,13 @@ const Layout = ({ children }: LayoutProps) => {
                   Products
                 </Button>
               </Link>
-              <Link to="/users" onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start">
-                  Users
-                </Button>
-              </Link>
+              {isAdmin && (
+                <Link to="/users" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" className="w-full justify-start">
+                    Users
+                  </Button>
+                </Link>
+              )}
               <Button
                 onClick={() => {
                   handleLogout();
