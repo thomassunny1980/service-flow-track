@@ -118,39 +118,23 @@ const ProductForm = () => {
           throw new Error("User not authenticated");
         }
 
-        // Create customer account if customer_contact (mobile) is provided
+        // Create customer account with secure password
         let customerId: string | null = null;
-        if (productData.customer_contact) {
-          try {
-            const { data: sessionData } = await supabase.auth.getSession();
-            const token = sessionData.session?.access_token;
-            
-            if (token) {
-              const response = await fetch(
-                `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-customer`,
-                {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                  },
-                  body: JSON.stringify({
-                    mobile: productData.customer_contact,
-                    fullName: productData.customer_name,
-                  }),
-                }
-              );
-
-              if (response.ok) {
-                const data = await response.json();
-                customerId = data.customerId;
-              }
-            }
-          } catch (err) {
-            console.error('Failed to create customer account:', err);
-            // Continue without customer_id if customer creation fails
+        let tempPassword: string | null = null;
+        
+        const { data: customerData, error: customerError } = await supabase.functions.invoke(
+          'create-customer',
+          {
+            body: { 
+              mobile: productData.customer_contact, 
+              fullName: productData.customer_name 
+            },
           }
-        }
+        );
+
+        if (customerError) throw customerError;
+        customerId = customerData.customerId;
+        tempPassword = customerData.tempPassword;
 
         const { error } = await supabase.from("products").insert({
           product_name: productData.product_name,
@@ -168,10 +152,11 @@ const ProductForm = () => {
 
         if (error) throw error;
         
-        if (customerId) {
-          toast.success(`Product created! Customer login: ${productData.customer_contact}@customer.local / Password: 123456`, {
-            duration: 10000,
-          });
+        if (tempPassword) {
+          toast.success(
+            `Product created! Customer login credentials - Mobile: ${productData.customer_contact}, Password: ${tempPassword}`,
+            { duration: 15000 }
+          );
         } else {
           toast.success("Product created successfully");
         }

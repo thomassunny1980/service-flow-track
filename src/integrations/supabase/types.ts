@@ -19,7 +19,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           customer_contact: string | null
-          customer_id: string | null
+          customer_id: string
           customer_name: string
           external_expected_return: string | null
           external_sent_date: string | null
@@ -35,7 +35,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           customer_contact?: string | null
-          customer_id?: string | null
+          customer_id: string
           customer_name: string
           external_expected_return?: string | null
           external_sent_date?: string | null
@@ -51,7 +51,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           customer_contact?: string | null
-          customer_id?: string | null
+          customer_id?: string
           customer_name?: string
           external_expected_return?: string | null
           external_sent_date?: string | null
