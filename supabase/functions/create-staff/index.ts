@@ -104,11 +104,7 @@ Deno.serve(async (req) => {
       role,
     });
 
-    // Create profile
-    await supabaseClient.from('profiles').insert({
-      id: newUser.user.id,
-      full_name: fullName,
-    });
+    // Profile is automatically created by the handle_new_user() trigger
 
     return new Response(
       JSON.stringify({ success: true, userId: newUser.user.id }),
