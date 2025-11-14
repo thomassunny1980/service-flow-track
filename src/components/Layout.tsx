@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { User, Session } from "@supabase/supabase-js";
-import { Package, LogOut, Menu, X } from "lucide-react";
+import { Package, LogOut, Menu, X, UserCircle } from "lucide-react";
 import { toast } from "sonner";
 
 interface LayoutProps {
@@ -96,6 +96,11 @@ const Layout = ({ children }: LayoutProps) => {
             </div>
             
             <div className="flex items-center gap-4">
+              <Link to="/profile" className="hidden md:block">
+                <Button variant="ghost" size="icon">
+                  <UserCircle className="h-5 w-5" />
+                </Button>
+              </Link>
               <Button
                 variant="ghost"
                 size="icon"
@@ -132,6 +137,12 @@ const Layout = ({ children }: LayoutProps) => {
                   </Button>
                 </Link>
               )}
+              <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start">
+                  <UserCircle className="mr-2 h-4 w-4" />
+                  Profile
+                </Button>
+              </Link>
               <Button
                 onClick={() => {
                   handleLogout();

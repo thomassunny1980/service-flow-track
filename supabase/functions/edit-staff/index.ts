@@ -6,6 +6,7 @@ interface EditStaffRequest {
   email?: string;
   fullName?: string;
   role?: 'admin' | 'staff';
+  password?: string;
 }
 
 Deno.serve(async (req) => {
@@ -64,13 +65,13 @@ Deno.serve(async (req) => {
       }
     );
 
-    const { userId, email, fullName, role }: EditStaffRequest = await req.json();
+    const { userId, email, fullName, role, password }: EditStaffRequest = await req.json();
 
     if (!userId) {
       throw new Error('User ID is required');
     }
 
-    console.log('Editing user:', { userId, email, fullName, role });
+    console.log('Editing user:', { userId, email, fullName, role, passwordProvided: !!password });
 
     // Update email if provided
     if (email) {
@@ -118,6 +119,19 @@ Deno.serve(async (req) => {
 
       if (profileEmailError) {
         console.error('Profile email update error:', profileEmailError);
+      }
+    }
+
+    // Update password if provided
+    if (password) {
+      const { error: passwordError } = await supabaseClient.auth.admin.updateUserById(
+        userId,
+        { password }
+      );
+
+      if (passwordError) {
+        console.error('Password update error:', passwordError);
+        throw new Error(`Failed to update password: ${passwordError.message}`);
       }
     }
 
