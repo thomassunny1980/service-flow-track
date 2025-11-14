@@ -27,10 +27,33 @@ const Dashboard = () => {
     delivered: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [userName, setUserName] = useState<string>("");
 
   useEffect(() => {
     fetchStatusCounts();
+    fetchUserProfile();
   }, []);
+
+  const fetchUserProfile = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("id", user.id)
+          .single();
+        
+        if (profile) {
+          setUserName(profile.full_name);
+        }
+      }
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error("Error fetching user profile:", error);
+      }
+    }
+  };
 
   const fetchStatusCounts = async () => {
     try {
@@ -122,10 +145,20 @@ const Dashboard = () => {
     <Layout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Overview of all service items by status
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold">Dashboard</h1>
+              <p className="text-muted-foreground">
+                Overview of all service items by status
+              </p>
+            </div>
+            {userName && (
+              <div className="text-right">
+                <p className="text-sm text-muted-foreground">Logged in as</p>
+                <p className="text-lg font-semibold">{userName}</p>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
