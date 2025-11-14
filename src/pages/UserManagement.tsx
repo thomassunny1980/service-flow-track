@@ -69,6 +69,7 @@ const UserManagement = () => {
     email: "",
     fullName: "",
     role: "staff",
+    password: "",
   });
 
   useEffect(() => {
@@ -167,6 +168,7 @@ const UserManagement = () => {
       email: user.profiles?.email || "",
       fullName: user.profiles?.full_name || "",
       role: user.role as "admin" | "staff",
+      password: "",
     });
     setEditDialogOpen(true);
   };
@@ -435,6 +437,23 @@ const UserManagement = () => {
                     <SelectItem value="admin">Admin</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="editPassword">New Password (optional)</Label>
+                <Input
+                  id="editPassword"
+                  type="password"
+                  value={editFormData.password}
+                  onChange={(e) =>
+                    setEditFormData({ ...editFormData, password: e.target.value })
+                  }
+                  placeholder="Leave blank to keep current password"
+                  minLength={12}
+                  maxLength={72}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Leave blank to keep the current password. If changing, must be at least 12 characters.
+                </p>
               </div>
               <div className="flex gap-2">
                 <Button type="submit" disabled={loading}>
