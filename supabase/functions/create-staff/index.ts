@@ -39,15 +39,28 @@ Deno.serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
-    // Check if user is admin
-    const { data: roles, error: rolesError } = await anonClient
+    // Create a client that uses the user's JWT so RLS sees auth.uid()
+    const userClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: { headers: { Authorization: `Bearer ${token}` } },
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      }
+    );
+
+    // Check if user is admin using RLS-aware client
+    const { data: roles, error: rolesError } = await userClient
       .from('user_roles')
       .select('role')
       .eq('user_id', user.id);
 
     console.log('Roles check:', { roles, rolesError: rolesError?.message });
 
-    const isAdmin = roles?.some(r => r.role === 'admin');
+    const isAdmin = roles?.some((r: { role: string }) => r.role === 'admin');
     if (!isAdmin) {
       throw new Error('Only admins can create staff accounts');
     }
