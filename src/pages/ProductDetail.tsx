@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { ArrowLeft, Edit, MessageSquare } from "lucide-react";
+import { ArrowLeft, Edit, MessageSquare, Receipt as ReceiptIcon } from "lucide-react";
 import StatusBadge from "@/components/StatusBadge";
 import { format } from "date-fns";
 import { z } from "zod";
+import Receipt from "@/components/Receipt";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const remarkSchema = z.object({
   content: z.string().trim().min(1, "Remark cannot be empty").max(1000, "Remark is too long"),
@@ -48,6 +50,7 @@ const ProductDetail = () => {
   const [newRemark, setNewRemark] = useState("");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [showReceipt, setShowReceipt] = useState(false);
 
   useEffect(() => {
     fetchProductDetails();
@@ -179,10 +182,16 @@ const ProductDetail = () => {
               <p className="text-muted-foreground">Product details and history</p>
             </div>
           </div>
-          <Button onClick={() => navigate(`/products/edit/${product.id}`)}>
-            <Edit className="mr-2 h-4 w-4" />
-            Edit
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setShowReceipt(true)}>
+              <ReceiptIcon className="mr-2 h-4 w-4" />
+              Receipt
+            </Button>
+            <Button onClick={() => navigate(`/products/edit/${product.id}`)}>
+              <Edit className="mr-2 h-4 w-4" />
+              Edit
+            </Button>
+          </div>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
@@ -305,6 +314,15 @@ const ProductDetail = () => {
             </div>
           </CardContent>
         </Card>
+
+        <Dialog open={showReceipt} onOpenChange={setShowReceipt}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Item Received Acknowledgment</DialogTitle>
+            </DialogHeader>
+            <Receipt product={product} />
+          </DialogContent>
+        </Dialog>
       </div>
     </Layout>
   );
