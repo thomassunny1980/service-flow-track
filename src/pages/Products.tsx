@@ -188,15 +188,19 @@ const Products = () => {
                     <TableCell>{product.serial_number || "-"}</TableCell>
                     <TableCell>{product.customer_name}</TableCell>
                     <TableCell>{product.customer_contact || "-"}</TableCell>
-                    <TableCell>
-                      {product.service_charge ? `₹${product.service_charge.toFixed(2)}` : "-"}
+                    <TableCell className="text-right">
+                      {(product.status === 'completed' || product.status === 'delivered') && product.service_charge
+                        ? `₹${product.service_charge.toFixed(2)}`
+                        : "-"}
                     </TableCell>
-                    <TableCell>
-                      {product.amount_paid ? `₹${product.amount_paid.toFixed(2)}` : "-"}
+                    <TableCell className="text-right">
+                      {product.status === 'delivered' && product.amount_paid !== null
+                        ? `₹${product.amount_paid.toFixed(2)}`
+                        : "-"}
                     </TableCell>
-                    <TableCell>
-                      {product.service_charge 
-                        ? `₹${((product.service_charge || 0) - (product.amount_paid || 0)).toFixed(2)}` 
+                    <TableCell className="text-right">
+                      {product.status === 'delivered' && product.service_charge && product.amount_paid !== null
+                        ? `₹${(product.service_charge - product.amount_paid).toFixed(2)}`
                         : "-"}
                     </TableCell>
                     <TableCell>
