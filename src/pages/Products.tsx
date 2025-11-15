@@ -28,7 +28,10 @@ type Product = {
   product_name: string;
   serial_number: string | null;
   customer_name: string;
+  customer_contact: string | null;
   status: string;
+  service_charge: number | null;
+  amount_paid: number | null;
   created_at: string;
   updated_at: string;
 };
@@ -40,6 +43,7 @@ const Products = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "all");
+  const [paymentFilter, setPaymentFilter] = useState(searchParams.get("payment") || "all");
 
   useEffect(() => {
     fetchProducts();
@@ -71,7 +75,25 @@ const Products = () => {
 
     const matchesStatus = statusFilter === "all" || product.status === statusFilter;
 
-    return matchesSearch && matchesStatus;
+    let matchesPayment = true;
+    if (paymentFilter !== "all") {
+      const serviceCharge = product.service_charge || 0;
+      const amountPaid = product.amount_paid || 0;
+
+      if (paymentFilter === "paid") {
+        matchesPayment = serviceCharge > 0 && amountPaid >= serviceCharge;
+      } else if (paymentFilter === "partial") {
+        matchesPayment = serviceCharge > 0 && amountPaid > 0 && amountPaid < serviceCharge;
+      } else if (paymentFilter === "pending") {
+        matchesPayment = serviceCharge > 0 && amountPaid === 0;
+      } else if (paymentFilter === "received") {
+        matchesPayment = amountPaid > 0;
+      } else if (paymentFilter === "balance") {
+        matchesPayment = serviceCharge > 0 && amountPaid < serviceCharge;
+      }
+    }
+
+    return matchesSearch && matchesStatus && matchesPayment;
   });
 
   return (
@@ -113,6 +135,19 @@ const Products = () => {
               <SelectItem value="delivered">Delivered</SelectItem>
             </SelectContent>
           </Select>
+          <Select value={paymentFilter} onValueChange={setPaymentFilter}>
+            <SelectTrigger className="w-full sm:w-[200px]">
+              <SelectValue placeholder="Filter by payment" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Payments</SelectItem>
+              <SelectItem value="paid">Paid in Full</SelectItem>
+              <SelectItem value="partial">Partial Payment</SelectItem>
+              <SelectItem value="pending">Pending Payment</SelectItem>
+              <SelectItem value="received">Has Payments</SelectItem>
+              <SelectItem value="balance">Has Balance</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="rounded-md border">
@@ -122,22 +157,25 @@ const Products = () => {
                 <TableHead>Product</TableHead>
                 <TableHead>Serial Number</TableHead>
                 <TableHead>Customer</TableHead>
+                <TableHead>Contact</TableHead>
+                <TableHead>Service Charge</TableHead>
+                <TableHead>Amount Paid</TableHead>
+                <TableHead>Balance</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Created</TableHead>
-                <TableHead>Updated</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center">
+                  <TableCell colSpan={10} className="text-center">
                     Loading...
                   </TableCell>
                 </TableRow>
               ) : filteredProducts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center">
+                  <TableCell colSpan={10} className="text-center">
                     No products found
                   </TableCell>
                 </TableRow>
@@ -149,14 +187,23 @@ const Products = () => {
                     </TableCell>
                     <TableCell>{product.serial_number || "-"}</TableCell>
                     <TableCell>{product.customer_name}</TableCell>
+                    <TableCell>{product.customer_contact || "-"}</TableCell>
+                    <TableCell>
+                      {product.service_charge ? `₹${product.service_charge.toFixed(2)}` : "-"}
+                    </TableCell>
+                    <TableCell>
+                      {product.amount_paid ? `₹${product.amount_paid.toFixed(2)}` : "-"}
+                    </TableCell>
+                    <TableCell>
+                      {product.service_charge 
+                        ? `₹${((product.service_charge || 0) - (product.amount_paid || 0)).toFixed(2)}` 
+                        : "-"}
+                    </TableCell>
                     <TableCell>
                       <StatusBadge status={product.status as any} />
                     </TableCell>
                     <TableCell>
                       {format(new Date(product.created_at), "MMM d, yyyy")}
-                    </TableCell>
-                    <TableCell>
-                      {format(new Date(product.updated_at), "MMM d, yyyy")}
                     </TableCell>
                     <TableCell className="text-right">
                       <Button
