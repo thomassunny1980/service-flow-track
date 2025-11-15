@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,18 +9,32 @@ import { toast } from "sonner";
 
 interface CompletionDialogProps {
   productId: string;
+  existingServiceCharge?: number | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onComplete: () => void;
 }
 
-const CompletionDialog = ({ productId, open, onOpenChange, onComplete }: CompletionDialogProps) => {
+const CompletionDialog = ({ productId, existingServiceCharge, open, onOpenChange, onComplete }: CompletionDialogProps) => {
   const [serviceCharge, setServiceCharge] = useState("");
   const [amountPaid, setAmountPaid] = useState("");
   const [paymentStatus, setPaymentStatus] = useState<"pending" | "paid" | "partial">("paid");
   const [deliveredTo, setDeliveredTo] = useState("");
   const [receivedBy, setReceivedBy] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  // Pre-fill service charge if it exists
+  useEffect(() => {
+    if (existingServiceCharge) {
+      setServiceCharge(existingServiceCharge.toString());
+    }
+  }, [existingServiceCharge]);
+
+  const calculateBalance = () => {
+    const charge = parseFloat(serviceCharge || "0");
+    const paid = parseFloat(amountPaid || "0");
+    return charge - paid;
+  };
 
   const handleSubmit = async () => {
     if (!serviceCharge || !deliveredTo || !receivedBy) {
@@ -115,6 +129,11 @@ const CompletionDialog = ({ productId, open, onOpenChange, onComplete }: Complet
                 <SelectItem value="pending">Pending</SelectItem>
               </SelectContent>
             </Select>
+            {serviceCharge && amountPaid && calculateBalance() > 0 && (
+              <div className="mt-2 p-3 bg-muted rounded-md">
+                <p className="text-sm font-medium">Balance Due: ₹{calculateBalance().toFixed(2)}</p>
+              </div>
+            )}
           </div>
 
           <div>

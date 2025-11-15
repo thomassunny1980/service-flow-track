@@ -348,6 +348,7 @@ const ProductDetail = () => {
 
         <CompletionDialog
           productId={product.id}
+          existingServiceCharge={product.service_charge}
           open={showCompletionDialog}
           onOpenChange={setShowCompletionDialog}
           onComplete={fetchProductDetails}
