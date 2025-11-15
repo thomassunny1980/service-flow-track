@@ -13,6 +13,7 @@ import { z } from "zod";
 import Receipt from "@/components/Receipt";
 import CompletionDialog from "@/components/CompletionDialog";
 import DeliveryReceipt from "@/components/DeliveryReceipt";
+import PaymentUpdateDialog from "@/components/PaymentUpdateDialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const remarkSchema = z.object({
@@ -61,6 +62,7 @@ const ProductDetail = () => {
   const [showReceipt, setShowReceipt] = useState(false);
   const [showCompletionDialog, setShowCompletionDialog] = useState(false);
   const [showDeliveryReceipt, setShowDeliveryReceipt] = useState(false);
+  const [showPaymentUpdate, setShowPaymentUpdate] = useState(false);
 
   useEffect(() => {
     fetchProductDetails();
@@ -257,6 +259,49 @@ const ProductDetail = () => {
             </CardContent>
           </Card>
 
+          {product.status === "delivered" && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  Payment Information
+                  {product.service_charge && product.amount_paid !== null && product.amount_paid < product.service_charge && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowPaymentUpdate(true)}
+                    >
+                      Update Payment
+                    </Button>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Service Charge</p>
+                  <p className="mt-1 text-lg font-semibold">
+                    ₹{product.service_charge?.toFixed(2) || "0.00"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Amount Paid</p>
+                  <p className="mt-1 text-lg font-semibold">
+                    ₹{product.amount_paid?.toFixed(2) || "0.00"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Balance Due</p>
+                  <p className="mt-1 text-lg font-semibold text-destructive">
+                    ₹{((product.service_charge || 0) - (product.amount_paid || 0)).toFixed(2)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Payment Status</p>
+                  <p className="mt-1 capitalize">{product.payment_status || "N/A"}</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {product.status === "external_service" && (
             <Card className="md:col-span-2">
               <CardHeader>
@@ -365,6 +410,17 @@ const ProductDetail = () => {
             />
           </DialogContent>
         </Dialog>
+
+        {product.service_charge && product.amount_paid !== null && (
+          <PaymentUpdateDialog
+            productId={product.id}
+            serviceCharge={product.service_charge}
+            currentAmountPaid={product.amount_paid}
+            open={showPaymentUpdate}
+            onOpenChange={setShowPaymentUpdate}
+            onComplete={fetchProductDetails}
+          />
+        )}
       </div>
     </Layout>
   );

@@ -15,6 +15,11 @@ interface CompletionDialogProps {
   onComplete: () => void;
 }
 
+type StaffUser = {
+  id: string;
+  full_name: string;
+};
+
 const CompletionDialog = ({ productId, existingServiceCharge, open, onOpenChange, onComplete }: CompletionDialogProps) => {
   const [serviceCharge, setServiceCharge] = useState("");
   const [amountPaid, setAmountPaid] = useState("");
@@ -22,6 +27,41 @@ const CompletionDialog = ({ productId, existingServiceCharge, open, onOpenChange
   const [deliveredTo, setDeliveredTo] = useState("");
   const [receivedBy, setReceivedBy] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [staffUsers, setStaffUsers] = useState<StaffUser[]>([]);
+  const [loadingStaff, setLoadingStaff] = useState(true);
+
+  // Fetch staff users
+  useEffect(() => {
+    const fetchStaffUsers = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("user_roles")
+          .select("user_id")
+          .eq("role", "staff");
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          const userIds = data.map(r => r.user_id);
+          const { data: profiles, error: profilesError } = await supabase
+            .from("profiles")
+            .select("id, full_name")
+            .in("id", userIds);
+
+          if (profilesError) throw profilesError;
+          setStaffUsers(profiles || []);
+        }
+      } catch (error) {
+        console.error("Error fetching staff users:", error);
+      } finally {
+        setLoadingStaff(false);
+      }
+    };
+
+    if (open) {
+      fetchStaffUsers();
+    }
+  }, [open]);
 
   // Pre-fill service charge if it exists
   useEffect(() => {
@@ -148,12 +188,18 @@ const CompletionDialog = ({ productId, existingServiceCharge, open, onOpenChange
 
           <div>
             <Label htmlFor="receivedBy">Handed Over By (Staff Name) *</Label>
-            <Input
-              id="receivedBy"
-              placeholder="Enter staff name"
-              value={receivedBy}
-              onChange={(e) => setReceivedBy(e.target.value)}
-            />
+            <Select value={receivedBy} onValueChange={setReceivedBy} disabled={loadingStaff}>
+              <SelectTrigger>
+                <SelectValue placeholder={loadingStaff ? "Loading staff..." : "Select staff member"} />
+              </SelectTrigger>
+              <SelectContent>
+                {staffUsers.map((staff) => (
+                  <SelectItem key={staff.id} value={staff.full_name}>
+                    {staff.full_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
