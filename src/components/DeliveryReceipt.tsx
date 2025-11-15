@@ -1,5 +1,7 @@
 import { format } from "date-fns";
 import logo from "@/assets/itechlogo.png";
+import { useState } from "react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface DeliveryReceiptProps {
   product: {
@@ -20,11 +22,15 @@ interface DeliveryReceiptProps {
 }
 
 const DeliveryReceipt = ({ product, invoiceNumber }: DeliveryReceiptProps) => {
+  const [showDetailedPayment, setShowDetailedPayment] = useState(false);
+  
   const handlePrint = () => {
     window.print();
   };
 
-  const balanceAmount = (product.service_charge || 0) - (product.amount_paid || 0);
+  const totalServiceCharge = product.service_charge || 0;
+  const amountPaid = product.amount_paid || 0;
+  const balanceAmount = totalServiceCharge - amountPaid;
 
   return (
     <div className="space-y-4">
@@ -113,27 +119,58 @@ const DeliveryReceipt = ({ product, invoiceNumber }: DeliveryReceiptProps) => {
 
         {/* Payment Summary */}
         <div className="mb-6 bg-muted/30 p-4 rounded-lg">
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Service Charge:</span>
-              <span className="font-medium text-foreground">₹{(product.service_charge || 0).toFixed(2)}</span>
+          <div className="space-y-3">
+            {/* Total Summary */}
+            <div className="flex justify-between items-center text-base pb-2 border-b border-border">
+              <span className="font-bold text-foreground">Total Service Amount:</span>
+              <span className="font-bold text-foreground text-lg">₹{totalServiceCharge.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Amount Paid:</span>
-              <span className="font-medium text-foreground">₹{(product.amount_paid || 0).toFixed(2)}</span>
+
+            {/* Detailed Payment Toggle Button */}
+            <button
+              onClick={() => setShowDetailedPayment(!showDetailedPayment)}
+              className="w-full flex items-center justify-between text-sm font-semibold text-primary hover:text-primary/80 transition-colors py-2 print:hidden"
+            >
+              <span>Detailed Payment Breakdown</span>
+              {showDetailedPayment ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </button>
+
+            {/* Detailed Payment Breakdown */}
+            <div className={showDetailedPayment ? "space-y-2 pt-2 border-t border-border" : "hidden print:block space-y-2 pt-2 border-t border-border"}>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Total Service Charge:</span>
+                <span className="font-medium text-foreground">₹{totalServiceCharge.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Amount Received:</span>
+                <span className="font-medium text-foreground">₹{amountPaid.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-sm pt-2 border-t border-border">
+                <span className="font-semibold text-foreground">Balance Due:</span>
+                <span className={`font-bold text-lg ${balanceAmount > 0 ? 'text-accent' : 'text-primary'}`}>
+                  ₹{balanceAmount.toFixed(2)}
+                </span>
+              </div>
             </div>
-            {balanceAmount > 0 && (
-              <div className="flex justify-between text-sm pt-2 border-t border-border">
-                <span className="text-accent font-semibold">Balance Due:</span>
-                <span className="font-bold text-accent">₹{balanceAmount.toFixed(2)}</span>
-              </div>
-            )}
-            {balanceAmount <= 0 && (
-              <div className="flex justify-between text-sm pt-2 border-t border-border">
-                <span className="text-primary font-semibold">Payment Status:</span>
-                <span className="font-bold text-primary">PAID IN FULL</span>
-              </div>
-            )}
+
+            {/* Payment Status Badge */}
+            <div className="pt-3 border-t border-border">
+              {balanceAmount === 0 && amountPaid > 0 && (
+                <div className="bg-primary/10 text-primary px-4 py-2 rounded-md text-center font-bold">
+                  ✓ PAID IN FULL
+                </div>
+              )}
+              {balanceAmount > 0 && amountPaid > 0 && (
+                <div className="bg-amber-500/10 text-amber-600 dark:text-amber-500 px-4 py-2 rounded-md text-center font-bold">
+                  ⚠ PARTIAL PAYMENT - Balance: ₹{balanceAmount.toFixed(2)}
+                </div>
+              )}
+              {amountPaid === 0 && (
+                <div className="bg-accent/10 text-accent px-4 py-2 rounded-md text-center font-bold">
+                  ⚠ PAYMENT PENDING - Full Balance: ₹{balanceAmount.toFixed(2)}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
