@@ -230,7 +230,10 @@ const Dashboard = () => {
         <div className="bg-gradient-to-br from-primary/5 to-accent/5 p-6 rounded-lg border border-border">
           <h2 className="text-xl font-bold text-foreground mb-4">Payment Summary</h2>
           <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
-            <Card className="bg-card/50 backdrop-blur">
+            <Card 
+              className="bg-card/50 backdrop-blur cursor-pointer transition-all hover:shadow-md"
+              onClick={() => navigate('/products?payment=all')}
+            >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Amount</CardTitle>
                 <IndianRupee className="h-4 w-4 text-primary" />
@@ -241,7 +244,10 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-card/50 backdrop-blur">
+            <Card 
+              className="bg-card/50 backdrop-blur cursor-pointer transition-all hover:shadow-md"
+              onClick={() => navigate('/products?payment=received')}
+            >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Received</CardTitle>
                 <TrendingUp className="h-4 w-4 text-primary" />
@@ -252,7 +258,10 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-card/50 backdrop-blur">
+            <Card 
+              className="bg-card/50 backdrop-blur cursor-pointer transition-all hover:shadow-md"
+              onClick={() => navigate('/products?payment=balance')}
+            >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Balance</CardTitle>
                 <AlertCircle className="h-4 w-4 text-accent" />
@@ -263,7 +272,10 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-card/50 backdrop-blur">
+            <Card 
+              className="bg-card/50 backdrop-blur cursor-pointer transition-all hover:shadow-md"
+              onClick={() => navigate('/products?payment=paid')}
+            >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Paid</CardTitle>
                 <CheckCircle className="h-4 w-4 text-primary" />
@@ -274,7 +286,10 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-card/50 backdrop-blur">
+            <Card 
+              className="bg-card/50 backdrop-blur cursor-pointer transition-all hover:shadow-md"
+              onClick={() => navigate('/products?payment=partial')}
+            >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Partial</CardTitle>
                 <Clock className="h-4 w-4 text-amber-600" />
@@ -285,7 +300,10 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-card/50 backdrop-blur">
+            <Card 
+              className="bg-card/50 backdrop-blur cursor-pointer transition-all hover:shadow-md"
+              onClick={() => navigate('/products?payment=pending')}
+            >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Pending</CardTitle>
                 <AlertCircle className="h-4 w-4 text-accent" />
