@@ -3,7 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { User, Session } from "@supabase/supabase-js";
-import { Package, LogOut, Menu, X, UserCircle } from "lucide-react";
+import { LogOut, Menu, X, UserCircle } from "lucide-react";
+import logo from "@/assets/itechlogo.png";
 import { toast } from "sonner";
 
 interface LayoutProps {
@@ -77,8 +78,8 @@ const Layout = ({ children }: LayoutProps) => {
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-8">
               <Link to="/" className="flex items-center gap-2 font-bold text-foreground">
-                <Package className="h-6 w-6 text-primary" />
-                Service Manager
+                <img src={logo} alt="I-TECH" className="h-8 w-8" />
+                <span className="hidden sm:inline">I-TECH SERVICE MANAGEMENT</span>
               </Link>
               <div className="hidden md:flex md:gap-4">
                 <Link to="/">
