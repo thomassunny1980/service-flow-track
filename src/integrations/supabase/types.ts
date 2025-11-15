@@ -16,50 +16,68 @@ export type Database = {
     Tables: {
       products: {
         Row: {
+          amount_paid: number | null
+          completed_date: string | null
           created_at: string
           created_by: string | null
           customer_contact: string | null
           customer_id: string
           customer_name: string
+          delivered_to: string | null
           external_expected_return: string | null
           external_sent_date: string | null
           external_service_center: string | null
           external_tracking_number: string | null
           id: string
+          payment_status: string | null
           product_name: string
+          received_by: string | null
           serial_number: string | null
+          service_charge: number | null
           status: Database["public"]["Enums"]["service_status"]
           updated_at: string
         }
         Insert: {
+          amount_paid?: number | null
+          completed_date?: string | null
           created_at?: string
           created_by?: string | null
           customer_contact?: string | null
           customer_id: string
           customer_name: string
+          delivered_to?: string | null
           external_expected_return?: string | null
           external_sent_date?: string | null
           external_service_center?: string | null
           external_tracking_number?: string | null
           id?: string
+          payment_status?: string | null
           product_name: string
+          received_by?: string | null
           serial_number?: string | null
+          service_charge?: number | null
           status?: Database["public"]["Enums"]["service_status"]
           updated_at?: string
         }
         Update: {
+          amount_paid?: number | null
+          completed_date?: string | null
           created_at?: string
           created_by?: string | null
           customer_contact?: string | null
           customer_id?: string
           customer_name?: string
+          delivered_to?: string | null
           external_expected_return?: string | null
           external_sent_date?: string | null
           external_service_center?: string | null
           external_tracking_number?: string | null
           id?: string
+          payment_status?: string | null
           product_name?: string
+          received_by?: string | null
           serial_number?: string | null
+          service_charge?: number | null
           status?: Database["public"]["Enums"]["service_status"]
           updated_at?: string
         }

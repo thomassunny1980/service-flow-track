@@ -6,11 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { ArrowLeft, Edit, MessageSquare, Receipt as ReceiptIcon } from "lucide-react";
+import { ArrowLeft, Edit, MessageSquare, Receipt as ReceiptIcon, CheckCircle, FileText } from "lucide-react";
 import StatusBadge from "@/components/StatusBadge";
 import { format } from "date-fns";
 import { z } from "zod";
 import Receipt from "@/components/Receipt";
+import CompletionDialog from "@/components/CompletionDialog";
+import DeliveryReceipt from "@/components/DeliveryReceipt";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const remarkSchema = z.object({
@@ -30,6 +32,12 @@ type Product = {
   external_expected_return: string | null;
   created_at: string;
   updated_at: string;
+  service_charge: number | null;
+  amount_paid: number | null;
+  payment_status: string | null;
+  completed_date: string | null;
+  delivered_to: string | null;
+  received_by: string | null;
 };
 
 type Remark = {
@@ -51,6 +59,8 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [showReceipt, setShowReceipt] = useState(false);
+  const [showCompletionDialog, setShowCompletionDialog] = useState(false);
+  const [showDeliveryReceipt, setShowDeliveryReceipt] = useState(false);
 
   useEffect(() => {
     fetchProductDetails();
@@ -187,6 +197,18 @@ const ProductDetail = () => {
               <ReceiptIcon className="mr-2 h-4 w-4" />
               Receipt
             </Button>
+            {product.status === "completed" && (
+              <Button variant="default" onClick={() => setShowCompletionDialog(true)}>
+                <CheckCircle className="mr-2 h-4 w-4" />
+                Complete & Deliver
+              </Button>
+            )}
+            {product.status === "delivered" && (
+              <Button variant="default" onClick={() => setShowDeliveryReceipt(true)}>
+                <FileText className="mr-2 h-4 w-4" />
+                View Invoice
+              </Button>
+            )}
             <Button onClick={() => navigate(`/products/edit/${product.id}`)}>
               <Edit className="mr-2 h-4 w-4" />
               Edit
@@ -321,6 +343,25 @@ const ProductDetail = () => {
               <DialogTitle>Item Received Acknowledgment</DialogTitle>
             </DialogHeader>
             <Receipt product={product} />
+          </DialogContent>
+        </Dialog>
+
+        <CompletionDialog
+          productId={product.id}
+          open={showCompletionDialog}
+          onOpenChange={setShowCompletionDialog}
+          onComplete={fetchProductDetails}
+        />
+
+        <Dialog open={showDeliveryReceipt} onOpenChange={setShowDeliveryReceipt}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Delivery Invoice</DialogTitle>
+            </DialogHeader>
+            <DeliveryReceipt 
+              product={product} 
+              invoiceNumber={`INV-${product.id.slice(0, 8).toUpperCase()}-${format(new Date(product.completed_date || product.created_at), "yyyyMMdd")}`}
+            />
           </DialogContent>
         </Dialog>
       </div>
