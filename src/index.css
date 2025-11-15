@@ -115,3 +115,16 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+@media print {
+  .receipt-container {
+    max-width: 100%;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  
+  body {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}
