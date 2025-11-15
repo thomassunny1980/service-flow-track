@@ -51,6 +51,7 @@ const ProductForm = () => {
     external_tracking_number: "",
     external_sent_date: "",
     external_expected_return: "",
+    service_charge: "",
   });
 
   useEffect(() => {
@@ -79,6 +80,7 @@ const ProductForm = () => {
         external_tracking_number: data.external_tracking_number || "",
         external_sent_date: data.external_sent_date || "",
         external_expected_return: data.external_expected_return || "",
+        service_charge: data.service_charge?.toString() || "",
       });
     } catch (error) {
       if (import.meta.env.DEV) {
@@ -103,6 +105,7 @@ const ProductForm = () => {
         external_tracking_number: validated.external_tracking_number || null,
         external_sent_date: formData.external_sent_date || null,
         external_expected_return: formData.external_expected_return || null,
+        service_charge: formData.service_charge ? parseFloat(formData.service_charge) : null,
       };
 
       if (isEditing) {
@@ -347,6 +350,29 @@ const ProductForm = () => {
                     />
                   </div>
                 </>
+              )}
+
+              {(formData.status === "completed" || formData.status === "ready_for_pickup") && (
+                <div className="space-y-2">
+                  <Label htmlFor="service_charge">Service Charge (₹)</Label>
+                  <Input
+                    id="service_charge"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="0.00"
+                    value={formData.service_charge}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        service_charge: e.target.value,
+                      })
+                    }
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Enter the total service charge for this repair
+                  </p>
+                </div>
               )}
 
               <div className="flex justify-end gap-4 pt-4">
