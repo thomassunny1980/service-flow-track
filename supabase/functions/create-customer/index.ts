@@ -61,17 +61,13 @@ Deno.serve(async (req) => {
 
     const customerEmail = `${mobile}@customer.local`;
 
-    // Generate secure random password for this customer
-    const passwordArray = new Uint8Array(16);
-    crypto.getRandomValues(passwordArray);
-    const securePassword = Array.from(passwordArray, byte => 
-      byte.toString(36).padStart(2, '0')
-    ).join('').slice(0, 12);
+    // Default password for customer accounts
+    const defaultPassword = '123456';
 
     // Try to create new customer user
     const { data: newUser, error: createError } = await supabaseClient.auth.admin.createUser({
       email: customerEmail,
-      password: securePassword,
+      password: defaultPassword,
       email_confirm: true,
       user_metadata: {
         full_name: fullName,
@@ -118,7 +114,7 @@ Deno.serve(async (req) => {
       JSON.stringify({ 
         customerId: newUser.user.id, 
         existed: false,
-        tempPassword: securePassword 
+        tempPassword: defaultPassword 
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
