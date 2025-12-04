@@ -8,6 +8,7 @@ import StatusBadge from "@/components/StatusBadge";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, LogOut, Package } from "lucide-react";
 import { format } from "date-fns";
+import ChangePasswordDialog from "@/components/ChangePasswordDialog";
 
 type ServiceStatus =
   | "received"
@@ -130,10 +131,13 @@ const CustomerDashboard = () => {
               <p className="text-sm text-muted-foreground">Welcome, {customerName}</p>
             )}
           </div>
-          <Button variant="outline" onClick={handleLogout}>
-            <LogOut className="h-4 w-4 mr-2" />
-            Logout
-          </Button>
+          <div className="flex items-center gap-2">
+            <ChangePasswordDialog />
+            <Button variant="outline" onClick={handleLogout}>
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
+            </Button>
+          </div>
         </div>
       </header>
 
