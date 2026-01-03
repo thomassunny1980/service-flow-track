@@ -88,6 +88,9 @@ const Layout = ({ children }: LayoutProps) => {
                 <Link to="/products">
                   <Button variant="ghost">Products</Button>
                 </Link>
+                <Link to="/quotations">
+                  <Button variant="ghost">Quotations</Button>
+                </Link>
                 {isAdmin && (
                   <Link to="/users">
                     <Button variant="ghost">Users</Button>
@@ -129,6 +132,11 @@ const Layout = ({ children }: LayoutProps) => {
               <Link to="/products" onClick={() => setMobileMenuOpen(false)}>
                 <Button variant="ghost" className="w-full justify-start">
                   Products
+                </Button>
+              </Link>
+              <Link to="/quotations" onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start">
+                  Quotations
                 </Button>
               </Link>
               {isAdmin && (

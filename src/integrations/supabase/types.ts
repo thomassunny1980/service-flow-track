@@ -107,6 +107,60 @@ export type Database = {
         }
         Relationships: []
       }
+      quotations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          customer_contact: string | null
+          customer_email: string | null
+          customer_name: string
+          id: string
+          items: Json
+          notes: string | null
+          status: Database["public"]["Enums"]["quotation_status"]
+          subtotal: number
+          tax_amount: number | null
+          tax_rate: number | null
+          total_amount: number
+          updated_at: string
+          validity_date: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          customer_contact?: string | null
+          customer_email?: string | null
+          customer_name: string
+          id?: string
+          items?: Json
+          notes?: string | null
+          status?: Database["public"]["Enums"]["quotation_status"]
+          subtotal?: number
+          tax_amount?: number | null
+          tax_rate?: number | null
+          total_amount?: number
+          updated_at?: string
+          validity_date: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          customer_contact?: string | null
+          customer_email?: string | null
+          customer_name?: string
+          id?: string
+          items?: Json
+          notes?: string | null
+          status?: Database["public"]["Enums"]["quotation_status"]
+          subtotal?: number
+          tax_amount?: number | null
+          tax_rate?: number | null
+          total_amount?: number
+          updated_at?: string
+          validity_date?: string
+        }
+        Relationships: []
+      }
       remarks: {
         Row: {
           content: string
@@ -165,6 +219,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cleanup_expired_quotations: { Args: never; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -175,6 +230,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "staff" | "customer"
+      quotation_status: "pending" | "approved" | "rejected"
       service_status:
         | "received"
         | "in_progress"
@@ -311,6 +367,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "staff", "customer"],
+      quotation_status: ["pending", "approved", "rejected"],
       service_status: [
         "received",
         "in_progress",
