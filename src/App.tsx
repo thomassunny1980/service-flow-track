@@ -12,6 +12,9 @@ import ProductForm from "./pages/ProductForm";
 import ProductDetail from "./pages/ProductDetail";
 import UserManagement from "./pages/UserManagement";
 import Profile from "./pages/Profile";
+import Quotations from "./pages/Quotations";
+import QuotationForm from "./pages/QuotationForm";
+import QuotationDetail from "./pages/QuotationDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +36,10 @@ const App = () => (
           <Route path="/products/:id" element={<ProductDetail />} />
           <Route path="/users" element={<UserManagement />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/quotations" element={<Quotations />} />
+          <Route path="/quotations/new" element={<QuotationForm />} />
+          <Route path="/quotations/edit/:id" element={<QuotationForm />} />
+          <Route path="/quotations/:id" element={<QuotationDetail />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
