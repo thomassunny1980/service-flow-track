@@ -193,6 +193,72 @@ export type Database = {
           },
         ]
       }
+      shop_settings: {
+        Row: {
+          bank_account_name: string | null
+          bank_account_number: string | null
+          bank_branch: string | null
+          bank_ifsc: string | null
+          bank_name: string | null
+          created_at: string
+          id: string
+          shop_address: string | null
+          shop_city: string | null
+          shop_email: string | null
+          shop_gst: string | null
+          shop_name: string
+          shop_phone: string | null
+          shop_pincode: string | null
+          shop_state: string | null
+          shop_website: string | null
+          terms_and_conditions: string | null
+          updated_at: string
+          upi_id: string | null
+        }
+        Insert: {
+          bank_account_name?: string | null
+          bank_account_number?: string | null
+          bank_branch?: string | null
+          bank_ifsc?: string | null
+          bank_name?: string | null
+          created_at?: string
+          id?: string
+          shop_address?: string | null
+          shop_city?: string | null
+          shop_email?: string | null
+          shop_gst?: string | null
+          shop_name?: string
+          shop_phone?: string | null
+          shop_pincode?: string | null
+          shop_state?: string | null
+          shop_website?: string | null
+          terms_and_conditions?: string | null
+          updated_at?: string
+          upi_id?: string | null
+        }
+        Update: {
+          bank_account_name?: string | null
+          bank_account_number?: string | null
+          bank_branch?: string | null
+          bank_ifsc?: string | null
+          bank_name?: string | null
+          created_at?: string
+          id?: string
+          shop_address?: string | null
+          shop_city?: string | null
+          shop_email?: string | null
+          shop_gst?: string | null
+          shop_name?: string
+          shop_phone?: string | null
+          shop_pincode?: string | null
+          shop_state?: string | null
+          shop_website?: string | null
+          terms_and_conditions?: string | null
+          updated_at?: string
+          upi_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string

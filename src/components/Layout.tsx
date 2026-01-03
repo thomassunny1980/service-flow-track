@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { User, Session } from "@supabase/supabase-js";
-import { LogOut, Menu, X, UserCircle } from "lucide-react";
+import { LogOut, Menu, X, UserCircle, Settings } from "lucide-react";
 import logo from "@/assets/itechlogo.png";
 import { toast } from "sonner";
 
@@ -92,9 +92,14 @@ const Layout = ({ children }: LayoutProps) => {
                   <Button variant="ghost">Quotations</Button>
                 </Link>
                 {isAdmin && (
-                  <Link to="/users">
-                    <Button variant="ghost">Users</Button>
-                  </Link>
+                  <>
+                    <Link to="/users">
+                      <Button variant="ghost">Users</Button>
+                    </Link>
+                    <Link to="/settings">
+                      <Button variant="ghost">Settings</Button>
+                    </Link>
+                  </>
                 )}
               </div>
             </div>
@@ -140,11 +145,19 @@ const Layout = ({ children }: LayoutProps) => {
                 </Button>
               </Link>
               {isAdmin && (
-                <Link to="/users" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="ghost" className="w-full justify-start">
-                    Users
-                  </Button>
-                </Link>
+                <>
+                  <Link to="/users" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start">
+                      Users
+                    </Button>
+                  </Link>
+                  <Link to="/settings" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Settings
+                    </Button>
+                  </Link>
+                </>
               )}
               <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>
                 <Button variant="ghost" className="w-full justify-start">

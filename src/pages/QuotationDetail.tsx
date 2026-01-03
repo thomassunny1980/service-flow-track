@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Printer, Edit, CheckCircle, XCircle } from "lucide-react";
@@ -34,38 +34,62 @@ interface Quotation {
   created_at: string;
 }
 
+interface ShopSettings {
+  shop_name: string;
+  shop_address: string | null;
+  shop_city: string | null;
+  shop_state: string | null;
+  shop_pincode: string | null;
+  shop_phone: string | null;
+  shop_email: string | null;
+  shop_website: string | null;
+  shop_gst: string | null;
+  bank_name: string | null;
+  bank_account_name: string | null;
+  bank_account_number: string | null;
+  bank_ifsc: string | null;
+  bank_branch: string | null;
+  upi_id: string | null;
+  terms_and_conditions: string | null;
+}
+
 const QuotationDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [quotation, setQuotation] = useState<Quotation | null>(null);
+  const [shopSettings, setShopSettings] = useState<ShopSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (id) {
-      fetchQuotation();
+      fetchData();
     }
   }, [id]);
 
-  const fetchQuotation = async () => {
+  const fetchData = async () => {
     try {
-      const { data, error } = await supabase
-        .from("quotations")
-        .select("*")
-        .eq("id", id)
-        .single();
+      const [quotationRes, settingsRes] = await Promise.all([
+        supabase.from("quotations").select("*").eq("id", id).single(),
+        supabase.from("shop_settings").select("*").limit(1).maybeSingle()
+      ]);
 
-      if (error) throw error;
+      if (quotationRes.error) throw quotationRes.error;
+
       const quotationData = {
-        ...data,
-        items: data.items as unknown as QuotationItem[],
-        subtotal: Number(data.subtotal),
-        tax_rate: Number(data.tax_rate),
-        tax_amount: Number(data.tax_amount),
-        total_amount: Number(data.total_amount),
+        ...quotationRes.data,
+        items: quotationRes.data.items as unknown as QuotationItem[],
+        subtotal: Number(quotationRes.data.subtotal),
+        tax_rate: Number(quotationRes.data.tax_rate),
+        tax_amount: Number(quotationRes.data.tax_amount),
+        total_amount: Number(quotationRes.data.total_amount),
       } as Quotation;
       setQuotation(quotationData);
+
+      if (settingsRes.data) {
+        setShopSettings(settingsRes.data as ShopSettings);
+      }
     } catch (error: any) {
       toast({
         title: "Error",
@@ -90,7 +114,7 @@ const QuotationDetail = () => {
         title: "Success",
         description: `Quotation ${status} successfully`,
       });
-      fetchQuotation();
+      fetchData();
     } catch (error: any) {
       toast({
         title: "Error",
@@ -98,6 +122,17 @@ const QuotationDetail = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const getShopAddress = () => {
+    if (!shopSettings) return "";
+    const parts = [
+      shopSettings.shop_address,
+      shopSettings.shop_city,
+      shopSettings.shop_state,
+      shopSettings.shop_pincode
+    ].filter(Boolean);
+    return parts.join(", ");
   };
 
   const handlePrint = () => {
@@ -114,30 +149,37 @@ const QuotationDetail = () => {
           <title>Quotation - ${quotation?.customer_name}</title>
           <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { font-family: Arial, sans-serif; padding: 20px; }
-            .header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
-            .logo { max-width: 150px; }
+            body { font-family: Arial, sans-serif; padding: 20px; font-size: 14px; }
+            .header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 15px; }
+            .logo { max-width: 120px; }
             .company-info { text-align: right; }
-            .company-info h2 { color: #333; margin-bottom: 5px; }
-            .title { text-align: center; font-size: 24px; margin: 20px 0; color: #333; }
-            .info-section { display: flex; justify-content: space-between; margin-bottom: 30px; }
+            .company-info h2 { color: #333; margin-bottom: 5px; font-size: 18px; }
+            .company-info p { font-size: 12px; color: #666; margin: 2px 0; }
+            .title { text-align: center; font-size: 22px; margin: 15px 0; color: #333; font-weight: bold; }
+            .info-section { display: flex; justify-content: space-between; margin-bottom: 20px; }
             .info-box { width: 48%; }
-            .info-box h3 { background: #f5f5f5; padding: 10px; margin-bottom: 10px; }
-            .info-box p { padding: 5px 10px; }
-            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-            th { background: #333; color: white; padding: 12px; text-align: left; }
-            td { border: 1px solid #ddd; padding: 10px; }
-            .totals { width: 300px; margin-left: auto; }
+            .info-box h3 { background: #f0f0f0; padding: 8px 10px; margin-bottom: 8px; font-size: 14px; }
+            .info-box p { padding: 3px 10px; font-size: 13px; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+            th { background: #333; color: white; padding: 10px; text-align: left; font-size: 13px; }
+            td { border: 1px solid #ddd; padding: 8px; font-size: 13px; }
+            .totals { width: 280px; margin-left: auto; }
             .totals table { margin-bottom: 0; }
-            .totals td { border: none; padding: 8px; }
+            .totals td { border: none; padding: 6px 8px; }
             .totals tr:last-child { font-weight: bold; font-size: 1.1em; border-top: 2px solid #333; }
-            .notes { margin-top: 30px; padding: 15px; background: #f9f9f9; border-radius: 5px; }
-            .notes h3 { margin-bottom: 10px; }
-            .footer { margin-top: 50px; text-align: center; color: #666; font-size: 12px; }
-            .status { display: inline-block; padding: 5px 15px; border-radius: 20px; font-weight: bold; }
+            .bank-details { margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 5px; }
+            .bank-details h3 { margin-bottom: 10px; font-size: 14px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+            .bank-details p { font-size: 12px; margin: 4px 0; }
+            .notes { margin-top: 15px; padding: 12px; background: #fff8e1; border-radius: 5px; border: 1px solid #ffe082; }
+            .notes h3 { margin-bottom: 8px; font-size: 13px; }
+            .notes p { font-size: 12px; white-space: pre-wrap; }
+            .footer { margin-top: 30px; text-align: center; color: #666; font-size: 11px; }
+            .status { display: inline-block; padding: 4px 12px; border-radius: 15px; font-weight: bold; font-size: 12px; }
             .status-approved { background: #d4edda; color: #155724; }
             .status-pending { background: #fff3cd; color: #856404; }
             .status-rejected { background: #f8d7da; color: #721c24; }
+            .two-col { display: flex; gap: 20px; }
+            .two-col > div { flex: 1; }
             @media print {
               body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
             }
@@ -194,6 +236,7 @@ const QuotationDetail = () => {
   }
 
   const items = quotation.items as QuotationItem[];
+  const shopAddress = getShopAddress();
 
   return (
     <Layout>
@@ -246,20 +289,25 @@ const QuotationDetail = () => {
         <Card>
           <CardContent className="p-6">
             <div ref={printRef}>
-              <div className="header flex justify-between items-start mb-8 pb-6 border-b-2">
-                <img src={itechLogo} alt="iTech Logo" className="h-16" />
+              {/* Header with Logo and Company Info */}
+              <div className="header flex justify-between items-start mb-6 pb-4 border-b-2">
+                <img src={itechLogo} alt="Logo" className="h-16" />
                 <div className="text-right">
-                  <h2 className="text-xl font-bold">iTech Service Center</h2>
-                  <p className="text-muted-foreground">Professional IT Services</p>
+                  <h2 className="text-xl font-bold">{shopSettings?.shop_name || "iTech Service Center"}</h2>
+                  {shopAddress && <p className="text-sm text-muted-foreground">{shopAddress}</p>}
+                  {shopSettings?.shop_phone && <p className="text-sm text-muted-foreground">Phone: {shopSettings.shop_phone}</p>}
+                  {shopSettings?.shop_email && <p className="text-sm text-muted-foreground">Email: {shopSettings.shop_email}</p>}
+                  {shopSettings?.shop_gst && <p className="text-sm text-muted-foreground">GST: {shopSettings.shop_gst}</p>}
                 </div>
               </div>
 
-              <h1 className="text-2xl font-bold text-center mb-8">QUOTATION</h1>
+              <h1 className="text-2xl font-bold text-center mb-6">QUOTATION</h1>
 
-              <div className="grid md:grid-cols-2 gap-8 mb-8">
+              {/* Customer and Quotation Info */}
+              <div className="grid md:grid-cols-2 gap-6 mb-6">
                 <div>
                   <h3 className="font-semibold bg-muted p-3 mb-3">Customer Details</h3>
-                  <div className="space-y-2 px-3">
+                  <div className="space-y-1 px-3">
                     <p><strong>Name:</strong> {quotation.customer_name}</p>
                     {quotation.customer_contact && (
                       <p><strong>Contact:</strong> {quotation.customer_contact}</p>
@@ -271,7 +319,7 @@ const QuotationDetail = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold bg-muted p-3 mb-3">Quotation Info</h3>
-                  <div className="space-y-2 px-3">
+                  <div className="space-y-1 px-3">
                     <p><strong>Date:</strong> {format(parseISO(quotation.created_at), "dd MMM yyyy")}</p>
                     <p><strong>Valid Until:</strong> {format(parseISO(quotation.validity_date), "dd MMM yyyy")}</p>
                     <p>
@@ -284,7 +332,8 @@ const QuotationDetail = () => {
                 </div>
               </div>
 
-              <table className="w-full mb-6">
+              {/* Items Table */}
+              <table className="w-full mb-4">
                 <thead>
                   <tr className="bg-primary text-primary-foreground">
                     <th className="p-3 text-left">#</th>
@@ -307,7 +356,8 @@ const QuotationDetail = () => {
                 </tbody>
               </table>
 
-              <div className="flex justify-end">
+              {/* Totals */}
+              <div className="flex justify-end mb-6">
                 <div className="w-72">
                   <div className="flex justify-between py-2">
                     <span>Subtotal:</span>
@@ -324,16 +374,45 @@ const QuotationDetail = () => {
                 </div>
               </div>
 
-              {quotation.notes && (
-                <div className="mt-8 p-4 bg-muted rounded-lg">
-                  <h3 className="font-semibold mb-2">Notes / Terms</h3>
-                  <p className="whitespace-pre-wrap">{quotation.notes}</p>
+              {/* Bank Details */}
+              {shopSettings && (shopSettings.bank_name || shopSettings.upi_id) && (
+                <div className="bank-details bg-muted/50 p-4 rounded-lg mb-4">
+                  <h3 className="font-semibold mb-3 border-b pb-2">Bank Details for Payment</h3>
+                  <div className="grid md:grid-cols-2 gap-4 text-sm">
+                    {shopSettings.bank_name && (
+                      <div className="space-y-1">
+                        {shopSettings.bank_name && <p><strong>Bank:</strong> {shopSettings.bank_name}</p>}
+                        {shopSettings.bank_branch && <p><strong>Branch:</strong> {shopSettings.bank_branch}</p>}
+                        {shopSettings.bank_account_name && <p><strong>Account Name:</strong> {shopSettings.bank_account_name}</p>}
+                        {shopSettings.bank_account_number && <p><strong>Account No:</strong> {shopSettings.bank_account_number}</p>}
+                        {shopSettings.bank_ifsc && <p><strong>IFSC:</strong> {shopSettings.bank_ifsc}</p>}
+                      </div>
+                    )}
+                    {shopSettings.upi_id && (
+                      <div>
+                        <p><strong>UPI ID:</strong> {shopSettings.upi_id}</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
-              <div className="mt-12 text-center text-sm text-muted-foreground">
+              {/* Notes / Terms */}
+              {(quotation.notes || shopSettings?.terms_and_conditions) && (
+                <div className="notes bg-amber-50 border border-amber-200 p-4 rounded-lg">
+                  <h3 className="font-semibold mb-2">Terms & Conditions</h3>
+                  {quotation.notes && <p className="whitespace-pre-wrap text-sm mb-2">{quotation.notes}</p>}
+                  {shopSettings?.terms_and_conditions && !quotation.notes && (
+                    <p className="whitespace-pre-wrap text-sm">{shopSettings.terms_and_conditions}</p>
+                  )}
+                </div>
+              )}
+
+              {/* Footer */}
+              <div className="mt-8 text-center text-sm text-muted-foreground">
                 <p>Thank you for your business!</p>
                 <p>This quotation is valid until {format(parseISO(quotation.validity_date), "dd MMM yyyy")}</p>
+                {shopSettings?.shop_website && <p className="mt-1">{shopSettings.shop_website}</p>}
               </div>
             </div>
           </CardContent>
