@@ -15,6 +15,7 @@ import Profile from "./pages/Profile";
 import Quotations from "./pages/Quotations";
 import QuotationForm from "./pages/QuotationForm";
 import QuotationDetail from "./pages/QuotationDetail";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const App = () => (
           <Route path="/quotations/new" element={<QuotationForm />} />
           <Route path="/quotations/edit/:id" element={<QuotationForm />} />
           <Route path="/quotations/:id" element={<QuotationDetail />} />
+          <Route path="/settings" element={<Settings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
