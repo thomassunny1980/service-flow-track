@@ -75,7 +75,7 @@ const QuotationForm = () => {
     try {
       const { data, error } = await supabase
         .from("shop_settings")
-        .select("tax_rates")
+        .select("tax_rates, quotation_prefix, quotation_year_format, quotation_number_digits, last_quotation_number")
         .limit(1)
         .maybeSingle();
 
@@ -86,6 +86,42 @@ const QuotationForm = () => {
       }
     } catch (error) {
       console.log("Using default tax rates");
+    }
+  };
+
+  const generateQuotationNumber = async (): Promise<string> => {
+    try {
+      const { data, error } = await supabase
+        .from("shop_settings")
+        .select("quotation_prefix, quotation_year_format, quotation_number_digits, last_quotation_number, id")
+        .limit(1)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      const prefix = (data as any)?.quotation_prefix || "QT";
+      const yearFormat = (data as any)?.quotation_year_format || "YYYY";
+      const digits = (data as any)?.quotation_number_digits || 4;
+      const lastNumber = (data as any)?.last_quotation_number || 0;
+      const newNumber = lastNumber + 1;
+
+      // Update the last quotation number
+      await supabase
+        .from("shop_settings")
+        .update({ last_quotation_number: newNumber } as any)
+        .eq("id", data?.id);
+
+      let yearPart = "";
+      if (yearFormat === "YYYY") {
+        yearPart = `-${new Date().getFullYear()}`;
+      } else if (yearFormat === "YY") {
+        yearPart = `-${String(new Date().getFullYear()).slice(-2)}`;
+      }
+
+      return `${prefix}${yearPart}-${String(newNumber).padStart(digits, "0")}`;
+    } catch (error) {
+      console.error("Error generating quotation number:", error);
+      return `QT-${Date.now()}`;
     }
   };
 
@@ -226,9 +262,12 @@ const QuotationForm = () => {
           description: "Quotation updated successfully",
         });
       } else {
+        // Generate quotation number for new quotations
+        const quotationNumber = await generateQuotationNumber();
+        
         const { error } = await supabase
           .from("quotations")
-          .insert([quotationData]);
+          .insert([{ ...quotationData, quotation_number: quotationNumber }]);
 
         if (error) throw error;
 
