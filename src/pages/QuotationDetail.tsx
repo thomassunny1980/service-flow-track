@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Printer, Edit, CheckCircle, XCircle } from "lucide-react";
+import { ArrowLeft, Printer, Edit, CheckCircle, XCircle, Download } from "lucide-react";
 import { format, parseISO, isPast } from "date-fns";
 import itechLogo from "@/assets/itechlogo.png";
 
@@ -15,11 +15,15 @@ interface QuotationItem {
   description: string;
   quantity: number;
   unit_price: number;
+  tax_rate?: number;
+  tax_name?: string;
+  tax_amount?: number;
   total: number;
 }
 
 interface Quotation {
   id: string;
+  quotation_number: string | null;
   customer_name: string;
   customer_contact: string | null;
   customer_email: string | null;
@@ -79,6 +83,7 @@ const QuotationDetail = () => {
 
       const quotationData = {
         ...quotationRes.data,
+        quotation_number: (quotationRes.data as any).quotation_number,
         items: quotationRes.data.items as unknown as QuotationItem[],
         subtotal: Number(quotationRes.data.subtotal),
         tax_rate: Number(quotationRes.data.tax_rate),
@@ -135,6 +140,45 @@ const QuotationDetail = () => {
     return parts.join(", ");
   };
 
+  const getPrintStyles = () => `
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; padding: 20px; font-size: 14px; }
+    .header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 15px; }
+    .logo { max-width: 120px; }
+    .company-info { text-align: right; }
+    .company-info h2 { color: #333; margin-bottom: 5px; font-size: 18px; }
+    .company-info p { font-size: 12px; color: #666; margin: 2px 0; }
+    .title { text-align: center; font-size: 22px; margin: 15px 0; color: #333; font-weight: bold; }
+    .quotation-number { text-align: center; font-size: 14px; color: #666; margin-bottom: 15px; }
+    .info-section { display: flex; justify-content: space-between; margin-bottom: 20px; }
+    .info-box { width: 48%; }
+    .info-box h3 { background: #f0f0f0; padding: 8px 10px; margin-bottom: 8px; font-size: 14px; }
+    .info-box p { padding: 3px 10px; font-size: 13px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+    th { background: #333; color: white; padding: 10px; text-align: left; font-size: 13px; }
+    td { border: 1px solid #ddd; padding: 8px; font-size: 13px; }
+    .totals { width: 280px; margin-left: auto; }
+    .totals table { margin-bottom: 0; }
+    .totals td { border: none; padding: 6px 8px; }
+    .totals tr:last-child { font-weight: bold; font-size: 1.1em; border-top: 2px solid #333; }
+    .bank-details { margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 5px; }
+    .bank-details h3 { margin-bottom: 10px; font-size: 14px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+    .bank-details p { font-size: 12px; margin: 4px 0; }
+    .notes { margin-top: 15px; padding: 12px; background: #fff8e1; border-radius: 5px; border: 1px solid #ffe082; }
+    .notes h3 { margin-bottom: 8px; font-size: 13px; }
+    .notes p { font-size: 12px; white-space: pre-wrap; }
+    .footer { margin-top: 30px; text-align: center; color: #666; font-size: 11px; }
+    .status { display: inline-block; padding: 4px 12px; border-radius: 15px; font-weight: bold; font-size: 12px; }
+    .status-approved { background: #d4edda; color: #155724; }
+    .status-pending { background: #fff3cd; color: #856404; }
+    .status-rejected { background: #f8d7da; color: #721c24; }
+    .two-col { display: flex; gap: 20px; }
+    .two-col > div { flex: 1; }
+    @media print {
+      body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    }
+  `;
+
   const handlePrint = () => {
     const printContent = printRef.current;
     if (!printContent) return;
@@ -146,44 +190,8 @@ const QuotationDetail = () => {
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Quotation - ${quotation?.customer_name}</title>
-          <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { font-family: Arial, sans-serif; padding: 20px; font-size: 14px; }
-            .header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 15px; }
-            .logo { max-width: 120px; }
-            .company-info { text-align: right; }
-            .company-info h2 { color: #333; margin-bottom: 5px; font-size: 18px; }
-            .company-info p { font-size: 12px; color: #666; margin: 2px 0; }
-            .title { text-align: center; font-size: 22px; margin: 15px 0; color: #333; font-weight: bold; }
-            .info-section { display: flex; justify-content: space-between; margin-bottom: 20px; }
-            .info-box { width: 48%; }
-            .info-box h3 { background: #f0f0f0; padding: 8px 10px; margin-bottom: 8px; font-size: 14px; }
-            .info-box p { padding: 3px 10px; font-size: 13px; }
-            table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
-            th { background: #333; color: white; padding: 10px; text-align: left; font-size: 13px; }
-            td { border: 1px solid #ddd; padding: 8px; font-size: 13px; }
-            .totals { width: 280px; margin-left: auto; }
-            .totals table { margin-bottom: 0; }
-            .totals td { border: none; padding: 6px 8px; }
-            .totals tr:last-child { font-weight: bold; font-size: 1.1em; border-top: 2px solid #333; }
-            .bank-details { margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 5px; }
-            .bank-details h3 { margin-bottom: 10px; font-size: 14px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
-            .bank-details p { font-size: 12px; margin: 4px 0; }
-            .notes { margin-top: 15px; padding: 12px; background: #fff8e1; border-radius: 5px; border: 1px solid #ffe082; }
-            .notes h3 { margin-bottom: 8px; font-size: 13px; }
-            .notes p { font-size: 12px; white-space: pre-wrap; }
-            .footer { margin-top: 30px; text-align: center; color: #666; font-size: 11px; }
-            .status { display: inline-block; padding: 4px 12px; border-radius: 15px; font-weight: bold; font-size: 12px; }
-            .status-approved { background: #d4edda; color: #155724; }
-            .status-pending { background: #fff3cd; color: #856404; }
-            .status-rejected { background: #f8d7da; color: #721c24; }
-            .two-col { display: flex; gap: 20px; }
-            .two-col > div { flex: 1; }
-            @media print {
-              body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
-            }
-          </style>
+          <title>Quotation - ${quotation?.quotation_number || quotation?.customer_name}</title>
+          <style>${getPrintStyles()}</style>
         </head>
         <body>
           ${printContent.innerHTML}
@@ -193,6 +201,47 @@ const QuotationDetail = () => {
 
     printWindow.document.close();
     printWindow.print();
+  };
+
+  const handleDownloadPDF = async () => {
+    const printContent = printRef.current;
+    if (!printContent) return;
+
+    // Create a hidden iframe for PDF generation
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'absolute';
+    iframe.style.left = '-9999px';
+    document.body.appendChild(iframe);
+
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (!iframeDoc) return;
+
+    iframeDoc.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Quotation - ${quotation?.quotation_number || quotation?.customer_name}</title>
+          <style>${getPrintStyles()}</style>
+        </head>
+        <body>
+          ${printContent.innerHTML}
+        </body>
+      </html>
+    `);
+    iframeDoc.close();
+
+    // Use browser print to PDF functionality
+    setTimeout(() => {
+      iframe.contentWindow?.print();
+      setTimeout(() => {
+        document.body.removeChild(iframe);
+      }, 1000);
+    }, 500);
+
+    toast({
+      title: "Download PDF",
+      description: "Use 'Save as PDF' in the print dialog to download",
+    });
   };
 
   const getStatusBadge = (status: string, validityDate: string) => {
@@ -279,6 +328,10 @@ const QuotationDetail = () => {
               <Edit className="h-4 w-4 mr-2" />
               Edit
             </Button>
+            <Button variant="outline" onClick={handleDownloadPDF}>
+              <Download className="h-4 w-4 mr-2" />
+              PDF
+            </Button>
             <Button onClick={handlePrint}>
               <Printer className="h-4 w-4 mr-2" />
               Print
@@ -301,7 +354,12 @@ const QuotationDetail = () => {
                 </div>
               </div>
 
-              <h1 className="text-2xl font-bold text-center mb-6">QUOTATION</h1>
+              <h1 className="text-2xl font-bold text-center mb-2">QUOTATION</h1>
+              {quotation.quotation_number && (
+                <p className="quotation-number text-center text-muted-foreground mb-6">
+                  #{quotation.quotation_number}
+                </p>
+              )}
 
               {/* Customer and Quotation Info */}
               <div className="grid md:grid-cols-2 gap-6 mb-6">

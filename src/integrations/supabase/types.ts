@@ -117,6 +117,7 @@ export type Database = {
           id: string
           items: Json
           notes: string | null
+          quotation_number: string | null
           status: Database["public"]["Enums"]["quotation_status"]
           subtotal: number
           tax_amount: number | null
@@ -134,6 +135,7 @@ export type Database = {
           id?: string
           items?: Json
           notes?: string | null
+          quotation_number?: string | null
           status?: Database["public"]["Enums"]["quotation_status"]
           subtotal?: number
           tax_amount?: number | null
@@ -151,6 +153,7 @@ export type Database = {
           id?: string
           items?: Json
           notes?: string | null
+          quotation_number?: string | null
           status?: Database["public"]["Enums"]["quotation_status"]
           subtotal?: number
           tax_amount?: number | null
@@ -202,6 +205,10 @@ export type Database = {
           bank_name: string | null
           created_at: string
           id: string
+          last_quotation_number: number | null
+          quotation_number_digits: number | null
+          quotation_prefix: string | null
+          quotation_year_format: string | null
           shop_address: string | null
           shop_city: string | null
           shop_email: string | null
@@ -224,6 +231,10 @@ export type Database = {
           bank_name?: string | null
           created_at?: string
           id?: string
+          last_quotation_number?: number | null
+          quotation_number_digits?: number | null
+          quotation_prefix?: string | null
+          quotation_year_format?: string | null
           shop_address?: string | null
           shop_city?: string | null
           shop_email?: string | null
@@ -246,6 +257,10 @@ export type Database = {
           bank_name?: string | null
           created_at?: string
           id?: string
+          last_quotation_number?: number | null
+          quotation_number_digits?: number | null
+          quotation_prefix?: string | null
+          quotation_year_format?: string | null
           shop_address?: string | null
           shop_city?: string | null
           shop_email?: string | null

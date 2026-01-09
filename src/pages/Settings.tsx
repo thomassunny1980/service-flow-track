@@ -9,7 +9,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Building2, CreditCard, FileText, Save, Percent, Plus, Trash2 } from "lucide-react";
+import { Building2, CreditCard, FileText, Save, Percent, Plus, Trash2, Hash } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface TaxRate {
   name: string;
@@ -35,6 +42,10 @@ interface ShopSettings {
   upi_id: string | null;
   terms_and_conditions: string | null;
   tax_rates: TaxRate[];
+  quotation_prefix: string;
+  quotation_year_format: string;
+  quotation_number_digits: number;
+  last_quotation_number: number;
 }
 
 const Settings = () => {
@@ -67,6 +78,10 @@ const Settings = () => {
       { name: "GST 5%", rate: 5 },
       { name: "No Tax", rate: 0 },
     ],
+    quotation_prefix: "QT",
+    quotation_year_format: "YYYY",
+    quotation_number_digits: 4,
+    last_quotation_number: 0,
   });
 
   useEffect(() => {
@@ -126,6 +141,10 @@ const Settings = () => {
             { name: "GST 5%", rate: 5 },
             { name: "No Tax", rate: 0 },
           ],
+          quotation_prefix: (data as any).quotation_prefix || "QT",
+          quotation_year_format: (data as any).quotation_year_format || "YYYY",
+          quotation_number_digits: (data as any).quotation_number_digits || 4,
+          last_quotation_number: (data as any).last_quotation_number || 0,
         });
       }
     } catch (error: any) {
@@ -167,7 +186,10 @@ const Settings = () => {
           upi_id: settings.upi_id || null,
           terms_and_conditions: settings.terms_and_conditions || null,
           tax_rates: JSON.parse(JSON.stringify(settings.tax_rates)),
-        })
+          quotation_prefix: settings.quotation_prefix,
+          quotation_year_format: settings.quotation_year_format,
+          quotation_number_digits: settings.quotation_number_digits,
+        } as any)
         .eq("id", settings.id);
 
       if (error) throw error;
@@ -243,7 +265,7 @@ const Settings = () => {
         </div>
 
         <Tabs defaultValue="shop" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 max-w-lg">
+          <TabsList className="grid w-full grid-cols-5 max-w-2xl">
             <TabsTrigger value="shop" className="flex items-center gap-2">
               <Building2 className="h-4 w-4" />
               <span className="hidden sm:inline">Shop Profile</span>
@@ -255,6 +277,10 @@ const Settings = () => {
             <TabsTrigger value="tax" className="flex items-center gap-2">
               <Percent className="h-4 w-4" />
               <span className="hidden sm:inline">Tax Rates</span>
+            </TabsTrigger>
+            <TabsTrigger value="numbering" className="flex items-center gap-2">
+              <Hash className="h-4 w-4" />
+              <span className="hidden sm:inline">Numbering</span>
             </TabsTrigger>
             <TabsTrigger value="terms" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
@@ -500,6 +526,79 @@ const Settings = () => {
                     )}
                   </div>
                 ))}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="numbering">
+            <Card>
+              <CardHeader>
+                <CardTitle>Quotation Numbering</CardTitle>
+                <CardDescription>
+                  Configure auto-generated quotation numbers (e.g., QT-2026-0001)
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="quotation_prefix">Prefix</Label>
+                    <Input
+                      id="quotation_prefix"
+                      value={settings.quotation_prefix}
+                      onChange={(e) => setSettings(prev => ({ ...prev, quotation_prefix: e.target.value }))}
+                      disabled={!isAdmin}
+                      placeholder="e.g., QT"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="quotation_year_format">Year Format</Label>
+                    <Select
+                      value={settings.quotation_year_format}
+                      onValueChange={(value) => setSettings(prev => ({ ...prev, quotation_year_format: value }))}
+                      disabled={!isAdmin}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select format" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="YYYY">Full Year (2026)</SelectItem>
+                        <SelectItem value="YY">Short Year (26)</SelectItem>
+                        <SelectItem value="NONE">No Year</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="quotation_number_digits">Number Digits</Label>
+                    <Select
+                      value={String(settings.quotation_number_digits)}
+                      onValueChange={(value) => setSettings(prev => ({ ...prev, quotation_number_digits: parseInt(value) }))}
+                      disabled={!isAdmin}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select digits" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="3">3 digits (001)</SelectItem>
+                        <SelectItem value="4">4 digits (0001)</SelectItem>
+                        <SelectItem value="5">5 digits (00001)</SelectItem>
+                        <SelectItem value="6">6 digits (000001)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="p-4 bg-muted rounded-lg">
+                  <Label className="text-sm text-muted-foreground">Preview</Label>
+                  <p className="text-lg font-mono mt-1">
+                    {settings.quotation_prefix}
+                    {settings.quotation_year_format !== "NONE" && "-"}
+                    {settings.quotation_year_format === "YYYY" && new Date().getFullYear()}
+                    {settings.quotation_year_format === "YY" && String(new Date().getFullYear()).slice(-2)}
+                    -{String(settings.last_quotation_number + 1).padStart(settings.quotation_number_digits, "0")}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Last quotation number: {settings.last_quotation_number}
+                  </p>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

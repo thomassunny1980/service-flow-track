@@ -30,6 +30,7 @@ import {
 
 interface Quotation {
   id: string;
+  quotation_number: string | null;
   customer_name: string;
   customer_contact: string | null;
   customer_email: string | null;
@@ -240,8 +241,8 @@ const Quotations = () => {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Quotation #</TableHead>
                 <TableHead>Customer</TableHead>
-                <TableHead>Contact</TableHead>
                 <TableHead>Items</TableHead>
                 <TableHead>Total</TableHead>
                 <TableHead>Valid Until</TableHead>
@@ -259,8 +260,8 @@ const Quotations = () => {
               ) : (
                 filteredQuotations.map((quotation) => (
                   <TableRow key={quotation.id}>
+                    <TableCell className="font-mono text-sm">{(quotation as any).quotation_number || "-"}</TableCell>
                     <TableCell className="font-medium">{quotation.customer_name}</TableCell>
-                    <TableCell>{quotation.customer_contact || "-"}</TableCell>
                     <TableCell>{Array.isArray(quotation.items) ? quotation.items.length : 0} items</TableCell>
                     <TableCell>₹{quotation.total_amount?.toFixed(2)}</TableCell>
                     <TableCell>{format(parseISO(quotation.validity_date), "dd/MM/yyyy")}</TableCell>
