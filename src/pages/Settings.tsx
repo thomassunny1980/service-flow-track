@@ -9,7 +9,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Building2, CreditCard, FileText, Save } from "lucide-react";
+import { Building2, CreditCard, FileText, Save, Percent, Plus, Trash2 } from "lucide-react";
+
+interface TaxRate {
+  name: string;
+  rate: number;
+}
 
 interface ShopSettings {
   id: string;
@@ -29,6 +34,7 @@ interface ShopSettings {
   bank_branch: string | null;
   upi_id: string | null;
   terms_and_conditions: string | null;
+  tax_rates: TaxRate[];
 }
 
 const Settings = () => {
@@ -55,6 +61,12 @@ const Settings = () => {
     bank_branch: "",
     upi_id: "",
     terms_and_conditions: "",
+    tax_rates: [
+      { name: "GST 18%", rate: 18 },
+      { name: "GST 12%", rate: 12 },
+      { name: "GST 5%", rate: 5 },
+      { name: "No Tax", rate: 0 },
+    ],
   });
 
   useEffect(() => {
@@ -108,6 +120,12 @@ const Settings = () => {
           bank_branch: data.bank_branch || "",
           upi_id: data.upi_id || "",
           terms_and_conditions: data.terms_and_conditions || "",
+          tax_rates: (data.tax_rates as unknown as TaxRate[]) || [
+            { name: "GST 18%", rate: 18 },
+            { name: "GST 12%", rate: 12 },
+            { name: "GST 5%", rate: 5 },
+            { name: "No Tax", rate: 0 },
+          ],
         });
       }
     } catch (error: any) {
@@ -148,6 +166,7 @@ const Settings = () => {
           bank_branch: settings.bank_branch || null,
           upi_id: settings.upi_id || null,
           terms_and_conditions: settings.terms_and_conditions || null,
+          tax_rates: JSON.parse(JSON.stringify(settings.tax_rates)),
         })
         .eq("id", settings.id);
 
@@ -170,6 +189,29 @@ const Settings = () => {
 
   const updateField = (field: keyof ShopSettings, value: string) => {
     setSettings(prev => ({ ...prev, [field]: value }));
+  };
+
+  const addTaxRate = () => {
+    setSettings(prev => ({
+      ...prev,
+      tax_rates: [...prev.tax_rates, { name: "", rate: 0 }],
+    }));
+  };
+
+  const removeTaxRate = (index: number) => {
+    setSettings(prev => ({
+      ...prev,
+      tax_rates: prev.tax_rates.filter((_, i) => i !== index),
+    }));
+  };
+
+  const updateTaxRate = (index: number, field: "name" | "rate", value: string | number) => {
+    setSettings(prev => ({
+      ...prev,
+      tax_rates: prev.tax_rates.map((tax, i) =>
+        i === index ? { ...tax, [field]: value } : tax
+      ),
+    }));
   };
 
   if (loading) {
@@ -201,7 +243,7 @@ const Settings = () => {
         </div>
 
         <Tabs defaultValue="shop" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 max-w-md">
+          <TabsList className="grid w-full grid-cols-4 max-w-lg">
             <TabsTrigger value="shop" className="flex items-center gap-2">
               <Building2 className="h-4 w-4" />
               <span className="hidden sm:inline">Shop Profile</span>
@@ -209,6 +251,10 @@ const Settings = () => {
             <TabsTrigger value="bank" className="flex items-center gap-2">
               <CreditCard className="h-4 w-4" />
               <span className="hidden sm:inline">Bank Details</span>
+            </TabsTrigger>
+            <TabsTrigger value="tax" className="flex items-center gap-2">
+              <Percent className="h-4 w-4" />
+              <span className="hidden sm:inline">Tax Rates</span>
             </TabsTrigger>
             <TabsTrigger value="terms" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
@@ -399,6 +445,61 @@ const Settings = () => {
                     />
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="tax">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Tax Rates</CardTitle>
+                  <CardDescription>
+                    Configure tax rates available for quotation items
+                  </CardDescription>
+                </div>
+                {isAdmin && (
+                  <Button variant="outline" size="sm" onClick={addTaxRate}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Tax
+                  </Button>
+                )}
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {settings.tax_rates.map((tax, index) => (
+                  <div key={index} className="flex items-center gap-4">
+                    <div className="flex-1 space-y-2">
+                      <Label>Tax Name</Label>
+                      <Input
+                        value={tax.name}
+                        onChange={(e) => updateTaxRate(index, "name", e.target.value)}
+                        disabled={!isAdmin}
+                        placeholder="e.g., GST 18%"
+                      />
+                    </div>
+                    <div className="w-32 space-y-2">
+                      <Label>Rate (%)</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={tax.rate}
+                        onChange={(e) => updateTaxRate(index, "rate", parseFloat(e.target.value) || 0)}
+                        disabled={!isAdmin}
+                      />
+                    </div>
+                    {isAdmin && settings.tax_rates.length > 1 && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="mt-6 text-destructive"
+                        onClick={() => removeTaxRate(index)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
               </CardContent>
             </Card>
           </TabsContent>

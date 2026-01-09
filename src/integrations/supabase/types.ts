@@ -211,6 +211,7 @@ export type Database = {
           shop_pincode: string | null
           shop_state: string | null
           shop_website: string | null
+          tax_rates: Json | null
           terms_and_conditions: string | null
           updated_at: string
           upi_id: string | null
@@ -232,6 +233,7 @@ export type Database = {
           shop_pincode?: string | null
           shop_state?: string | null
           shop_website?: string | null
+          tax_rates?: Json | null
           terms_and_conditions?: string | null
           updated_at?: string
           upi_id?: string | null
@@ -253,6 +255,7 @@ export type Database = {
           shop_pincode?: string | null
           shop_state?: string | null
           shop_website?: string | null
+          tax_rates?: Json | null
           terms_and_conditions?: string | null
           updated_at?: string
           upi_id?: string | null

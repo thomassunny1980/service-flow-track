@@ -7,15 +7,30 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Trash2, ArrowLeft } from "lucide-react";
 import { addDays, format } from "date-fns";
+
+interface TaxRate {
+  name: string;
+  rate: number;
+}
 
 interface QuotationItem {
   id: string;
   description: string;
   quantity: number;
   unit_price: number;
+  tax_rate: number;
+  tax_name: string;
+  tax_amount: number;
   total: number;
 }
 
@@ -24,20 +39,26 @@ const QuotationForm = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [taxRates, setTaxRates] = useState<TaxRate[]>([
+    { name: "GST 18%", rate: 18 },
+    { name: "GST 12%", rate: 12 },
+    { name: "GST 5%", rate: 5 },
+    { name: "No Tax", rate: 0 },
+  ]);
   const [formData, setFormData] = useState({
     customer_name: "",
     customer_contact: "",
     customer_email: "",
     validity_date: format(addDays(new Date(), 15), "yyyy-MM-dd"),
     notes: "",
-    tax_rate: 18,
   });
   const [items, setItems] = useState<QuotationItem[]>([
-    { id: crypto.randomUUID(), description: "", quantity: 1, unit_price: 0, total: 0 },
+    { id: crypto.randomUUID(), description: "", quantity: 1, unit_price: 0, tax_rate: 18, tax_name: "GST 18%", tax_amount: 0, total: 0 },
   ]);
 
   useEffect(() => {
     checkAuth();
+    fetchTaxRates();
     if (id) {
       fetchQuotation();
     }
@@ -47,6 +68,24 @@ const QuotationForm = () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       navigate("/auth");
+    }
+  };
+
+  const fetchTaxRates = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("shop_settings")
+        .select("tax_rates")
+        .limit(1)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      if (data?.tax_rates) {
+        setTaxRates(data.tax_rates as unknown as TaxRate[]);
+      }
+    } catch (error) {
+      console.log("Using default tax rates");
     }
   };
 
@@ -67,9 +106,15 @@ const QuotationForm = () => {
           customer_email: data.customer_email || "",
           validity_date: data.validity_date,
           notes: data.notes || "",
-          tax_rate: Number(data.tax_rate) || 18,
         });
-        setItems((data.items as unknown as QuotationItem[]) || []);
+        const fetchedItems = (data.items as unknown as QuotationItem[]) || [];
+        // Ensure items have tax fields
+        setItems(fetchedItems.map(item => ({
+          ...item,
+          tax_rate: item.tax_rate ?? 18,
+          tax_name: item.tax_name ?? "GST 18%",
+          tax_amount: item.tax_amount ?? 0,
+        })));
       }
     } catch (error: any) {
       toast({
@@ -81,9 +126,10 @@ const QuotationForm = () => {
   };
 
   const addItem = () => {
+    const defaultTax = taxRates[0] || { name: "No Tax", rate: 0 };
     setItems([
       ...items,
-      { id: crypto.randomUUID(), description: "", quantity: 1, unit_price: 0, total: 0 },
+      { id: crypto.randomUUID(), description: "", quantity: 1, unit_price: 0, tax_rate: defaultTax.rate, tax_name: defaultTax.name, tax_amount: 0, total: 0 },
     ]);
   };
 
@@ -98,8 +144,11 @@ const QuotationForm = () => {
       items.map((item) => {
         if (item.id === itemId) {
           const updatedItem = { ...item, [field]: value };
-          if (field === "quantity" || field === "unit_price") {
-            updatedItem.total = updatedItem.quantity * updatedItem.unit_price;
+          // Recalculate totals when quantity, unit_price, or tax changes
+          if (field === "quantity" || field === "unit_price" || field === "tax_rate") {
+            const subtotal = updatedItem.quantity * updatedItem.unit_price;
+            updatedItem.tax_amount = (subtotal * updatedItem.tax_rate) / 100;
+            updatedItem.total = subtotal + updatedItem.tax_amount;
           }
           return updatedItem;
         }
@@ -108,9 +157,31 @@ const QuotationForm = () => {
     );
   };
 
+  const updateItemTax = (itemId: string, taxName: string) => {
+    const selectedTax = taxRates.find(t => t.name === taxName);
+    if (!selectedTax) return;
+    
+    setItems(
+      items.map((item) => {
+        if (item.id === itemId) {
+          const subtotal = item.quantity * item.unit_price;
+          const taxAmount = (subtotal * selectedTax.rate) / 100;
+          return {
+            ...item,
+            tax_rate: selectedTax.rate,
+            tax_name: selectedTax.name,
+            tax_amount: taxAmount,
+            total: subtotal + taxAmount,
+          };
+        }
+        return item;
+      })
+    );
+  };
+
   const calculateTotals = () => {
-    const subtotal = items.reduce((sum, item) => sum + item.total, 0);
-    const taxAmount = (subtotal * formData.tax_rate) / 100;
+    const subtotal = items.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
+    const taxAmount = items.reduce((sum, item) => sum + item.tax_amount, 0);
     const total = subtotal + taxAmount;
     return { subtotal, taxAmount, total };
   };
@@ -125,13 +196,16 @@ const QuotationForm = () => {
 
       const { subtotal, taxAmount, total } = calculateTotals();
 
+      // Calculate average tax rate for backward compatibility
+      const avgTaxRate = subtotal > 0 ? (taxAmount / subtotal) * 100 : 0;
+
       const quotationData = {
         customer_name: formData.customer_name,
         customer_contact: formData.customer_contact || null,
         customer_email: formData.customer_email || null,
         validity_date: formData.validity_date,
         notes: formData.notes || null,
-        tax_rate: formData.tax_rate,
+        tax_rate: avgTaxRate,
         items: JSON.parse(JSON.stringify(items)),
         subtotal: subtotal,
         tax_amount: taxAmount,
@@ -240,8 +314,8 @@ const QuotationForm = () => {
             <CardHeader>
               <CardTitle>Quotation Details</CardTitle>
             </CardHeader>
-            <CardContent className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
+            <CardContent>
+              <div className="space-y-2 max-w-xs">
                 <Label htmlFor="validity_date">Valid Until *</Label>
                 <Input
                   id="validity_date"
@@ -251,19 +325,6 @@ const QuotationForm = () => {
                     setFormData({ ...formData, validity_date: e.target.value })
                   }
                   required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="tax_rate">Tax Rate (%)</Label>
-                <Input
-                  id="tax_rate"
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={formData.tax_rate}
-                  onChange={(e) =>
-                    setFormData({ ...formData, tax_rate: parseFloat(e.target.value) || 0 })
-                  }
                 />
               </div>
             </CardContent>
@@ -280,7 +341,7 @@ const QuotationForm = () => {
             <CardContent className="space-y-4">
               {items.map((item, index) => (
                 <div key={item.id} className="grid gap-4 md:grid-cols-12 items-end border-b pb-4">
-                  <div className="md:col-span-5 space-y-2">
+                  <div className="md:col-span-4 space-y-2">
                     <Label>Description</Label>
                     <Input
                       value={item.description}
@@ -288,8 +349,8 @@ const QuotationForm = () => {
                       placeholder="Item description"
                     />
                   </div>
-                  <div className="md:col-span-2 space-y-2">
-                    <Label>Quantity</Label>
+                  <div className="md:col-span-1 space-y-2">
+                    <Label>Qty</Label>
                     <Input
                       type="number"
                       min="1"
@@ -312,6 +373,24 @@ const QuotationForm = () => {
                     />
                   </div>
                   <div className="md:col-span-2 space-y-2">
+                    <Label>Tax</Label>
+                    <Select
+                      value={item.tax_name}
+                      onValueChange={(value) => updateItemTax(item.id, value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select tax" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {taxRates.map((tax) => (
+                          <SelectItem key={tax.name} value={tax.name}>
+                            {tax.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="md:col-span-2 space-y-2">
                     <Label>Total (₹)</Label>
                     <Input value={item.total.toFixed(2)} readOnly className="bg-muted" />
                   </div>
@@ -322,7 +401,7 @@ const QuotationForm = () => {
                       size="icon"
                       onClick={() => removeItem(item.id)}
                       disabled={items.length === 1}
-                      className="text-red-600"
+                      className="text-destructive"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -337,7 +416,7 @@ const QuotationForm = () => {
                     <span>₹{subtotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Tax ({formData.tax_rate}%):</span>
+                    <span className="text-muted-foreground">Tax:</span>
                     <span>₹{taxAmount.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between font-bold text-lg border-t pt-2">

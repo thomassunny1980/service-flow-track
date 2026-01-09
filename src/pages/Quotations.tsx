@@ -13,9 +13,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Eye, CheckCircle, XCircle, Trash2 } from "lucide-react";
+import { Plus, Search, Eye, CheckCircle, XCircle, Trash2, RefreshCw, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { format, isPast, parseISO } from "date-fns";
+import { format, isPast, parseISO, addDays } from "date-fns";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -146,8 +146,12 @@ const Quotations = () => {
     }
   };
 
+  const isExpiredQuotation = (status: string, validityDate: string) => {
+    return isPast(parseISO(validityDate)) && status === 'pending';
+  };
+
   const getStatusBadge = (status: string, validityDate: string) => {
-    const isExpired = isPast(parseISO(validityDate)) && status === 'pending';
+    const isExpired = isExpiredQuotation(status, validityDate);
     
     if (isExpired) {
       return <Badge variant="destructive">Expired</Badge>;
@@ -160,6 +164,33 @@ const Quotations = () => {
         return <Badge variant="destructive">Rejected</Badge>;
       default:
         return <Badge variant="secondary">Pending</Badge>;
+    }
+  };
+
+  const renewQuotation = async (quotationId: string) => {
+    try {
+      const newValidityDate = format(addDays(new Date(), 15), "yyyy-MM-dd");
+      const { error } = await supabase
+        .from("quotations")
+        .update({ 
+          validity_date: newValidityDate,
+          status: 'pending' 
+        })
+        .eq("id", quotationId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Quotation renewed with new validity date",
+      });
+      fetchQuotations();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
     }
   };
 
@@ -243,7 +274,7 @@ const Quotations = () => {
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
-                        {quotation.status === 'pending' && (
+                        {quotation.status === 'pending' && !isExpiredQuotation(quotation.status, quotation.validity_date) && (
                           <>
                             <Button
                               variant="ghost"
@@ -263,10 +294,31 @@ const Quotations = () => {
                             </Button>
                           </>
                         )}
+                        {isExpiredQuotation(quotation.status, quotation.validity_date) && (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-blue-600 hover:text-blue-700"
+                              onClick={() => renewQuotation(quotation.id)}
+                              title="Renew Quotation"
+                            >
+                              <RefreshCw className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => navigate(`/quotations/edit/${quotation.id}`)}
+                              title="Edit Quotation"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </>
+                        )}
                         {userRole === 'admin' && (
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="icon" className="text-red-600">
+                              <Button variant="ghost" size="icon" className="text-destructive">
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </AlertDialogTrigger>
