@@ -15,6 +15,10 @@ import Profile from "./pages/Profile";
 import Quotations from "./pages/Quotations";
 import QuotationForm from "./pages/QuotationForm";
 import QuotationDetail from "./pages/QuotationDetail";
+import Inventory from "./pages/Inventory";
+import Invoices from "./pages/Invoices";
+import InvoiceForm from "./pages/InvoiceForm";
+import InvoiceDetail from "./pages/InvoiceDetail";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
@@ -42,6 +46,11 @@ function App() {
             <Route path="/quotations/new" element={<QuotationForm />} />
             <Route path="/quotations/edit/:id" element={<QuotationForm />} />
             <Route path="/quotations/:id" element={<QuotationDetail />} />
+            <Route path="/inventory" element={<Inventory />} />
+            <Route path="/invoices" element={<Invoices />} />
+            <Route path="/invoices/new" element={<InvoiceForm />} />
+            <Route path="/invoices/edit/:id" element={<InvoiceForm />} />
+            <Route path="/invoices/:id" element={<InvoiceDetail />} />
             <Route path="/settings" element={<Settings />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

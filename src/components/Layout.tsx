@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { User, Session } from "@supabase/supabase-js";
-import { LogOut, Menu, X, UserCircle, Settings } from "lucide-react";
+import { LogOut, Menu, X, UserCircle, Settings, Package, FileText } from "lucide-react";
 import logo from "@/assets/itechlogo.png";
 import { toast } from "sonner";
 
@@ -88,8 +88,14 @@ const Layout = ({ children }: LayoutProps) => {
                 <Link to="/products">
                   <Button variant="ghost">Products</Button>
                 </Link>
+                <Link to="/inventory">
+                  <Button variant="ghost">Inventory</Button>
+                </Link>
                 <Link to="/quotations">
                   <Button variant="ghost">Quotations</Button>
+                </Link>
+                <Link to="/invoices">
+                  <Button variant="ghost">Invoices</Button>
                 </Link>
                 {isAdmin && (
                   <>
@@ -139,9 +145,21 @@ const Layout = ({ children }: LayoutProps) => {
                   Products
                 </Button>
               </Link>
+              <Link to="/inventory" onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start">
+                  <Package className="mr-2 h-4 w-4" />
+                  Inventory
+                </Button>
+              </Link>
               <Link to="/quotations" onClick={() => setMobileMenuOpen(false)}>
                 <Button variant="ghost" className="w-full justify-start">
                   Quotations
+                </Button>
+              </Link>
+              <Link to="/invoices" onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start">
+                  <FileText className="mr-2 h-4 w-4" />
+                  Invoices
                 </Button>
               </Link>
               {isAdmin && (
