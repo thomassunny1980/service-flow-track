@@ -162,11 +162,18 @@ const QuotationForm = () => {
   };
 
   const addItem = () => {
-    const defaultTax = taxRates[0] || { name: "No Tax", rate: 0 };
-    setItems([
-      ...items,
-      { id: crypto.randomUUID(), description: "", quantity: 1, unit_price: 0, tax_rate: defaultTax.rate, tax_name: defaultTax.name, tax_amount: 0, total: 0 },
-    ]);
+    const defaultTax = taxRates.length > 0 ? taxRates[0] : { name: "No Tax", rate: 0 };
+    const newItem: QuotationItem = {
+      id: crypto.randomUUID(),
+      description: "",
+      quantity: 1,
+      unit_price: 0,
+      tax_rate: defaultTax.rate,
+      tax_name: defaultTax.name,
+      tax_amount: 0,
+      total: 0,
+    };
+    setItems((prevItems) => [...prevItems, newItem]);
   };
 
   const removeItem = (itemId: string) => {
