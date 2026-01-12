@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, Wrench, Clock, CheckCircle, Send, Truck, FileCheck, IndianRupee, TrendingUp, AlertCircle } from "lucide-react";
+import { Package, Wrench, Clock, CheckCircle, Send, Truck, FileCheck, IndianRupee, TrendingUp, AlertCircle, FileText, Receipt, XCircle, CreditCard } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 
@@ -24,6 +24,23 @@ type PaymentSummary = {
   pendingCount: number;
 };
 
+type QuotationSummary = {
+  pending: number;
+  approved: number;
+  rejected: number;
+  total: number;
+};
+
+type InvoiceSummary = {
+  unpaid: number;
+  partial: number;
+  paid: number;
+  overdue: number;
+  total: number;
+  totalAmount: number;
+  totalPaid: number;
+};
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const [counts, setCounts] = useState<StatusCounts>({
@@ -43,6 +60,21 @@ const Dashboard = () => {
     partialCount: 0,
     pendingCount: 0,
   });
+  const [quotationSummary, setQuotationSummary] = useState<QuotationSummary>({
+    pending: 0,
+    approved: 0,
+    rejected: 0,
+    total: 0,
+  });
+  const [invoiceSummary, setInvoiceSummary] = useState<InvoiceSummary>({
+    unpaid: 0,
+    partial: 0,
+    paid: 0,
+    overdue: 0,
+    total: 0,
+    totalAmount: 0,
+    totalPaid: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState<string>("");
 
@@ -50,6 +82,8 @@ const Dashboard = () => {
     fetchStatusCounts();
     fetchPaymentSummary();
     fetchUserProfile();
+    fetchQuotationSummary();
+    fetchInvoiceSummary();
   }, []);
 
   const fetchUserProfile = async () => {
@@ -150,6 +184,94 @@ const Dashboard = () => {
     } catch (error) {
       if (import.meta.env.DEV) {
         console.error("Error fetching payment summary:", error);
+      }
+    }
+  };
+
+  const fetchQuotationSummary = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("quotations")
+        .select("status");
+
+      if (error) throw error;
+
+      let pending = 0;
+      let approved = 0;
+      let rejected = 0;
+
+      data?.forEach((quotation) => {
+        switch (quotation.status) {
+          case 'pending':
+            pending++;
+            break;
+          case 'approved':
+            approved++;
+            break;
+          case 'rejected':
+            rejected++;
+            break;
+        }
+      });
+
+      setQuotationSummary({
+        pending,
+        approved,
+        rejected,
+        total: data?.length || 0,
+      });
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error("Error fetching quotation summary:", error);
+      }
+    }
+  };
+
+  const fetchInvoiceSummary = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("invoices")
+        .select("status, total_amount");
+
+      if (error) throw error;
+
+      let unpaid = 0;
+      let partial = 0;
+      let paid = 0;
+      let overdue = 0;
+      let totalAmount = 0;
+
+      data?.forEach((invoice) => {
+        totalAmount += Number(invoice.total_amount) || 0;
+        
+        switch (invoice.status) {
+          case 'unpaid':
+            unpaid++;
+            break;
+          case 'partial':
+            partial++;
+            break;
+          case 'paid':
+            paid++;
+            break;
+          case 'overdue':
+            overdue++;
+            break;
+        }
+      });
+
+      setInvoiceSummary({
+        unpaid,
+        partial,
+        paid,
+        overdue,
+        total: data?.length || 0,
+        totalAmount,
+        totalPaid: 0, // We'd need to track this separately if needed
+      });
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error("Error fetching invoice summary:", error);
       }
     }
   };
@@ -347,9 +469,135 @@ const Dashboard = () => {
           </div>
         </div>
 
+        {/* Quotations & Invoices Section */}
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Quotation Summary */}
+          <div className="bg-gradient-to-br from-blue-500/5 to-indigo-500/5 p-6 rounded-lg border border-border">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-foreground">Quotations</h2>
+              <FileText className="h-5 w-5 text-blue-600" />
+            </div>
+            <div className="grid gap-3 grid-cols-2">
+              <Card 
+                className="bg-card/50 backdrop-blur cursor-pointer transition-all hover:shadow-md"
+                onClick={() => navigate('/quotations?status=pending')}
+              >
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4 px-4">
+                  <CardTitle className="text-sm font-medium">Pending</CardTitle>
+                  <Clock className="h-4 w-4 text-amber-600" />
+                </CardHeader>
+                <CardContent className="px-4 pb-4">
+                  <div className="text-2xl font-bold text-amber-600">{quotationSummary.pending}</div>
+                </CardContent>
+              </Card>
+
+              <Card 
+                className="bg-card/50 backdrop-blur cursor-pointer transition-all hover:shadow-md"
+                onClick={() => navigate('/quotations?status=approved')}
+              >
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4 px-4">
+                  <CardTitle className="text-sm font-medium">Approved</CardTitle>
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                </CardHeader>
+                <CardContent className="px-4 pb-4">
+                  <div className="text-2xl font-bold text-green-600">{quotationSummary.approved}</div>
+                </CardContent>
+              </Card>
+
+              <Card 
+                className="bg-card/50 backdrop-blur cursor-pointer transition-all hover:shadow-md"
+                onClick={() => navigate('/quotations?status=rejected')}
+              >
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4 px-4">
+                  <CardTitle className="text-sm font-medium">Rejected</CardTitle>
+                  <XCircle className="h-4 w-4 text-red-600" />
+                </CardHeader>
+                <CardContent className="px-4 pb-4">
+                  <div className="text-2xl font-bold text-red-600">{quotationSummary.rejected}</div>
+                </CardContent>
+              </Card>
+
+              <Card 
+                className="bg-card/50 backdrop-blur cursor-pointer transition-all hover:shadow-md"
+                onClick={() => navigate('/quotations')}
+              >
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4 px-4">
+                  <CardTitle className="text-sm font-medium">Total</CardTitle>
+                  <FileText className="h-4 w-4 text-blue-600" />
+                </CardHeader>
+                <CardContent className="px-4 pb-4">
+                  <div className="text-2xl font-bold text-blue-600">{quotationSummary.total}</div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Invoice Summary */}
+          <div className="bg-gradient-to-br from-emerald-500/5 to-teal-500/5 p-6 rounded-lg border border-border">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-foreground">Invoices</h2>
+              <Receipt className="h-5 w-5 text-emerald-600" />
+            </div>
+            <div className="grid gap-3 grid-cols-2">
+              <Card 
+                className="bg-card/50 backdrop-blur cursor-pointer transition-all hover:shadow-md"
+                onClick={() => navigate('/invoices?status=unpaid')}
+              >
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4 px-4">
+                  <CardTitle className="text-sm font-medium">Unpaid</CardTitle>
+                  <AlertCircle className="h-4 w-4 text-red-600" />
+                </CardHeader>
+                <CardContent className="px-4 pb-4">
+                  <div className="text-2xl font-bold text-red-600">{invoiceSummary.unpaid}</div>
+                </CardContent>
+              </Card>
+
+              <Card 
+                className="bg-card/50 backdrop-blur cursor-pointer transition-all hover:shadow-md"
+                onClick={() => navigate('/invoices?status=partial')}
+              >
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4 px-4">
+                  <CardTitle className="text-sm font-medium">Partial</CardTitle>
+                  <CreditCard className="h-4 w-4 text-amber-600" />
+                </CardHeader>
+                <CardContent className="px-4 pb-4">
+                  <div className="text-2xl font-bold text-amber-600">{invoiceSummary.partial}</div>
+                </CardContent>
+              </Card>
+
+              <Card 
+                className="bg-card/50 backdrop-blur cursor-pointer transition-all hover:shadow-md"
+                onClick={() => navigate('/invoices?status=paid')}
+              >
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4 px-4">
+                  <CardTitle className="text-sm font-medium">Paid</CardTitle>
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                </CardHeader>
+                <CardContent className="px-4 pb-4">
+                  <div className="text-2xl font-bold text-green-600">{invoiceSummary.paid}</div>
+                </CardContent>
+              </Card>
+
+              <Card 
+                className="bg-card/50 backdrop-blur cursor-pointer transition-all hover:shadow-md"
+                onClick={() => navigate('/invoices')}
+              >
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4 px-4">
+                  <CardTitle className="text-sm font-medium">Total</CardTitle>
+                  <Receipt className="h-4 w-4 text-emerald-600" />
+                </CardHeader>
+                <CardContent className="px-4 pb-4">
+                  <div className="text-2xl font-bold text-emerald-600">{invoiceSummary.total}</div>
+                  <p className="text-xs text-muted-foreground">₹{invoiceSummary.totalAmount.toFixed(2)}</p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+
         <Card>
           <CardHeader>
-            <CardTitle>Total Items</CardTitle>
+            <CardTitle>Total Service Items</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-4xl font-bold">
