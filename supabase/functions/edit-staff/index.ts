@@ -16,10 +16,16 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Create a client for validating the user token
-    const anonClient = createClient(
+    // Create a service role client for admin operations (bypasses RLS)
+    const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
     );
 
     // Verify the request is from an authenticated admin user
@@ -31,7 +37,7 @@ Deno.serve(async (req) => {
     }
 
     const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: userError } = await anonClient.auth.getUser(token);
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
 
     console.log('User validation:', { userId: user?.id, error: userError?.message });
 
@@ -40,8 +46,8 @@ Deno.serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
-    // Check if user is admin
-    const { data: roles, error: rolesError } = await anonClient
+    // Check if user is admin using service role client (bypasses RLS)
+    const { data: roles, error: rolesError } = await supabaseClient
       .from('user_roles')
       .select('role')
       .eq('user_id', user.id);
@@ -52,18 +58,6 @@ Deno.serve(async (req) => {
     if (!isAdmin) {
       throw new Error('Only admins can edit staff accounts');
     }
-
-    // Create a service role client for admin operations
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false
-        }
-      }
-    );
 
     const { userId, email, fullName, role, password }: EditStaffRequest = await req.json();
 
