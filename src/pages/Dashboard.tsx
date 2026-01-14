@@ -231,7 +231,7 @@ const Dashboard = () => {
     try {
       const { data, error } = await supabase
         .from("invoices")
-        .select("status, total_amount");
+        .select("status, total_amount, amount_paid");
 
       if (error) throw error;
 
@@ -240,9 +240,11 @@ const Dashboard = () => {
       let paid = 0;
       let overdue = 0;
       let totalAmount = 0;
+      let totalPaid = 0;
 
       data?.forEach((invoice) => {
         totalAmount += Number(invoice.total_amount) || 0;
+        totalPaid += Number(invoice.amount_paid) || 0;
         
         switch (invoice.status) {
           case 'unpaid':
@@ -267,7 +269,7 @@ const Dashboard = () => {
         overdue,
         total: data?.length || 0,
         totalAmount,
-        totalPaid: 0, // We'd need to track this separately if needed
+        totalPaid,
       });
     } catch (error) {
       if (import.meta.env.DEV) {
@@ -532,13 +534,53 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Invoice Summary */}
+          {/* Invoice Payment Summary */}
           <div className="bg-gradient-to-br from-emerald-500/5 to-teal-500/5 p-6 rounded-lg border border-border">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-foreground">Invoices</h2>
+              <h2 className="text-xl font-bold text-foreground">Invoice Payments</h2>
               <Receipt className="h-5 w-5 text-emerald-600" />
             </div>
-            <div className="grid gap-3 grid-cols-2">
+            <div className="grid gap-3 grid-cols-3 mb-4">
+              <Card 
+                className="bg-card/50 backdrop-blur cursor-pointer transition-all hover:shadow-md"
+                onClick={() => navigate('/invoices')}
+              >
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4 px-4">
+                  <CardTitle className="text-sm font-medium">Total Amount</CardTitle>
+                  <IndianRupee className="h-4 w-4 text-emerald-600" />
+                </CardHeader>
+                <CardContent className="px-4 pb-4">
+                  <div className="text-xl font-bold text-foreground">₹{invoiceSummary.totalAmount.toFixed(2)}</div>
+                </CardContent>
+              </Card>
+
+              <Card 
+                className="bg-card/50 backdrop-blur cursor-pointer transition-all hover:shadow-md"
+                onClick={() => navigate('/invoices?status=paid')}
+              >
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4 px-4">
+                  <CardTitle className="text-sm font-medium">Received</CardTitle>
+                  <TrendingUp className="h-4 w-4 text-green-600" />
+                </CardHeader>
+                <CardContent className="px-4 pb-4">
+                  <div className="text-xl font-bold text-green-600">₹{invoiceSummary.totalPaid.toFixed(2)}</div>
+                </CardContent>
+              </Card>
+
+              <Card 
+                className="bg-card/50 backdrop-blur cursor-pointer transition-all hover:shadow-md"
+                onClick={() => navigate('/invoices?status=unpaid')}
+              >
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4 px-4">
+                  <CardTitle className="text-sm font-medium">Balance</CardTitle>
+                  <AlertCircle className="h-4 w-4 text-red-600" />
+                </CardHeader>
+                <CardContent className="px-4 pb-4">
+                  <div className="text-xl font-bold text-red-600">₹{(invoiceSummary.totalAmount - invoiceSummary.totalPaid).toFixed(2)}</div>
+                </CardContent>
+              </Card>
+            </div>
+            <div className="grid gap-3 grid-cols-4">
               <Card 
                 className="bg-card/50 backdrop-blur cursor-pointer transition-all hover:shadow-md"
                 onClick={() => navigate('/invoices?status=unpaid')}
@@ -588,7 +630,6 @@ const Dashboard = () => {
                 </CardHeader>
                 <CardContent className="px-4 pb-4">
                   <div className="text-2xl font-bold text-emerald-600">{invoiceSummary.total}</div>
-                  <p className="text-xs text-muted-foreground">₹{invoiceSummary.totalAmount.toFixed(2)}</p>
                 </CardContent>
               </Card>
             </div>
