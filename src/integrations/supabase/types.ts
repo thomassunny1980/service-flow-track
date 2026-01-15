@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      customers: {
+        Row: {
+          address: string | null
+          contact: string | null
+          created_at: string
+          created_by: string | null
+          email: string | null
+          id: string
+          name: string
+          state: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          contact?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          name: string
+          state?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          contact?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          name?: string
+          state?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       inventory: {
         Row: {
           created_at: string
@@ -64,9 +100,11 @@ export type Database = {
           amount_paid: number | null
           created_at: string
           created_by: string | null
+          customer_address: string | null
           customer_contact: string | null
           customer_email: string | null
           customer_name: string
+          customer_state: string | null
           due_date: string | null
           id: string
           invoice_number: string | null
@@ -83,9 +121,11 @@ export type Database = {
           amount_paid?: number | null
           created_at?: string
           created_by?: string | null
+          customer_address?: string | null
           customer_contact?: string | null
           customer_email?: string | null
           customer_name: string
+          customer_state?: string | null
           due_date?: string | null
           id?: string
           invoice_number?: string | null
@@ -102,9 +142,11 @@ export type Database = {
           amount_paid?: number | null
           created_at?: string
           created_by?: string | null
+          customer_address?: string | null
           customer_contact?: string | null
           customer_email?: string | null
           customer_name?: string
+          customer_state?: string | null
           due_date?: string | null
           id?: string
           invoice_number?: string | null
@@ -224,9 +266,11 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
+          customer_address: string | null
           customer_contact: string | null
           customer_email: string | null
           customer_name: string
+          customer_state: string | null
           id: string
           items: Json
           notes: string | null
@@ -242,9 +286,11 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by?: string | null
+          customer_address?: string | null
           customer_contact?: string | null
           customer_email?: string | null
           customer_name: string
+          customer_state?: string | null
           id?: string
           items?: Json
           notes?: string | null
@@ -260,9 +306,11 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string | null
+          customer_address?: string | null
           customer_contact?: string | null
           customer_email?: string | null
           customer_name?: string
+          customer_state?: string | null
           id?: string
           items?: Json
           notes?: string | null

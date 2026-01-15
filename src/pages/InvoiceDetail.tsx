@@ -28,6 +28,8 @@ interface Invoice {
   customer_name: string;
   customer_contact: string | null;
   customer_email: string | null;
+  customer_address: string | null;
+  customer_state: string | null;
   items: InvoiceItem[];
   subtotal: number;
   tax_amount: number;
@@ -87,6 +89,8 @@ const InvoiceDetail = () => {
         subtotal: Number(invoiceRes.data.subtotal),
         tax_amount: Number(invoiceRes.data.tax_amount),
         total_amount: Number(invoiceRes.data.total_amount),
+        customer_address: (invoiceRes.data as any).customer_address || null,
+        customer_state: (invoiceRes.data as any).customer_state || null,
       } as Invoice;
       setInvoice(invoiceData);
 
@@ -244,6 +248,8 @@ const InvoiceDetail = () => {
                 customerName={invoice.customer_name}
                 customerContact={invoice.customer_contact}
                 customerEmail={invoice.customer_email}
+                customerAddress={invoice.customer_address}
+                customerState={invoice.customer_state}
                 items={invoice.items}
                 subtotal={invoice.subtotal}
                 taxAmount={invoice.tax_amount}
