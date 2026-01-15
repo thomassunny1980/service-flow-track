@@ -8,6 +8,9 @@ interface PrintItem {
   tax_rate?: number;
   tax_name?: string;
   tax_amount?: number;
+  cgst_amount?: number;
+  sgst_amount?: number;
+  igst_amount?: number;
   total: number;
   unit?: string;
 }
@@ -38,6 +41,7 @@ interface PrintTemplateProps {
   customerContact: string | null;
   customerEmail: string | null;
   customerAddress?: string | null;
+  customerState?: string | null;
   items: PrintItem[];
   subtotal: number;
   taxAmount: number;
@@ -159,7 +163,7 @@ export const getPrintStyles = () => `
     color: #000; 
     padding: 8px 5px; 
     text-align: center; 
-    font-size: 11px;
+    font-size: 10px;
     font-weight: bold;
     border: 1px solid #000;
   }
@@ -177,7 +181,7 @@ export const getPrintStyles = () => `
   
   .items-table .description-cell {
     text-align: left;
-    max-width: 200px;
+    max-width: 180px;
   }
   
   .item-subtotal {
@@ -277,6 +281,7 @@ const PrintTemplate = ({
   customerContact,
   customerEmail,
   customerAddress,
+  customerState,
   items,
   subtotal,
   taxAmount,
@@ -300,6 +305,14 @@ const PrintTemplate = ({
   };
 
   const shopAddress = getShopAddress();
+  
+  // Determine if interstate (IGST) or intrastate (CGST+SGST)
+  const isInterState = customerState && shopSettings?.shop_state && customerState !== shopSettings.shop_state;
+  
+  // Calculate totals
+  const cgstTotal = isInterState ? 0 : items.reduce((sum, item) => sum + (item.cgst_amount || (item.tax_amount || 0) / 2), 0);
+  const sgstTotal = isInterState ? 0 : items.reduce((sum, item) => sum + (item.sgst_amount || (item.tax_amount || 0) / 2), 0);
+  const igstTotal = isInterState ? items.reduce((sum, item) => sum + (item.igst_amount || item.tax_amount || 0), 0) : 0;
 
   return (
     <div className="print-template">
@@ -357,7 +370,7 @@ const PrintTemplate = ({
             </div>
             <div className="header-info-cell">
               <strong>Destination</strong><br />
-              &nbsp;
+              {customerState || ''}
             </div>
           </div>
           <div className="header-info-row">
@@ -374,6 +387,7 @@ const PrintTemplate = ({
         <p><strong>{type === 'QUOTATION' ? 'Invoice to' : 'Bill to'}</strong></p>
         <p><b>{customerName}</b></p>
         {customerAddress && <p>{customerAddress}</p>}
+        {customerState && <p>State: {customerState}</p>}
         {customerContact && <p>Contact: {customerContact}</p>}
         {customerEmail && <p>Email: {customerEmail}</p>}
       </div>
@@ -382,36 +396,46 @@ const PrintTemplate = ({
       <table className="items-table">
         <thead>
           <tr>
-            <th style={{ width: '30px' }}>SI<br />No.</th>
+            <th style={{ width: '25px' }}>SI<br />No.</th>
             <th style={{ width: 'auto' }}>Description of Goods</th>
-            <th style={{ width: '50px' }}>GST<br />Rate</th>
-            <th style={{ width: '60px' }}>Quantity</th>
-            <th style={{ width: '70px' }}>Rate</th>
-            <th style={{ width: '35px' }}>per</th>
-            <th style={{ width: '80px' }}>Amount</th>
+            <th style={{ width: '50px' }}>Tax<br />Rate</th>
+            <th style={{ width: '50px' }}>Qty</th>
+            <th style={{ width: '65px' }}>Rate<br />(Excl.)</th>
+            <th style={{ width: '65px' }}>Rate<br />(Incl.)</th>
+            <th style={{ width: '75px' }}>Amount</th>
           </tr>
         </thead>
         <tbody>
-          {items.map((item, index) => (
-            <tr key={item.id}>
-              <td className="text-center">{index + 1}</td>
-              <td className="description-cell">
-                <strong>{item.description}</strong>
-                {item.tax_name && (
-                  <div className="item-subtotal">
-                    Tax: {item.tax_name} ({item.tax_rate}%) = ₹{(item.tax_amount || 0).toFixed(2)}
-                  </div>
-                )}
-              </td>
-              <td className="text-center">{item.tax_rate ? `${item.tax_rate} %` : '-'}</td>
-              <td className="text-center">
-                {item.quantity} {item.unit || 'Nos'}
-              </td>
-              <td className="text-right">₹{item.unit_price.toFixed(2)}</td>
-              <td className="text-center">{item.unit || 'Nos'}</td>
-              <td className="text-right"><b>₹{item.total.toFixed(2)}</b></td>
-            </tr>
-          ))}
+          {items.map((item, index) => {
+            const rateExcl = item.unit_price;
+            const taxPerUnit = item.tax_rate ? (item.unit_price * item.tax_rate / 100) : 0;
+            const rateIncl = item.unit_price + taxPerUnit;
+            
+            return (
+              <tr key={item.id}>
+                <td className="text-center">{index + 1}</td>
+                <td className="description-cell">
+                  <strong>{item.description}</strong>
+                  {item.tax_name && item.tax_rate && item.tax_rate > 0 && (
+                    <div className="item-subtotal">
+                      {isInterState ? (
+                        `IGST ${item.tax_rate}%: ₹${(item.igst_amount || item.tax_amount || 0).toFixed(2)}`
+                      ) : (
+                        `CGST ${item.tax_rate/2}%: ₹${(item.cgst_amount || (item.tax_amount || 0)/2).toFixed(2)} | SGST ${item.tax_rate/2}%: ₹${(item.sgst_amount || (item.tax_amount || 0)/2).toFixed(2)}`
+                      )}
+                    </div>
+                  )}
+                </td>
+                <td className="text-center">{item.tax_rate ? `${item.tax_rate}%` : '-'}</td>
+                <td className="text-center">
+                  {item.quantity} {item.unit || 'Nos'}
+                </td>
+                <td className="text-right">₹{rateExcl.toFixed(2)}</td>
+                <td className="text-right">₹{rateIncl.toFixed(2)}</td>
+                <td className="text-right"><b>₹{item.total.toFixed(2)}</b></td>
+              </tr>
+            );
+          })}
           {/* Empty rows for spacing if needed */}
           {items.length < 5 && [...Array(5 - items.length)].map((_, i) => (
             <tr key={`empty-${i}`}>
@@ -433,10 +457,23 @@ const PrintTemplate = ({
           <span style={{ marginRight: '20px' }}>Subtotal:</span>
           <span>₹{subtotal.toFixed(2)}</span>
         </div>
-        <div className="totals-row">
-          <span style={{ marginRight: '20px' }}>Tax:</span>
-          <span>₹{taxAmount.toFixed(2)}</span>
-        </div>
+        {isInterState ? (
+          <div className="totals-row">
+            <span style={{ marginRight: '20px' }}>IGST:</span>
+            <span>₹{igstTotal.toFixed(2)}</span>
+          </div>
+        ) : (
+          <>
+            <div className="totals-row">
+              <span style={{ marginRight: '20px' }}>CGST:</span>
+              <span>₹{cgstTotal.toFixed(2)}</span>
+            </div>
+            <div className="totals-row">
+              <span style={{ marginRight: '20px' }}>SGST:</span>
+              <span>₹{sgstTotal.toFixed(2)}</span>
+            </div>
+          </>
+        )}
         <div className="totals-row grand-total">
           <span style={{ marginRight: '20px' }}>Total:</span>
           <span>₹{totalAmount.toFixed(2)}</span>
