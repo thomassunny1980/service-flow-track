@@ -1,4 +1,23 @@
+import { useState, useEffect } from "react";
 import itechLogo from "@/assets/itechlogo.png";
+
+// Convert image to base64 for print compatibility
+const getBase64Logo = (): Promise<string> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "Anonymous";
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d");
+      ctx?.drawImage(img, 0, 0);
+      resolve(canvas.toDataURL("image/png"));
+    };
+    img.onerror = () => resolve(itechLogo);
+    img.src = itechLogo;
+  });
+};
 
 interface PrintItem {
   id: string;
@@ -294,6 +313,12 @@ const PrintTemplate = ({
   notes,
   shopSettings
 }: PrintTemplateProps) => {
+  const [logoBase64, setLogoBase64] = useState<string>(itechLogo);
+
+  useEffect(() => {
+    getBase64Logo().then(setLogoBase64);
+  }, []);
+
   const getShopAddress = () => {
     if (!shopSettings) return "";
     const parts = [
@@ -308,9 +333,10 @@ const PrintTemplate = ({
   const shopAddress = getShopAddress();
   
   // Determine if interstate (IGST) or intrastate (CGST+SGST)
+  // If customer state is same as shop state OR customer state is not set, use CGST+SGST
   const isInterState = customerState && shopSettings?.shop_state && customerState !== shopSettings.shop_state;
   
-  // Calculate totals
+  // Calculate totals - for intrastate, always split into CGST and SGST
   const cgstTotal = isInterState ? 0 : items.reduce((sum, item) => sum + (item.cgst_amount || (item.tax_amount || 0) / 2), 0);
   const sgstTotal = isInterState ? 0 : items.reduce((sum, item) => sum + (item.sgst_amount || (item.tax_amount || 0) / 2), 0);
   const igstTotal = isInterState ? items.reduce((sum, item) => sum + (item.igst_amount || item.tax_amount || 0), 0) : 0;
@@ -324,7 +350,7 @@ const PrintTemplate = ({
       <div className="main-header">
         <div className="header-left">
           <div className="logo-company">
-            <img src={itechLogo} alt="Logo" className="logo" />
+            <img src={logoBase64} alt="Logo" className="logo" />
             <div className="company-details">
               <h2>{shopSettings?.shop_name || "I TECH COMPUTERS"}</h2>
               {shopAddress && <p>{shopAddress}</p>}
