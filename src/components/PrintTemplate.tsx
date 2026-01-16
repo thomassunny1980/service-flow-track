@@ -2,6 +2,7 @@ import itechLogo from "@/assets/itechlogo.png";
 
 interface PrintItem {
   id: string;
+  item_name?: string;
   description: string;
   quantity: number;
   unit_price: number;
@@ -410,19 +411,17 @@ const PrintTemplate = ({
             const rateExcl = item.unit_price;
             const taxPerUnit = item.tax_rate ? (item.unit_price * item.tax_rate / 100) : 0;
             const rateIncl = item.unit_price + taxPerUnit;
+            const displayName = item.item_name || item.description;
+            const displayDescription = item.item_name ? item.description : "";
             
             return (
               <tr key={item.id}>
                 <td className="text-center">{index + 1}</td>
                 <td className="description-cell">
-                  <strong>{item.description}</strong>
-                  {item.tax_name && item.tax_rate && item.tax_rate > 0 && (
-                    <div className="item-subtotal">
-                      {isInterState ? (
-                        `IGST ${item.tax_rate}%: ₹${(item.igst_amount || item.tax_amount || 0).toFixed(2)}`
-                      ) : (
-                        `CGST ${item.tax_rate/2}%: ₹${(item.cgst_amount || (item.tax_amount || 0)/2).toFixed(2)} | SGST ${item.tax_rate/2}%: ₹${(item.sgst_amount || (item.tax_amount || 0)/2).toFixed(2)}`
-                      )}
+                  <strong>{displayName}</strong>
+                  {displayDescription && (
+                    <div style={{ fontSize: '10px', fontWeight: 'normal', marginTop: '2px' }}>
+                      {displayDescription}
                     </div>
                   )}
                 </td>
@@ -474,9 +473,13 @@ const PrintTemplate = ({
             </div>
           </>
         )}
+        <div className="totals-row">
+          <span style={{ marginRight: '20px' }}>Round Off:</span>
+          <span>₹{(Math.round(totalAmount) - totalAmount).toFixed(2)}</span>
+        </div>
         <div className="totals-row grand-total">
           <span style={{ marginRight: '20px' }}>Total:</span>
-          <span>₹{totalAmount.toFixed(2)}</span>
+          <span>₹{Math.round(totalAmount).toFixed(2)}</span>
         </div>
       </div>
 

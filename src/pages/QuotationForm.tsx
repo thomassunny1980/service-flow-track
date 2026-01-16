@@ -44,6 +44,7 @@ interface Customer {
 interface QuotationItem {
   id: string;
   inventory_id: string | null;
+  item_name: string;
   description: string;
   quantity: number | string;
   unit_price: number | string;
@@ -91,7 +92,7 @@ const QuotationForm = () => {
     notes: "",
   });
   const [items, setItems] = useState<QuotationItem[]>([
-    { id: crypto.randomUUID(), inventory_id: null, description: "", quantity: 1, unit_price: 0, tax_rate: 18, tax_name: "GST 18%", tax_amount: 0, cgst_amount: 0, sgst_amount: 0, igst_amount: 0, total: 0 },
+    { id: crypto.randomUUID(), inventory_id: null, item_name: "", description: "", quantity: 1, unit_price: 0, tax_rate: 18, tax_name: "GST 18%", tax_amount: 0, cgst_amount: 0, sgst_amount: 0, igst_amount: 0, total: 0 },
   ]);
 
   useEffect(() => {
@@ -221,6 +222,7 @@ const QuotationForm = () => {
         setItems(fetchedItems.map(item => ({
           ...item,
           inventory_id: item.inventory_id ?? null,
+          item_name: item.item_name ?? "",
           tax_rate: item.tax_rate ?? 18,
           tax_name: item.tax_name ?? "GST 18%",
           tax_amount: item.tax_amount ?? 0,
@@ -273,6 +275,7 @@ const QuotationForm = () => {
     const newItem: QuotationItem = {
       id: crypto.randomUUID(),
       inventory_id: null,
+      item_name: "",
       description: "",
       quantity: 1,
       unit_price: 0,
@@ -306,7 +309,7 @@ const QuotationForm = () => {
           return {
             ...item,
             inventory_id: inventoryId,
-            description: inventoryItem.item_name,
+            item_name: inventoryItem.item_name,
             unit_price: inventoryItem.sale_rate,
             unit: inventoryItem.unit || 'Nos',
             ...taxCalc,
@@ -394,7 +397,8 @@ const QuotationForm = () => {
     const sgstTotal = items.reduce((sum, item) => sum + item.sgst_amount, 0);
     const igstTotal = items.reduce((sum, item) => sum + item.igst_amount, 0);
     const total = subtotal + taxAmount;
-    return { subtotal, taxAmount, cgstTotal, sgstTotal, igstTotal, total };
+    const roundedTotal = Math.round(total);
+    return { subtotal, taxAmount, cgstTotal, sgstTotal, igstTotal, total: roundedTotal };
   };
 
   const saveCustomer = async () => {
@@ -652,7 +656,7 @@ const QuotationForm = () => {
               {items.map((item, index) => (
                 <div key={item.id} className="grid gap-4 md:grid-cols-12 items-end border-b pb-4">
                   <div className="md:col-span-2 space-y-2">
-                    <Label>From Inventory</Label>
+                    <Label>Item</Label>
                     <Select
                       value={item.inventory_id || ""}
                       onValueChange={(value) => selectInventoryItem(item.id, value)}
@@ -761,7 +765,7 @@ const QuotationForm = () => {
                     </>
                   )}
                   <div className="flex justify-between font-bold text-lg border-t pt-2">
-                    <span>Total:</span>
+                    <span>Total (Rounded):</span>
                     <span>₹{total.toFixed(2)}</span>
                   </div>
                 </div>

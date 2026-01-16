@@ -12,6 +12,7 @@ import PrintTemplate, { getPrintStyles } from "@/components/PrintTemplate";
 
 interface QuotationItem {
   id: string;
+  item_name?: string;
   description: string;
   quantity: number;
   unit_price: number;
@@ -28,6 +29,8 @@ interface Quotation {
   customer_name: string;
   customer_contact: string | null;
   customer_email: string | null;
+  customer_address: string | null;
+  customer_state: string | null;
   items: QuotationItem[];
   subtotal: number;
   tax_rate: number;
@@ -90,6 +93,8 @@ const QuotationDetail = () => {
         tax_rate: Number(quotationRes.data.tax_rate),
         tax_amount: Number(quotationRes.data.tax_amount),
         total_amount: Number(quotationRes.data.total_amount),
+        customer_address: (quotationRes.data as any).customer_address || null,
+        customer_state: (quotationRes.data as any).customer_state || null,
       } as Quotation;
       setQuotation(quotationData);
 
@@ -294,6 +299,8 @@ const QuotationDetail = () => {
                 customerName={quotation.customer_name}
                 customerContact={quotation.customer_contact}
                 customerEmail={quotation.customer_email}
+                customerAddress={quotation.customer_address}
+                customerState={quotation.customer_state}
                 items={quotation.items}
                 subtotal={quotation.subtotal}
                 taxAmount={quotation.tax_amount}
