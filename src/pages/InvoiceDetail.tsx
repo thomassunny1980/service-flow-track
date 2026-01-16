@@ -12,6 +12,7 @@ import PrintTemplate, { getPrintStyles } from "@/components/PrintTemplate";
 
 interface InvoiceItem {
   id: string;
+  item_name?: string;
   description: string;
   quantity: number;
   unit_price: number;
