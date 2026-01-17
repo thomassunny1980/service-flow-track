@@ -204,7 +204,10 @@ const InvoiceForm = () => {
   };
 
   const isInterState = () => {
-    return formData.customer_state !== shopState && formData.customer_state !== "";
+    // Case-insensitive comparison for state matching
+    const customerStateLower = formData.customer_state?.toLowerCase().trim() || "";
+    const shopStateLower = shopState?.toLowerCase().trim() || "";
+    return customerStateLower !== "" && shopStateLower !== "" && customerStateLower !== shopStateLower;
   };
 
   const calculateItemTax = (subtotal: number, taxRate: number) => {

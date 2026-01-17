@@ -333,8 +333,10 @@ const PrintTemplate = ({
   const shopAddress = getShopAddress();
   
   // Determine if interstate (IGST) or intrastate (CGST+SGST)
-  // If customer state is same as shop state OR customer state is not set, use CGST+SGST
-  const isInterState = customerState && shopSettings?.shop_state && customerState !== shopSettings.shop_state;
+  // Case-insensitive comparison for state matching
+  const customerStateLower = customerState?.toLowerCase().trim() || "";
+  const shopStateLower = shopSettings?.shop_state?.toLowerCase().trim() || "";
+  const isInterState = customerStateLower !== "" && shopStateLower !== "" && customerStateLower !== shopStateLower;
   
   // Calculate totals - for intrastate, always split into CGST and SGST
   const cgstTotal = isInterState ? 0 : items.reduce((sum, item) => sum + (item.cgst_amount || (item.tax_amount || 0) / 2), 0);
