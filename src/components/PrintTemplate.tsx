@@ -74,30 +74,59 @@ interface PrintTemplateProps {
   shopSettings: ShopSettings | null;
 }
 
+// Number to words converter for Indian currency
+const numberToWords = (num: number): string => {
+  const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+  const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+  const convertLessThanThousand = (n: number): string => {
+    if (n === 0) return '';
+    if (n < 20) return ones[n];
+    if (n < 100) return tens[Math.floor(n / 10)] + (n % 10 !== 0 ? ' ' + ones[n % 10] : '');
+    return ones[Math.floor(n / 100)] + ' Hundred' + (n % 100 !== 0 ? ' ' + convertLessThanThousand(n % 100) : '');
+  };
+
+  if (num === 0) return 'Zero';
+
+  const crore = Math.floor(num / 10000000);
+  const lakh = Math.floor((num % 10000000) / 100000);
+  const thousand = Math.floor((num % 100000) / 1000);
+  const remaining = num % 1000;
+
+  let result = '';
+  if (crore > 0) result += convertLessThanThousand(crore) + ' Crore ';
+  if (lakh > 0) result += convertLessThanThousand(lakh) + ' Lakh ';
+  if (thousand > 0) result += convertLessThanThousand(thousand) + ' Thousand ';
+  if (remaining > 0) result += convertLessThanThousand(remaining);
+
+  return result.trim() + ' Only';
+};
+
 export const getPrintStyles = () => `
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: Arial, sans-serif; padding: 15px; font-size: 12px; color: #000; }
+  body { font-family: Arial, sans-serif; padding: 15px; font-size: 11px; color: #000; }
   
   .document-title { 
     text-align: center; 
     font-size: 16px; 
     font-weight: bold; 
     padding: 8px; 
-    border: 1px solid #000;
     margin-bottom: 0;
+  }
+  
+  .main-container {
+    border: 1px solid #000;
   }
   
   .main-header {
     display: table;
     width: 100%;
     border-collapse: collapse;
-    border: 1px solid #000;
-    border-top: none;
   }
   
   .header-left {
     display: table-cell;
-    width: 60%;
+    width: 55%;
     vertical-align: top;
     border-right: 1px solid #000;
     padding: 0;
@@ -105,32 +134,32 @@ export const getPrintStyles = () => `
   
   .header-right {
     display: table-cell;
-    width: 40%;
+    width: 45%;
     vertical-align: top;
   }
   
   .logo-company {
     display: flex;
     align-items: flex-start;
-    padding: 10px;
+    padding: 8px;
   }
   
   .logo { 
-    width: 70px; 
+    width: 60px; 
     height: auto;
-    margin-right: 10px;
+    margin-right: 8px;
   }
   
   .company-details h2 { 
-    font-size: 14px; 
+    font-size: 13px; 
     font-weight: bold;
     color: #c00;
-    margin-bottom: 3px;
+    margin-bottom: 2px;
   }
   
   .company-details p { 
-    font-size: 11px; 
-    line-height: 1.4;
+    font-size: 10px; 
+    line-height: 1.3;
     margin: 1px 0;
   }
   
@@ -145,8 +174,8 @@ export const getPrintStyles = () => `
   
   .header-info-cell {
     flex: 1;
-    padding: 5px 8px;
-    font-size: 11px;
+    padding: 4px 6px;
+    font-size: 10px;
     border-right: 1px solid #000;
   }
   
@@ -159,39 +188,42 @@ export const getPrintStyles = () => `
   }
   
   .customer-section {
-    border: 1px solid #000;
-    border-top: none;
-    padding: 10px;
+    border-top: 1px solid #000;
+    padding: 8px;
   }
   
   .customer-section p {
-    font-size: 11px;
-    line-height: 1.5;
-    margin: 2px 0;
+    font-size: 10px;
+    line-height: 1.4;
+    margin: 1px 0;
+  }
+  
+  .customer-label {
+    font-size: 10px;
+    margin-bottom: 2px;
   }
   
   .items-table { 
     width: 100%; 
-    border-collapse: collapse; 
-    margin-top: 0;
-    border: 1px solid #000;
-    border-top: none;
+    border-collapse: collapse;
+    border-top: 1px solid #000;
   }
   
   .items-table th { 
     background: #fff; 
     color: #000; 
-    padding: 8px 5px; 
+    padding: 6px 4px; 
     text-align: center; 
     font-size: 10px;
     font-weight: bold;
     border: 1px solid #000;
+    border-top: none;
   }
   
   .items-table td { 
     border: 1px solid #000; 
-    padding: 6px 5px; 
-    font-size: 11px;
+    padding: 4px; 
+    font-size: 10px;
     vertical-align: top;
   }
   
@@ -201,96 +233,98 @@ export const getPrintStyles = () => `
   
   .items-table .description-cell {
     text-align: left;
-    max-width: 180px;
   }
   
-  .item-subtotal {
+  .tax-row td {
+    border-top: none !important;
+  }
+  
+  .total-row td {
+    font-weight: bold;
+    border-top: 2px solid #000 !important;
+  }
+  
+  .amount-words-section {
+    padding: 6px 8px;
     font-size: 10px;
-    color: #666;
-    margin-top: 3px;
+    border-top: 1px solid #000;
   }
   
-  .totals-section {
-    border: 1px solid #000;
-    border-top: none;
-    padding: 10px;
+  .amount-words-section strong {
+    font-weight: bold;
   }
   
-  .totals-row {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 5px;
+  .footer-section {
+    display: table;
+    width: 100%;
+    border-top: 1px solid #000;
   }
   
-  .totals-row span {
-    min-width: 100px;
+  .declaration-section {
+    display: table-cell;
+    width: 50%;
+    vertical-align: top;
+    padding: 8px;
+    border-right: 1px solid #000;
+    font-size: 10px;
+  }
+  
+  .declaration-section h4 {
+    font-size: 10px;
+    text-decoration: underline;
+    margin-bottom: 4px;
+  }
+  
+  .bank-signature-section {
+    display: table-cell;
+    width: 50%;
+    vertical-align: top;
+    padding: 8px;
+    font-size: 10px;
+  }
+  
+  .bank-details h4 {
+    font-size: 10px;
+    text-decoration: underline;
+    margin-bottom: 4px;
+  }
+  
+  .bank-details p {
+    margin: 2px 0;
+  }
+  
+  .company-signature {
     text-align: right;
-  }
-  
-  .totals-row.grand-total {
+    margin-top: 20px;
     font-weight: bold;
-    font-size: 14px;
-    border-top: 2px solid #000;
-    padding-top: 5px;
-    margin-top: 5px;
   }
   
-  .bank-section {
-    border: 1px solid #000;
-    border-top: none;
-    padding: 10px;
-  }
-  
-  .bank-section h3 {
-    font-size: 12px;
-    font-weight: bold;
-    margin-bottom: 8px;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 5px;
-  }
-  
-  .bank-details-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-  
-  .bank-section p {
-    font-size: 11px;
-    margin: 3px 0;
-  }
-  
-  .terms-section {
-    border: 1px solid #000;
-    border-top: none;
-    padding: 10px;
-    background: #fffbf0;
-  }
-  
-  .terms-section h3 {
-    font-size: 12px;
-    font-weight: bold;
-    margin-bottom: 5px;
-  }
-  
-  .terms-section p {
+  .authorised-signatory {
+    text-align: right;
+    margin-top: 30px;
     font-size: 10px;
-    line-height: 1.4;
-    white-space: pre-wrap;
+    border-top: 1px solid #000;
+    padding-top: 4px;
+    display: inline-block;
+    float: right;
   }
   
-  .footer { 
-    margin-top: 15px;
+  .document-footer { 
+    margin-top: 8px;
     text-align: center; 
     font-size: 10px;
-    color: #666;
-    border-top: 1px solid #000;
-    padding-top: 8px;
+    color: #000;
+  }
+  
+  .eoe-text {
+    text-align: right;
+    font-size: 10px;
+    font-style: italic;
   }
   
   @media print {
     body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
-    @page { margin: 10mm; }
+    @page { margin: 8mm; }
   }
 `;
 
@@ -324,8 +358,7 @@ const PrintTemplate = ({
     const parts = [
       shopSettings.shop_address,
       shopSettings.shop_city,
-      shopSettings.shop_state,
-      shopSettings.shop_pincode
+      shopSettings.shop_state
     ].filter(Boolean);
     return parts.join(", ");
   };
@@ -333,218 +366,286 @@ const PrintTemplate = ({
   const shopAddress = getShopAddress();
   
   // Determine if interstate (IGST) or intrastate (CGST+SGST)
-  // Case-insensitive comparison for state matching
   const customerStateLower = customerState?.toLowerCase().trim() || "";
   const shopStateLower = shopSettings?.shop_state?.toLowerCase().trim() || "";
   const isInterState = customerStateLower !== "" && shopStateLower !== "" && customerStateLower !== shopStateLower;
   
-  // Calculate totals - for intrastate, always split into CGST and SGST
+  // Calculate totals
   const cgstTotal = isInterState ? 0 : items.reduce((sum, item) => sum + (item.cgst_amount || (item.tax_amount || 0) / 2), 0);
   const sgstTotal = isInterState ? 0 : items.reduce((sum, item) => sum + (item.sgst_amount || (item.tax_amount || 0) / 2), 0);
   const igstTotal = isInterState ? items.reduce((sum, item) => sum + (item.igst_amount || item.tax_amount || 0), 0) : 0;
+  
+  const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
+  const roundedTotal = Math.round(totalAmount);
+  const roundOff = roundedTotal - totalAmount;
+  
+  // Get state code (for Kerala it's 32)
+  const getStateCode = (state: string | null | undefined): string => {
+    if (!state) return "";
+    const stateCodeMap: { [key: string]: string } = {
+      'kerala': '32',
+      'tamil nadu': '33',
+      'karnataka': '29',
+      'andhra pradesh': '37',
+      'telangana': '36',
+      'maharashtra': '27',
+      'gujarat': '24',
+      'rajasthan': '08',
+      'delhi': '07',
+      'uttar pradesh': '09',
+      'west bengal': '19',
+    };
+    return stateCodeMap[state.toLowerCase().trim()] || "";
+  };
+
+  const shopStateCode = getStateCode(shopSettings?.shop_state);
+  const customerStateCode = getStateCode(customerState);
 
   return (
     <div className="print-template">
       {/* Document Title */}
       <div className="document-title">{type}</div>
 
-      {/* Main Header with Logo, Company Info, and Document Details */}
-      <div className="main-header">
-        <div className="header-left">
-          <div className="logo-company">
-            <img src={logoBase64} alt="Logo" className="logo" />
-            <div className="company-details">
-              <h2>{shopSettings?.shop_name || "I TECH COMPUTERS"}</h2>
-              {shopAddress && <p>{shopAddress}</p>}
-              {shopSettings?.shop_gst && <p>GSTIN/UIN: {shopSettings.shop_gst}</p>}
-              {shopSettings?.shop_state && <p>State Name: {shopSettings.shop_state}, Code: 32</p>}
-              {shopSettings?.shop_email && <p>E-Mail: {shopSettings.shop_email}</p>}
+      <div className="main-container">
+        {/* Main Header with Logo, Company Info, and Document Details */}
+        <div className="main-header">
+          <div className="header-left">
+            <div className="logo-company">
+              <img src={logoBase64} alt="Logo" className="logo" />
+              <div className="company-details">
+                <h2>{shopSettings?.shop_name || "I TECH COMPUTERS"}</h2>
+                {shopAddress && <p>{shopAddress}</p>}
+                {shopSettings?.shop_gst && <p>GSTIN/UIN: {shopSettings.shop_gst}</p>}
+                {shopSettings?.shop_state && <p>State Name : {shopSettings.shop_state}, Code : {shopStateCode}</p>}
+                {shopSettings?.shop_email && <p>E-Mail : {shopSettings.shop_email}</p>}
+              </div>
+            </div>
+          </div>
+          <div className="header-right">
+            <div className="header-info-row">
+              <div className="header-info-cell">
+                <strong>{type === 'QUOTATION' ? 'Quotation' : 'Invoice'} No.</strong><br />
+                <b>{documentNumber || '-'}</b>
+              </div>
+              <div className="header-info-cell">
+                <strong>Dated</strong><br />
+                <b>{createdDate}</b>
+              </div>
+            </div>
+            <div className="header-info-row">
+              <div className="header-info-cell" style={{ flex: 2 }}>
+                <strong>Mode/Terms of Payment</strong><br />
+                &nbsp;
+              </div>
+            </div>
+            <div className="header-info-row">
+              <div className="header-info-cell">
+                <strong>Buyer's Ref./Order No.</strong><br />
+                {documentNumber || '-'}
+              </div>
+              <div className="header-info-cell">
+                <strong>Other Reference(s)</strong><br />
+                &nbsp;
+              </div>
+            </div>
+            <div className="header-info-row">
+              <div className="header-info-cell">
+                <strong>Despatch through</strong><br />
+                &nbsp;
+              </div>
+              <div className="header-info-cell">
+                <strong>Destination</strong><br />
+                {customerState || ''}
+              </div>
+            </div>
+            <div className="header-info-row">
+              <div className="header-info-cell" style={{ flex: 2 }}>
+                <strong>Terms of Delivery</strong><br />
+                &nbsp;
+              </div>
             </div>
           </div>
         </div>
-        <div className="header-right">
-          <div className="header-info-row">
-            <div className="header-info-cell" style={{ borderRight: '1px solid #000' }}>
-              <strong>{type === 'QUOTATION' ? 'Quotation' : 'Invoice'} No.</strong><br />
-              <b>{documentNumber || '-'}</b>
-            </div>
-            <div className="header-info-cell">
-              <strong>Dated</strong><br />
-              <b>{createdDate}</b>
-            </div>
-          </div>
-          <div className="header-info-row">
-            <div className="header-info-cell" style={{ borderRight: '1px solid #000' }}>
-              <strong>Mode/Terms of Payment</strong><br />
-              &nbsp;
-            </div>
-            <div className="header-info-cell">
-              &nbsp;
-            </div>
-          </div>
-          <div className="header-info-row">
-            <div className="header-info-cell" style={{ borderRight: '1px solid #000' }}>
-              <strong>Buyer's Ref./Order No.</strong><br />
-              {documentNumber || '-'}
-            </div>
-            <div className="header-info-cell">
-              <strong>Other Reference(s)</strong><br />
-              &nbsp;
-            </div>
-          </div>
-          <div className="header-info-row">
-            <div className="header-info-cell" style={{ borderRight: '1px solid #000' }}>
-              <strong>Despatch through</strong><br />
-              &nbsp;
-            </div>
-            <div className="header-info-cell">
-              <strong>Destination</strong><br />
-              {customerState || ''}
-            </div>
-          </div>
-          <div className="header-info-row">
-            <div className="header-info-cell">
-              <strong>Terms of Delivery</strong><br />
-              {validityDate ? `Valid until: ${validityDate}` : dueDate ? `Due: ${dueDate}` : ''}
-            </div>
-          </div>
+
+        {/* Customer Section */}
+        <div className="customer-section">
+          <p className="customer-label">{type === 'QUOTATION' ? 'Invoice to' : 'Bill to'}</p>
+          <p><b>{customerName}</b></p>
+          {customerAddress && <p>{customerAddress}</p>}
+          {customerContact && <p>{customerContact}</p>}
+          {customerState && <p>State Name{' '}{' '}{' '}{' '}: {customerState}, Code : {customerStateCode}</p>}
         </div>
-      </div>
 
-      {/* Customer Section */}
-      <div className="customer-section">
-        <p><strong>{type === 'QUOTATION' ? 'Invoice to' : 'Bill to'}</strong></p>
-        <p><b>{customerName}</b></p>
-        {customerAddress && <p>{customerAddress}</p>}
-        {customerState && <p>State: {customerState}</p>}
-        {customerContact && <p>Contact: {customerContact}</p>}
-        {customerEmail && <p>Email: {customerEmail}</p>}
-      </div>
-
-      {/* Items Table */}
-      <table className="items-table">
-        <thead>
-          <tr>
-            <th style={{ width: '25px' }}>SI<br />No.</th>
-            <th style={{ width: 'auto' }}>Description of Goods</th>
-            <th style={{ width: '50px' }}>Tax<br />Rate</th>
-            <th style={{ width: '50px' }}>Qty</th>
-            <th style={{ width: '65px' }}>Rate<br />(Excl.)</th>
-            <th style={{ width: '65px' }}>Rate<br />(Incl.)</th>
-            <th style={{ width: '75px' }}>Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          {items.map((item, index) => {
-            const rateExcl = item.unit_price;
-            const taxPerUnit = item.tax_rate ? (item.unit_price * item.tax_rate / 100) : 0;
-            const rateIncl = item.unit_price + taxPerUnit;
-            const displayName = item.item_name || item.description;
-            const displayDescription = item.item_name ? item.description : "";
-            
-            return (
-              <tr key={item.id}>
-                <td className="text-center">{index + 1}</td>
-                <td className="description-cell">
-                  <strong>{displayName}</strong>
-                  {displayDescription && (
-                    <div style={{ fontSize: '10px', fontWeight: 'normal', marginTop: '2px' }}>
-                      {displayDescription}
-                    </div>
-                  )}
-                </td>
-                <td className="text-center">{item.tax_rate ? `${item.tax_rate}%` : '-'}</td>
-                <td className="text-center">
-                  {item.quantity} {item.unit || 'Nos'}
-                </td>
-                <td className="text-right">₹{rateExcl.toFixed(2)}</td>
-                <td className="text-right">₹{rateIncl.toFixed(2)}</td>
-                <td className="text-right"><b>₹{item.total.toFixed(2)}</b></td>
-              </tr>
-            );
-          })}
-          {/* Empty rows for spacing if needed */}
-          {items.length < 5 && [...Array(5 - items.length)].map((_, i) => (
-            <tr key={`empty-${i}`}>
-              <td>&nbsp;</td>
-              <td>&nbsp;</td>
-              <td>&nbsp;</td>
-              <td>&nbsp;</td>
-              <td>&nbsp;</td>
-              <td>&nbsp;</td>
-              <td>&nbsp;</td>
+        {/* Items Table */}
+        <table className="items-table">
+          <thead>
+            <tr>
+              <th style={{ width: '30px' }}>Sl<br />No.</th>
+              <th>Description of Goods</th>
+              <th style={{ width: '45px' }}>GST<br />Rate</th>
+              <th style={{ width: '50px' }}>Due on</th>
+              <th style={{ width: '55px' }}>Quantity</th>
+              <th style={{ width: '70px' }}>Rate</th>
+              <th style={{ width: '35px' }}>per</th>
+              <th style={{ width: '80px' }}>Amount</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {items.map((item, index) => {
+              const displayName = item.item_name || item.description;
+              const displayDescription = item.item_name ? item.description : "";
+              
+              return (
+                <tr key={item.id}>
+                  <td className="text-center">{index + 1}</td>
+                  <td className="description-cell">
+                    <strong>{displayName}</strong>
+                    {displayDescription && (
+                      <div style={{ fontSize: '9px', fontWeight: 'normal', marginTop: '2px', fontStyle: 'italic' }}>
+                        {displayDescription}
+                      </div>
+                    )}
+                  </td>
+                  <td className="text-center">{item.tax_rate ? `${item.tax_rate} %` : '-'}</td>
+                  <td className="text-center">{validityDate ? '10 Days' : ''}</td>
+                  <td className="text-center">
+                    <b>{item.quantity}</b> {item.unit || 'Nos'}
+                  </td>
+                  <td className="text-right">{item.unit_price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                  <td className="text-center">{item.unit || 'Nos'}</td>
+                  <td className="text-right">{item.total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                </tr>
+              );
+            })}
+            
+            {/* Empty rows for spacing */}
+            {items.length < 3 && [...Array(3 - items.length)].map((_, i) => (
+              <tr key={`empty-${i}`}>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+              </tr>
+            ))}
+            
+            {/* Tax rows */}
+            {isInterState ? (
+              <tr className="tax-row">
+                <td></td>
+                <td className="text-right"><strong><em>IGST</em></strong></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td className="text-right">{igstTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+              </tr>
+            ) : (
+              <>
+                <tr className="tax-row">
+                  <td></td>
+                  <td className="text-right"><strong><em>CGST</em></strong></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td className="text-right">{cgstTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                </tr>
+                <tr className="tax-row">
+                  <td></td>
+                  <td className="text-right"><strong><em>SGST</em></strong></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td className="text-right">{sgstTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                </tr>
+              </>
+            )}
+            
+            {/* Round Off row */}
+            <tr className="tax-row">
+              <td></td>
+              <td className="text-right"><strong><em>Round Off</em></strong></td>
+              <td className="text-center">0 %</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td className="text-right">{roundOff >= 0 ? roundOff.toFixed(2) : roundOff.toFixed(2)}</td>
+            </tr>
+            
+            {/* Empty row before total */}
+            <tr>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+            
+            {/* Total row */}
+            <tr className="total-row">
+              <td></td>
+              <td className="text-right"><strong>Total</strong></td>
+              <td></td>
+              <td></td>
+              <td className="text-center"><b>{totalQuantity}</b> Nos</td>
+              <td></td>
+              <td></td>
+              <td className="text-right"><b>₹ {roundedTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b></td>
+            </tr>
+          </tbody>
+        </table>
 
-      {/* Totals Section */}
-      <div className="totals-section">
-        <div className="totals-row">
-          <span style={{ marginRight: '20px' }}>Subtotal:</span>
-          <span>₹{subtotal.toFixed(2)}</span>
+        {/* Amount in words */}
+        <div className="amount-words-section">
+          <span>Amount Chargeable (in words)</span>
+          <span className="eoe-text" style={{ float: 'right' }}>E. & O.E</span>
+          <br />
+          <strong>INR {numberToWords(roundedTotal)}</strong>
         </div>
-        {isInterState ? (
-          <div className="totals-row">
-            <span style={{ marginRight: '20px' }}>IGST:</span>
-            <span>₹{igstTotal.toFixed(2)}</span>
+
+        {/* Footer section with Declaration and Bank Details */}
+        <div className="footer-section">
+          <div className="declaration-section">
+            <h4>Declaration</h4>
+            <p>We declare that this invoice shows the actual price of the goods described and that all particulars are true and correct.</p>
           </div>
-        ) : (
-          <>
-            <div className="totals-row">
-              <span style={{ marginRight: '20px' }}>CGST:</span>
-              <span>₹{cgstTotal.toFixed(2)}</span>
+          <div className="bank-signature-section">
+            <div className="bank-details">
+              <h4>Company's Bank Details</h4>
+              {shopSettings?.bank_name && (
+                <>
+                  <p>Bank Name{' '}{' '}{' '}{' '}{' '}{' '}: <strong>{shopSettings.bank_name}</strong></p>
+                  {shopSettings.bank_account_number && <p>A/c No.{' '}{' '}{' '}{' '}{' '}{' '}{' '}{' '}{' '}{' '}: <strong>{shopSettings.bank_account_number}</strong></p>}
+                  {shopSettings.bank_branch && shopSettings.bank_ifsc && (
+                    <p>Branch & IFS Code: <strong>{shopSettings.bank_branch} & {shopSettings.bank_ifsc}</strong></p>
+                  )}
+                </>
+              )}
             </div>
-            <div className="totals-row">
-              <span style={{ marginRight: '20px' }}>SGST:</span>
-              <span>₹{sgstTotal.toFixed(2)}</span>
+            <div className="company-signature">
+              for {shopSettings?.shop_name || "I TECH COMPUTERS"}
             </div>
-          </>
-        )}
-        <div className="totals-row">
-          <span style={{ marginRight: '20px' }}>Round Off:</span>
-          <span>₹{(Math.round(totalAmount) - totalAmount).toFixed(2)}</span>
-        </div>
-        <div className="totals-row grand-total">
-          <span style={{ marginRight: '20px' }}>Total:</span>
-          <span>₹{Math.round(totalAmount).toFixed(2)}</span>
+            <div className="authorised-signatory">
+              Authorised Signatory
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Bank Details */}
-      {shopSettings && (shopSettings.bank_name || shopSettings.upi_id) && (
-        <div className="bank-section">
-          <h3>Bank Details for Payment</h3>
-          <div className="bank-details-grid">
-            {shopSettings.bank_name && (
-              <div>
-                <p><strong>Bank:</strong> {shopSettings.bank_name}</p>
-                {shopSettings.bank_branch && <p><strong>Branch:</strong> {shopSettings.bank_branch}</p>}
-                {shopSettings.bank_account_name && <p><strong>A/C Name:</strong> {shopSettings.bank_account_name}</p>}
-                {shopSettings.bank_account_number && <p><strong>A/C No:</strong> {shopSettings.bank_account_number}</p>}
-                {shopSettings.bank_ifsc && <p><strong>IFSC:</strong> {shopSettings.bank_ifsc}</p>}
-              </div>
-            )}
-            {shopSettings.upi_id && (
-              <div>
-                <p><strong>UPI ID:</strong> {shopSettings.upi_id}</p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Terms & Notes */}
-      {(notes || shopSettings?.terms_and_conditions) && (
-        <div className="terms-section">
-          <h3>Terms & Conditions</h3>
-          {notes && <p>{notes}</p>}
-          {shopSettings?.terms_and_conditions && <p>{shopSettings.terms_and_conditions}</p>}
-        </div>
-      )}
-
-      {/* Footer */}
-      <div className="footer">
+      {/* Document Footer */}
+      <div className="document-footer">
         <p>This is a Computer Generated Document</p>
       </div>
     </div>
