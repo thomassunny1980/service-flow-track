@@ -46,7 +46,36 @@ interface ShopSettings {
   quotation_year_format: string;
   quotation_number_digits: number;
   last_quotation_number: number;
+  invoice_prefix: string;
+  invoice_year_format: string;
+  invoice_number_digits: number;
+  last_invoice_number: number;
 }
+
+// Helper function to get financial year string
+const getFinancialYearString = (format: string): string => {
+  const now = new Date();
+  const currentMonth = now.getMonth(); // 0-11
+  const currentYear = now.getFullYear();
+  
+  // Financial year starts in April (month 3)
+  // If current month is Jan-Mar (0-2), we're in the previous year's FY
+  const fyStartYear = currentMonth < 3 ? currentYear - 1 : currentYear;
+  const fyEndYear = fyStartYear + 1;
+  
+  switch (format) {
+    case "FY-YY":
+      return `${String(fyStartYear).slice(-2)}-${String(fyEndYear).slice(-2)}`;
+    case "FY-YYYY":
+      return `${fyStartYear}-${String(fyEndYear).slice(-2)}`;
+    case "YYYY":
+      return String(currentYear);
+    case "YY":
+      return String(currentYear).slice(-2);
+    default:
+      return "";
+  }
+};
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -79,9 +108,13 @@ const Settings = () => {
       { name: "No Tax", rate: 0 },
     ],
     quotation_prefix: "QT",
-    quotation_year_format: "YYYY",
+    quotation_year_format: "FY-YY",
     quotation_number_digits: 4,
     last_quotation_number: 0,
+    invoice_prefix: "INV",
+    invoice_year_format: "FY-YY",
+    invoice_number_digits: 4,
+    last_invoice_number: 0,
   });
 
   useEffect(() => {
@@ -142,9 +175,13 @@ const Settings = () => {
             { name: "No Tax", rate: 0 },
           ],
           quotation_prefix: (data as any).quotation_prefix || "QT",
-          quotation_year_format: (data as any).quotation_year_format || "YYYY",
+          quotation_year_format: (data as any).quotation_year_format || "FY-YY",
           quotation_number_digits: (data as any).quotation_number_digits || 4,
           last_quotation_number: (data as any).last_quotation_number || 0,
+          invoice_prefix: (data as any).invoice_prefix || "INV",
+          invoice_year_format: (data as any).invoice_year_format || "FY-YY",
+          invoice_number_digits: (data as any).invoice_number_digits || 4,
+          last_invoice_number: (data as any).last_invoice_number || 0,
         });
       }
     } catch (error: any) {
@@ -189,6 +226,9 @@ const Settings = () => {
           quotation_prefix: settings.quotation_prefix,
           quotation_year_format: settings.quotation_year_format,
           quotation_number_digits: settings.quotation_number_digits,
+          invoice_prefix: settings.invoice_prefix,
+          invoice_year_format: settings.invoice_year_format,
+          invoice_number_digits: settings.invoice_number_digits,
         } as any)
         .eq("id", settings.id);
 
@@ -531,76 +571,151 @@ const Settings = () => {
           </TabsContent>
 
           <TabsContent value="numbering">
-            <Card>
-              <CardHeader>
-                <CardTitle>Quotation Numbering</CardTitle>
-                <CardDescription>
-                  Configure auto-generated quotation numbers (e.g., QT-2026-0001)
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid gap-4 md:grid-cols-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="quotation_prefix">Prefix</Label>
-                    <Input
-                      id="quotation_prefix"
-                      value={settings.quotation_prefix}
-                      onChange={(e) => setSettings(prev => ({ ...prev, quotation_prefix: e.target.value }))}
-                      disabled={!isAdmin}
-                      placeholder="e.g., QT"
-                    />
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Quotation Numbering</CardTitle>
+                  <CardDescription>
+                    Configure auto-generated quotation numbers (e.g., QT-25-26-0001)
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="quotation_prefix">Prefix</Label>
+                      <Input
+                        id="quotation_prefix"
+                        value={settings.quotation_prefix}
+                        onChange={(e) => setSettings(prev => ({ ...prev, quotation_prefix: e.target.value }))}
+                        disabled={!isAdmin}
+                        placeholder="e.g., QT"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="quotation_year_format">Year Format</Label>
+                      <Select
+                        value={settings.quotation_year_format}
+                        onValueChange={(value) => setSettings(prev => ({ ...prev, quotation_year_format: value }))}
+                        disabled={!isAdmin}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select format" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="FY-YY">Financial Year Short (25-26)</SelectItem>
+                          <SelectItem value="FY-YYYY">Financial Year Full (2025-26)</SelectItem>
+                          <SelectItem value="YYYY">Calendar Year Full (2026)</SelectItem>
+                          <SelectItem value="YY">Calendar Year Short (26)</SelectItem>
+                          <SelectItem value="NONE">No Year</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="quotation_number_digits">Number Digits</Label>
+                      <Select
+                        value={String(settings.quotation_number_digits)}
+                        onValueChange={(value) => setSettings(prev => ({ ...prev, quotation_number_digits: parseInt(value) }))}
+                        disabled={!isAdmin}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select digits" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="3">3 digits (001)</SelectItem>
+                          <SelectItem value="4">4 digits (0001)</SelectItem>
+                          <SelectItem value="5">5 digits (00001)</SelectItem>
+                          <SelectItem value="6">6 digits (000001)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="quotation_year_format">Year Format</Label>
-                    <Select
-                      value={settings.quotation_year_format}
-                      onValueChange={(value) => setSettings(prev => ({ ...prev, quotation_year_format: value }))}
-                      disabled={!isAdmin}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select format" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="YYYY">Full Year (2026)</SelectItem>
-                        <SelectItem value="YY">Short Year (26)</SelectItem>
-                        <SelectItem value="NONE">No Year</SelectItem>
-                      </SelectContent>
-                    </Select>
+                  <div className="p-4 bg-muted rounded-lg">
+                    <Label className="text-sm text-muted-foreground">Preview</Label>
+                    <p className="text-lg font-mono mt-1">
+                      {settings.quotation_prefix}
+                      {settings.quotation_year_format !== "NONE" && "-"}
+                      {getFinancialYearString(settings.quotation_year_format)}
+                      -{String(settings.last_quotation_number + 1).padStart(settings.quotation_number_digits, "0")}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Last quotation number: {settings.last_quotation_number}
+                    </p>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="quotation_number_digits">Number Digits</Label>
-                    <Select
-                      value={String(settings.quotation_number_digits)}
-                      onValueChange={(value) => setSettings(prev => ({ ...prev, quotation_number_digits: parseInt(value) }))}
-                      disabled={!isAdmin}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select digits" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="3">3 digits (001)</SelectItem>
-                        <SelectItem value="4">4 digits (0001)</SelectItem>
-                        <SelectItem value="5">5 digits (00001)</SelectItem>
-                        <SelectItem value="6">6 digits (000001)</SelectItem>
-                      </SelectContent>
-                    </Select>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Invoice Numbering</CardTitle>
+                  <CardDescription>
+                    Configure auto-generated invoice numbers (e.g., INV-25-26-0001)
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="invoice_prefix">Prefix</Label>
+                      <Input
+                        id="invoice_prefix"
+                        value={settings.invoice_prefix}
+                        onChange={(e) => setSettings(prev => ({ ...prev, invoice_prefix: e.target.value }))}
+                        disabled={!isAdmin}
+                        placeholder="e.g., INV"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="invoice_year_format">Year Format</Label>
+                      <Select
+                        value={settings.invoice_year_format}
+                        onValueChange={(value) => setSettings(prev => ({ ...prev, invoice_year_format: value }))}
+                        disabled={!isAdmin}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select format" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="FY-YY">Financial Year Short (25-26)</SelectItem>
+                          <SelectItem value="FY-YYYY">Financial Year Full (2025-26)</SelectItem>
+                          <SelectItem value="YYYY">Calendar Year Full (2026)</SelectItem>
+                          <SelectItem value="YY">Calendar Year Short (26)</SelectItem>
+                          <SelectItem value="NONE">No Year</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="invoice_number_digits">Number Digits</Label>
+                      <Select
+                        value={String(settings.invoice_number_digits)}
+                        onValueChange={(value) => setSettings(prev => ({ ...prev, invoice_number_digits: parseInt(value) }))}
+                        disabled={!isAdmin}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select digits" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="3">3 digits (001)</SelectItem>
+                          <SelectItem value="4">4 digits (0001)</SelectItem>
+                          <SelectItem value="5">5 digits (00001)</SelectItem>
+                          <SelectItem value="6">6 digits (000001)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                </div>
-                <div className="p-4 bg-muted rounded-lg">
-                  <Label className="text-sm text-muted-foreground">Preview</Label>
-                  <p className="text-lg font-mono mt-1">
-                    {settings.quotation_prefix}
-                    {settings.quotation_year_format !== "NONE" && "-"}
-                    {settings.quotation_year_format === "YYYY" && new Date().getFullYear()}
-                    {settings.quotation_year_format === "YY" && String(new Date().getFullYear()).slice(-2)}
-                    -{String(settings.last_quotation_number + 1).padStart(settings.quotation_number_digits, "0")}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Last quotation number: {settings.last_quotation_number}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+                  <div className="p-4 bg-muted rounded-lg">
+                    <Label className="text-sm text-muted-foreground">Preview</Label>
+                    <p className="text-lg font-mono mt-1">
+                      {settings.invoice_prefix}
+                      {settings.invoice_year_format !== "NONE" && "-"}
+                      {getFinancialYearString(settings.invoice_year_format)}
+                      -{String(settings.last_invoice_number + 1).padStart(settings.invoice_number_digits, "0")}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Last invoice number: {settings.last_invoice_number}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="terms">
