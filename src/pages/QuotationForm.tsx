@@ -163,6 +163,27 @@ const QuotationForm = () => {
     }
   };
 
+  const getFinancialYearString = (format: string): string => {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    const fyStartYear = currentMonth < 3 ? currentYear - 1 : currentYear;
+    const fyEndYear = fyStartYear + 1;
+    
+    switch (format) {
+      case "FY-YY":
+        return `${String(fyStartYear).slice(-2)}-${String(fyEndYear).slice(-2)}`;
+      case "FY-YYYY":
+        return `${fyStartYear}-${String(fyEndYear).slice(-2)}`;
+      case "YYYY":
+        return String(currentYear);
+      case "YY":
+        return String(currentYear).slice(-2);
+      default:
+        return "";
+    }
+  };
+
   const generateQuotationNumber = async (): Promise<string> => {
     try {
       const { data, error } = await supabase
@@ -174,7 +195,7 @@ const QuotationForm = () => {
       if (error) throw error;
 
       const prefix = (data as any)?.quotation_prefix || "QT";
-      const yearFormat = (data as any)?.quotation_year_format || "YYYY";
+      const yearFormat = (data as any)?.quotation_year_format || "FY-YY";
       const digits = (data as any)?.quotation_number_digits || 4;
       const lastNumber = (data as any)?.last_quotation_number || 0;
       const newNumber = lastNumber + 1;
@@ -185,14 +206,9 @@ const QuotationForm = () => {
         .update({ last_quotation_number: newNumber } as any)
         .eq("id", data?.id);
 
-      let yearPart = "";
-      if (yearFormat === "YYYY") {
-        yearPart = `-${new Date().getFullYear()}`;
-      } else if (yearFormat === "YY") {
-        yearPart = `-${String(new Date().getFullYear()).slice(-2)}`;
-      }
+      const yearPart = getFinancialYearString(yearFormat);
 
-      return `${prefix}${yearPart}-${String(newNumber).padStart(digits, "0")}`;
+      return `${prefix}${yearPart ? `-${yearPart}` : ""}-${String(newNumber).padStart(digits, "0")}`;
     } catch (error) {
       console.error("Error generating quotation number:", error);
       return `QT-${Date.now()}`;
