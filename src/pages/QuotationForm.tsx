@@ -17,6 +17,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Trash2, ArrowLeft, Package } from "lucide-react";
 import { addDays, format } from "date-fns";
+import { CustomerSearchInput } from "@/components/CustomerSearchInput";
 
 interface TaxRate {
   name: string;
@@ -240,10 +241,7 @@ const QuotationForm = () => {
     }
   };
 
-  const selectCustomer = (customerId: string) => {
-    const customer = customers.find(c => c.id === customerId);
-    if (!customer) return;
-
+  const selectCustomer = (customer: Customer) => {
     setFormData(prev => ({
       ...prev,
       customer_name: customer.name,
@@ -538,35 +536,15 @@ const QuotationForm = () => {
               <CardTitle>Customer Details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {customers.length > 0 && (
-                <div className="space-y-2">
-                  <Label>Select Existing Customer</Label>
-                  <Select onValueChange={selectCustomer}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choose a customer..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {customers.map((customer) => (
-                        <SelectItem key={customer.id} value={customer.id}>
-                          {customer.name} {customer.contact ? `(${customer.contact})` : ''}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
               <div className="grid gap-4 md:grid-cols-3">
-                <div className="space-y-2">
-                  <Label htmlFor="customer_name">Customer Name *</Label>
-                  <Input
-                    id="customer_name"
-                    value={formData.customer_name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, customer_name: e.target.value })
-                    }
-                    required
-                  />
-                </div>
+                <CustomerSearchInput
+                  customers={customers}
+                  value={formData.customer_name}
+                  onCustomerSelect={selectCustomer}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, customer_name: value })
+                  }
+                />
                 <div className="space-y-2">
                   <Label htmlFor="customer_contact">Contact Number</Label>
                   <Input
