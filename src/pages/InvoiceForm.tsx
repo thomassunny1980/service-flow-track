@@ -91,6 +91,7 @@ const InvoiceForm = () => {
     customer_email: "",
     customer_address: "",
     customer_state: "Kerala",
+    invoice_date: format(new Date(), "yyyy-MM-dd"),
     due_date: format(addDays(new Date(), 30), "yyyy-MM-dd"),
     notes: "",
     status: "unpaid",
@@ -168,10 +169,11 @@ const InvoiceForm = () => {
     }
   };
 
-  const getFinancialYearString = (format: string): string => {
-    const now = new Date();
-    const currentMonth = now.getMonth();
-    const currentYear = now.getFullYear();
+  // Helper function to get financial year string from a specific date
+  const getFinancialYearStringFromDate = (dateString: string, format: string): string => {
+    const date = new Date(dateString);
+    const currentMonth = date.getMonth();
+    const currentYear = date.getFullYear();
     const fyStartYear = currentMonth < 3 ? currentYear - 1 : currentYear;
     const fyEndYear = fyStartYear + 1;
     
@@ -189,11 +191,19 @@ const InvoiceForm = () => {
     }
   };
 
+  const getCurrentFYKey = (dateString: string): string => {
+    const date = new Date(dateString);
+    const month = date.getMonth();
+    const year = date.getFullYear();
+    const fyStartYear = month < 3 ? year - 1 : year;
+    return `${fyStartYear}-${fyStartYear + 1}`;
+  };
+
   const generateInvoiceNumber = async (): Promise<string> => {
     try {
       const { data, error } = await supabase
         .from("shop_settings")
-        .select("invoice_prefix, invoice_year_format, invoice_number_digits, last_invoice_number, id")
+        .select("invoice_prefix, invoice_year_format, invoice_number_digits, last_invoice_number, invoice_fy_year, invoice_fy_last_number, auto_reset_invoice_sequence, id")
         .limit(1)
         .maybeSingle();
 
@@ -202,16 +212,40 @@ const InvoiceForm = () => {
       const prefix = (data as any)?.invoice_prefix || "INV";
       const yearFormat = (data as any)?.invoice_year_format || "FY-YY";
       const digits = (data as any)?.invoice_number_digits || 4;
-      const lastNumber = (data as any)?.last_invoice_number || 0;
-      const newNumber = lastNumber + 1;
+      const autoReset = (data as any)?.auto_reset_invoice_sequence ?? true;
+      const storedFyYear = (data as any)?.invoice_fy_year || null;
+      
+      // Get financial year based on the invoice date
+      const currentFY = getCurrentFYKey(formData.invoice_date);
+      
+      let newNumber: number;
+      
+      if (autoReset && storedFyYear !== currentFY) {
+        // New financial year - reset to 1
+        newNumber = 1;
+        await supabase
+          .from("shop_settings")
+          .update({ 
+            last_invoice_number: newNumber,
+            invoice_fy_year: currentFY,
+            invoice_fy_last_number: newNumber
+          } as any)
+          .eq("id", data?.id);
+      } else {
+        // Same financial year - increment
+        const lastNumber = (data as any)?.last_invoice_number || 0;
+        newNumber = lastNumber + 1;
+        await supabase
+          .from("shop_settings")
+          .update({ 
+            last_invoice_number: newNumber,
+            invoice_fy_year: currentFY,
+            invoice_fy_last_number: newNumber
+          } as any)
+          .eq("id", data?.id);
+      }
 
-      // Update the last invoice number
-      await supabase
-        .from("shop_settings")
-        .update({ last_invoice_number: newNumber } as any)
-        .eq("id", data?.id);
-
-      const yearPart = getFinancialYearString(yearFormat);
+      const yearPart = getFinancialYearStringFromDate(formData.invoice_date, yearFormat);
 
       return `${prefix}${yearPart ? `-${yearPart}` : ""}-${String(newNumber).padStart(digits, "0")}`;
     } catch (error) {
@@ -256,6 +290,7 @@ const InvoiceForm = () => {
           customer_email: data.customer_email || "",
           customer_address: (data as any).customer_address || "",
           customer_state: (data as any).customer_state || "Kerala",
+          invoice_date: format(new Date(), "yyyy-MM-dd"),
           due_date: format(addDays(new Date(), 30), "yyyy-MM-dd"),
           notes: data.notes || "",
           status: "unpaid",
@@ -299,6 +334,7 @@ const InvoiceForm = () => {
           customer_email: data.customer_email || "",
           customer_address: (data as any).customer_address || "",
           customer_state: (data as any).customer_state || "Kerala",
+          invoice_date: data.created_at ? format(new Date(data.created_at), "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
           due_date: data.due_date || format(addDays(new Date(), 30), "yyyy-MM-dd"),
           notes: data.notes || "",
           status: data.status || "unpaid",
@@ -672,7 +708,22 @@ const InvoiceForm = () => {
             <CardHeader>
               <CardTitle>Invoice Details</CardTitle>
             </CardHeader>
-            <CardContent className="grid gap-4 md:grid-cols-2">
+            <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <div className="space-y-2">
+                <Label htmlFor="invoice_date">Invoice Date *</Label>
+                <Input
+                  id="invoice_date"
+                  type="date"
+                  value={formData.invoice_date}
+                  onChange={(e) =>
+                    setFormData({ ...formData, invoice_date: e.target.value })
+                  }
+                  required
+                />
+                <p className="text-xs text-muted-foreground">
+                  This date determines the financial year for numbering
+                </p>
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="due_date">Due Date</Label>
                 <Input

@@ -41,6 +41,33 @@ type InvoiceSummary = {
   totalPaid: number;
 };
 
+type FinancialYearSummary = {
+  fyYear: string;
+  fyDisplayName: string;
+  quotationCount: number;
+  invoiceCount: number;
+  quotationTotal: number;
+  invoiceTotal: number;
+};
+
+const getFinancialYearFromDate = (dateString: string): string => {
+  const date = new Date(dateString);
+  const month = date.getMonth();
+  const year = date.getFullYear();
+  const fyStartYear = month < 3 ? year - 1 : year;
+  const fyEndYear = fyStartYear + 1;
+  return `${String(fyStartYear).slice(-2)}-${String(fyEndYear).slice(-2)}`;
+};
+
+const getCurrentFinancialYear = (): string => {
+  const now = new Date();
+  const month = now.getMonth();
+  const year = now.getFullYear();
+  const fyStartYear = month < 3 ? year - 1 : year;
+  const fyEndYear = fyStartYear + 1;
+  return `${String(fyStartYear).slice(-2)}-${String(fyEndYear).slice(-2)}`;
+};
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const [counts, setCounts] = useState<StatusCounts>({
@@ -75,6 +102,14 @@ const Dashboard = () => {
     totalAmount: 0,
     totalPaid: 0,
   });
+  const [fySummary, setFySummary] = useState<FinancialYearSummary>({
+    fyYear: getCurrentFinancialYear(),
+    fyDisplayName: `FY ${getCurrentFinancialYear()}`,
+    quotationCount: 0,
+    invoiceCount: 0,
+    quotationTotal: 0,
+    invoiceTotal: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState<string>("");
 
@@ -84,6 +119,7 @@ const Dashboard = () => {
     fetchUserProfile();
     fetchQuotationSummary();
     fetchInvoiceSummary();
+    fetchFinancialYearSummary();
   }, []);
 
   const fetchUserProfile = async () => {
@@ -278,6 +314,60 @@ const Dashboard = () => {
     }
   };
 
+  const fetchFinancialYearSummary = async () => {
+    try {
+      const currentFY = getCurrentFinancialYear();
+      
+      // Fetch quotations
+      const { data: quotations, error: qError } = await supabase
+        .from("quotations")
+        .select("created_at, total_amount");
+
+      if (qError) throw qError;
+
+      // Fetch invoices
+      const { data: invoices, error: iError } = await supabase
+        .from("invoices")
+        .select("created_at, total_amount");
+
+      if (iError) throw iError;
+
+      // Filter by current financial year
+      let qCount = 0;
+      let qTotal = 0;
+      quotations?.forEach((q) => {
+        const fy = getFinancialYearFromDate(q.created_at);
+        if (fy === currentFY) {
+          qCount++;
+          qTotal += Number(q.total_amount) || 0;
+        }
+      });
+
+      let iCount = 0;
+      let iTotal = 0;
+      invoices?.forEach((inv) => {
+        const fy = getFinancialYearFromDate(inv.created_at);
+        if (fy === currentFY) {
+          iCount++;
+          iTotal += Number(inv.total_amount) || 0;
+        }
+      });
+
+      setFySummary({
+        fyYear: currentFY,
+        fyDisplayName: `FY 20${currentFY.split('-')[0]}-${currentFY.split('-')[1]}`,
+        quotationCount: qCount,
+        invoiceCount: iCount,
+        quotationTotal: qTotal,
+        invoiceTotal: iTotal,
+      });
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error("Error fetching FY summary:", error);
+      }
+    }
+  };
+
   const statusCards = [
     {
       title: "Received",
@@ -347,6 +437,59 @@ const Dashboard = () => {
                 <p className="text-lg font-semibold">{userName}</p>
               </div>
             )}
+          </div>
+        </div>
+
+        {/* Financial Year Summary Section */}
+        <div className="bg-gradient-to-br from-emerald-500/5 to-teal-500/5 p-6 rounded-lg border border-border">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-foreground">{fySummary.fyDisplayName} Summary</h2>
+            <span className="text-sm text-muted-foreground">Apr {`20${fySummary.fyYear.split('-')[0]}`} - Mar {`20${fySummary.fyYear.split('-')[1]}`}</span>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Card className="bg-card/50 backdrop-blur">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Quotations Created</CardTitle>
+                <FileText className="h-4 w-4 text-blue-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-blue-600">{fySummary.quotationCount}</div>
+                <p className="text-xs text-muted-foreground mt-1">This financial year</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card/50 backdrop-blur">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Quotation Value</CardTitle>
+                <IndianRupee className="h-4 w-4 text-blue-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-blue-600">₹{fySummary.quotationTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+                <p className="text-xs text-muted-foreground mt-1">Total quotation amount</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card/50 backdrop-blur">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Invoices Created</CardTitle>
+                <Receipt className="h-4 w-4 text-green-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">{fySummary.invoiceCount}</div>
+                <p className="text-xs text-muted-foreground mt-1">This financial year</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card/50 backdrop-blur">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Invoice Value</CardTitle>
+                <IndianRupee className="h-4 w-4 text-green-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">₹{fySummary.invoiceTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+                <p className="text-xs text-muted-foreground mt-1">Total invoice amount</p>
+              </CardContent>
+            </Card>
           </div>
         </div>
 

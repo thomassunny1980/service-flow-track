@@ -359,6 +359,8 @@ export type Database = {
       }
       shop_settings: {
         Row: {
+          auto_reset_invoice_sequence: boolean | null
+          auto_reset_quotation_sequence: boolean | null
           bank_account_name: string | null
           bank_account_number: string | null
           bank_branch: string | null
@@ -366,11 +368,15 @@ export type Database = {
           bank_name: string | null
           created_at: string
           id: string
+          invoice_fy_last_number: number | null
+          invoice_fy_year: string | null
           invoice_number_digits: number | null
           invoice_prefix: string | null
           invoice_year_format: string | null
           last_invoice_number: number | null
           last_quotation_number: number | null
+          quotation_fy_last_number: number | null
+          quotation_fy_year: string | null
           quotation_number_digits: number | null
           quotation_prefix: string | null
           quotation_year_format: string | null
@@ -389,6 +395,8 @@ export type Database = {
           upi_id: string | null
         }
         Insert: {
+          auto_reset_invoice_sequence?: boolean | null
+          auto_reset_quotation_sequence?: boolean | null
           bank_account_name?: string | null
           bank_account_number?: string | null
           bank_branch?: string | null
@@ -396,11 +404,15 @@ export type Database = {
           bank_name?: string | null
           created_at?: string
           id?: string
+          invoice_fy_last_number?: number | null
+          invoice_fy_year?: string | null
           invoice_number_digits?: number | null
           invoice_prefix?: string | null
           invoice_year_format?: string | null
           last_invoice_number?: number | null
           last_quotation_number?: number | null
+          quotation_fy_last_number?: number | null
+          quotation_fy_year?: string | null
           quotation_number_digits?: number | null
           quotation_prefix?: string | null
           quotation_year_format?: string | null
@@ -419,6 +431,8 @@ export type Database = {
           upi_id?: string | null
         }
         Update: {
+          auto_reset_invoice_sequence?: boolean | null
+          auto_reset_quotation_sequence?: boolean | null
           bank_account_name?: string | null
           bank_account_number?: string | null
           bank_branch?: string | null
@@ -426,11 +440,15 @@ export type Database = {
           bank_name?: string | null
           created_at?: string
           id?: string
+          invoice_fy_last_number?: number | null
+          invoice_fy_year?: string | null
           invoice_number_digits?: number | null
           invoice_prefix?: string | null
           invoice_year_format?: string | null
           last_invoice_number?: number | null
           last_quotation_number?: number | null
+          quotation_fy_last_number?: number | null
+          quotation_fy_year?: string | null
           quotation_number_digits?: number | null
           quotation_prefix?: string | null
           quotation_year_format?: string | null
