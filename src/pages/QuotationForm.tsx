@@ -90,6 +90,7 @@ const QuotationForm = () => {
     customer_address: "",
     customer_state: "Kerala",
     validity_date: format(addDays(new Date(), 15), "yyyy-MM-dd"),
+    quotation_date: format(new Date(), "yyyy-MM-dd"),
     notes: "",
   });
   const [items, setItems] = useState<QuotationItem[]>([
@@ -163,10 +164,11 @@ const QuotationForm = () => {
     }
   };
 
-  const getFinancialYearString = (format: string): string => {
-    const now = new Date();
-    const currentMonth = now.getMonth();
-    const currentYear = now.getFullYear();
+  // Helper function to get financial year string from a specific date
+  const getFinancialYearStringFromDate = (dateString: string, format: string): string => {
+    const date = new Date(dateString);
+    const currentMonth = date.getMonth();
+    const currentYear = date.getFullYear();
     const fyStartYear = currentMonth < 3 ? currentYear - 1 : currentYear;
     const fyEndYear = fyStartYear + 1;
     
@@ -184,11 +186,19 @@ const QuotationForm = () => {
     }
   };
 
+  const getCurrentFYKey = (dateString: string): string => {
+    const date = new Date(dateString);
+    const month = date.getMonth();
+    const year = date.getFullYear();
+    const fyStartYear = month < 3 ? year - 1 : year;
+    return `${fyStartYear}-${fyStartYear + 1}`;
+  };
+
   const generateQuotationNumber = async (): Promise<string> => {
     try {
       const { data, error } = await supabase
         .from("shop_settings")
-        .select("quotation_prefix, quotation_year_format, quotation_number_digits, last_quotation_number, id")
+        .select("quotation_prefix, quotation_year_format, quotation_number_digits, last_quotation_number, quotation_fy_year, quotation_fy_last_number, auto_reset_quotation_sequence, id")
         .limit(1)
         .maybeSingle();
 
@@ -197,16 +207,40 @@ const QuotationForm = () => {
       const prefix = (data as any)?.quotation_prefix || "QT";
       const yearFormat = (data as any)?.quotation_year_format || "FY-YY";
       const digits = (data as any)?.quotation_number_digits || 4;
-      const lastNumber = (data as any)?.last_quotation_number || 0;
-      const newNumber = lastNumber + 1;
+      const autoReset = (data as any)?.auto_reset_quotation_sequence ?? true;
+      const storedFyYear = (data as any)?.quotation_fy_year || null;
+      
+      // Get financial year based on the quotation date
+      const currentFY = getCurrentFYKey(formData.quotation_date);
+      
+      let newNumber: number;
+      
+      if (autoReset && storedFyYear !== currentFY) {
+        // New financial year - reset to 1
+        newNumber = 1;
+        await supabase
+          .from("shop_settings")
+          .update({ 
+            last_quotation_number: newNumber,
+            quotation_fy_year: currentFY,
+            quotation_fy_last_number: newNumber
+          } as any)
+          .eq("id", data?.id);
+      } else {
+        // Same financial year - increment
+        const lastNumber = (data as any)?.last_quotation_number || 0;
+        newNumber = lastNumber + 1;
+        await supabase
+          .from("shop_settings")
+          .update({ 
+            last_quotation_number: newNumber,
+            quotation_fy_year: currentFY,
+            quotation_fy_last_number: newNumber
+          } as any)
+          .eq("id", data?.id);
+      }
 
-      // Update the last quotation number
-      await supabase
-        .from("shop_settings")
-        .update({ last_quotation_number: newNumber } as any)
-        .eq("id", data?.id);
-
-      const yearPart = getFinancialYearString(yearFormat);
+      const yearPart = getFinancialYearStringFromDate(formData.quotation_date, yearFormat);
 
       return `${prefix}${yearPart ? `-${yearPart}` : ""}-${String(newNumber).padStart(digits, "0")}`;
     } catch (error) {
@@ -233,6 +267,7 @@ const QuotationForm = () => {
           customer_address: (data as any).customer_address || "",
           customer_state: (data as any).customer_state || "Kerala",
           validity_date: data.validity_date,
+          quotation_date: data.created_at ? format(new Date(data.created_at), "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
           notes: data.notes || "",
         });
         const fetchedItems = (data.items as unknown as QuotationItem[]) || [];
@@ -625,8 +660,23 @@ const QuotationForm = () => {
             <CardHeader>
               <CardTitle>Quotation Details</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-2 max-w-xs">
+            <CardContent className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="quotation_date">Quotation Date *</Label>
+                <Input
+                  id="quotation_date"
+                  type="date"
+                  value={formData.quotation_date}
+                  onChange={(e) =>
+                    setFormData({ ...formData, quotation_date: e.target.value })
+                  }
+                  required
+                />
+                <p className="text-xs text-muted-foreground">
+                  This date determines the financial year for numbering
+                </p>
+              </div>
+              <div className="space-y-2">
                 <Label htmlFor="validity_date">Valid Until *</Label>
                 <Input
                   id="validity_date"

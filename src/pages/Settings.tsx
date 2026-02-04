@@ -9,7 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Building2, CreditCard, FileText, Save, Percent, Plus, Trash2, Hash } from "lucide-react";
+import { Building2, CreditCard, FileText, Save, Percent, Plus, Trash2, Hash, RotateCcw } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -50,6 +51,10 @@ interface ShopSettings {
   invoice_year_format: string;
   invoice_number_digits: number;
   last_invoice_number: number;
+  auto_reset_quotation_sequence: boolean;
+  auto_reset_invoice_sequence: boolean;
+  quotation_fy_year: string | null;
+  invoice_fy_year: string | null;
 }
 
 // Helper function to get financial year string
@@ -115,6 +120,10 @@ const Settings = () => {
     invoice_year_format: "FY-YY",
     invoice_number_digits: 4,
     last_invoice_number: 0,
+    auto_reset_quotation_sequence: true,
+    auto_reset_invoice_sequence: true,
+    quotation_fy_year: null,
+    invoice_fy_year: null,
   });
 
   useEffect(() => {
@@ -182,6 +191,10 @@ const Settings = () => {
           invoice_year_format: (data as any).invoice_year_format || "FY-YY",
           invoice_number_digits: (data as any).invoice_number_digits || 4,
           last_invoice_number: (data as any).last_invoice_number || 0,
+          auto_reset_quotation_sequence: (data as any).auto_reset_quotation_sequence ?? true,
+          auto_reset_invoice_sequence: (data as any).auto_reset_invoice_sequence ?? true,
+          quotation_fy_year: (data as any).quotation_fy_year || null,
+          invoice_fy_year: (data as any).invoice_fy_year || null,
         });
       }
     } catch (error: any) {
@@ -229,6 +242,8 @@ const Settings = () => {
           invoice_prefix: settings.invoice_prefix,
           invoice_year_format: settings.invoice_year_format,
           invoice_number_digits: settings.invoice_number_digits,
+          auto_reset_quotation_sequence: settings.auto_reset_quotation_sequence,
+          auto_reset_invoice_sequence: settings.auto_reset_invoice_sequence,
         } as any)
         .eq("id", settings.id);
 
@@ -639,7 +654,21 @@ const Settings = () => {
                     </p>
                     <p className="text-xs text-muted-foreground mt-2">
                       Last quotation number: {settings.last_quotation_number}
+                      {settings.quotation_fy_year && ` (FY: ${settings.quotation_fy_year})`}
                     </p>
+                  </div>
+                  <div className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="space-y-0.5">
+                      <Label className="text-base">Auto-Reset Sequence</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Automatically reset quotation numbering at the start of each new financial year (April 1st)
+                      </p>
+                    </div>
+                    <Switch
+                      checked={settings.auto_reset_quotation_sequence}
+                      onCheckedChange={(checked) => setSettings(prev => ({ ...prev, auto_reset_quotation_sequence: checked }))}
+                      disabled={!isAdmin}
+                    />
                   </div>
                 </CardContent>
               </Card>
@@ -711,7 +740,21 @@ const Settings = () => {
                     </p>
                     <p className="text-xs text-muted-foreground mt-2">
                       Last invoice number: {settings.last_invoice_number}
+                      {settings.invoice_fy_year && ` (FY: ${settings.invoice_fy_year})`}
                     </p>
+                  </div>
+                  <div className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="space-y-0.5">
+                      <Label className="text-base">Auto-Reset Sequence</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Automatically reset invoice numbering at the start of each new financial year (April 1st)
+                      </p>
+                    </div>
+                    <Switch
+                      checked={settings.auto_reset_invoice_sequence}
+                      onCheckedChange={(checked) => setSettings(prev => ({ ...prev, auto_reset_invoice_sequence: checked }))}
+                      disabled={!isAdmin}
+                    />
                   </div>
                 </CardContent>
               </Card>
