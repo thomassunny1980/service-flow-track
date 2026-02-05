@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { corsHeaders } from '../_shared/cors.ts';
+import { getCorsHeaders, corsHeaders } from '../_shared/cors.ts';
 
 interface CreateCustomerRequest {
   mobile: string;
@@ -7,9 +7,12 @@ interface CreateCustomerRequest {
 }
 
 Deno.serve(async (req) => {
+  const origin = req.headers.get('Origin');
+  const headers = getCorsHeaders(origin);
+
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+    return new Response('ok', { headers });
   }
 
   try {
@@ -83,7 +86,7 @@ Deno.serve(async (req) => {
         return new Response(
           JSON.stringify({ customerId: existingUser.id, existed: true }),
           {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            headers: { ...headers, 'Content-Type': 'application/json' },
             status: 200,
           }
         );
@@ -117,7 +120,7 @@ Deno.serve(async (req) => {
         tempPassword: defaultPassword 
       }),
       {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...headers, 'Content-Type': 'application/json' },
         status: 200,
       }
     );
@@ -126,7 +129,7 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({ error: errorMessage }),
       {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...headers, 'Content-Type': 'application/json' },
         status: 400,
       }
     );
