@@ -34,7 +34,7 @@ const CustomerAuth = () => {
       
       const { error } = await supabase.auth.signInWithPassword({
         email: customerEmail,
-        password: password || "123456",
+        password: password,
       });
 
       if (error) {
