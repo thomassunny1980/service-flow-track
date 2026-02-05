@@ -26,6 +26,7 @@ import {
   Settings,
   UserCircle,
   LogOut,
+  Download,
 } from "lucide-react";
 import logo from "@/assets/itechlogo.png";
 import { toast } from "sonner";
@@ -49,9 +50,33 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const [isAdmin, setIsAdmin] = useState(false);
+  const [canInstall, setCanInstall] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
     checkUserRole();
+
+    // Check if already installed
+    if (window.matchMedia("(display-mode: standalone)").matches) {
+      setIsInstalled(true);
+    }
+
+    // Listen for install prompt availability
+    const handleBeforeInstallPrompt = () => {
+      setCanInstall(true);
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+
+    // Check if install prompt might be available (not iOS, not installed)
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if (isIOS && !window.matchMedia("(display-mode: standalone)").matches) {
+      setCanInstall(true); // Show for iOS with manual instructions
+    }
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    };
   }, []);
 
   const checkUserRole = async () => {
@@ -179,6 +204,24 @@ export function AppSidebar() {
               <span>Logout</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
+          {(canInstall || !isInstalled) && (
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                isActive={isActive("/install")}
+                tooltip="Install App"
+              >
+                <NavLink
+                  to="/install"
+                  className="flex items-center gap-2"
+                  activeClassName="bg-accent text-accent-foreground"
+                >
+                  <Download className="h-4 w-4 flex-shrink-0" />
+                  <span>Install App</span>
+                </NavLink>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
