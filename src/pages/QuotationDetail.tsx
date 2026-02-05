@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Printer, Edit, CheckCircle, XCircle, Download } from "lucide-react";
 import { format, parseISO, isPast } from "date-fns";
 import PrintTemplate, { getPrintStyles } from "@/components/PrintTemplate";
+import { escapeHtml } from "@/lib/htmlEscape";
 
 interface QuotationItem {
   id: string;
@@ -142,11 +143,13 @@ const QuotationDetail = () => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
+    const safeTitle = escapeHtml(quotation?.quotation_number || quotation?.customer_name);
+
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Quotation - ${quotation?.quotation_number || quotation?.customer_name}</title>
+          <title>Quotation - ${safeTitle}</title>
           <style>${getPrintStyles()}</style>
         </head>
         <body>
@@ -171,11 +174,13 @@ const QuotationDetail = () => {
     const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
     if (!iframeDoc) return;
 
+    const safeTitle = escapeHtml(quotation?.quotation_number || quotation?.customer_name);
+
     iframeDoc.write(`
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Quotation - ${quotation?.quotation_number || quotation?.customer_name}</title>
+          <title>Quotation - ${safeTitle}</title>
           <style>${getPrintStyles()}</style>
         </head>
         <body>

@@ -6,6 +6,36 @@ interface CreateCustomerRequest {
   fullName: string;
 }
 
+// Generate a secure random password
+function generateSecurePassword(length: number = 12): string {
+  const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+  const numbers = '0123456789';
+  const special = '!@#$%^&*';
+  const allChars = uppercase + lowercase + numbers + special;
+  
+  // Ensure at least one of each required character type
+  const password: string[] = [
+    uppercase[Math.floor(Math.random() * uppercase.length)],
+    lowercase[Math.floor(Math.random() * lowercase.length)],
+    numbers[Math.floor(Math.random() * numbers.length)],
+    special[Math.floor(Math.random() * special.length)],
+  ];
+  
+  // Fill the rest with random characters
+  for (let i = password.length; i < length; i++) {
+    password.push(allChars[Math.floor(Math.random() * allChars.length)]);
+  }
+  
+  // Shuffle the password array
+  for (let i = password.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [password[i], password[j]] = [password[j], password[i]];
+  }
+  
+  return password.join('');
+}
+
 Deno.serve(async (req) => {
   const origin = req.headers.get('Origin');
   const headers = getCorsHeaders(origin);
@@ -64,13 +94,13 @@ Deno.serve(async (req) => {
 
     const customerEmail = `${mobile}@customer.local`;
 
-    // Default password for customer accounts
-    const defaultPassword = '123456';
+    // Generate a unique secure password for this customer
+    const generatedPassword = generateSecurePassword(12);
 
     // Try to create new customer user
     const { data: newUser, error: createError } = await supabaseClient.auth.admin.createUser({
       email: customerEmail,
-      password: defaultPassword,
+      password: generatedPassword,
       email_confirm: true,
       user_metadata: {
         full_name: fullName,
@@ -117,7 +147,7 @@ Deno.serve(async (req) => {
       JSON.stringify({ 
         customerId: newUser.user.id, 
         existed: false,
-        tempPassword: defaultPassword 
+        tempPassword: generatedPassword 
       }),
       {
         headers: { ...headers, 'Content-Type': 'application/json' },
