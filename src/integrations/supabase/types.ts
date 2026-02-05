@@ -491,7 +491,48 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      inventory_staff_view: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string | null
+          item_code: string | null
+          item_name: string | null
+          min_stock_level: number | null
+          quantity: number | null
+          sale_rate: number | null
+          unit: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string | null
+          item_code?: string | null
+          item_name?: string | null
+          min_stock_level?: number | null
+          quantity?: number | null
+          sale_rate?: number | null
+          unit?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string | null
+          item_code?: string | null
+          item_name?: string | null
+          min_stock_level?: number | null
+          quantity?: number | null
+          sale_rate?: number | null
+          unit?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       cleanup_expired_quotations: { Args: never; Returns: undefined }
