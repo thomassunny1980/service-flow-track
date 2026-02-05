@@ -21,6 +21,7 @@ import InvoiceForm from "./pages/InvoiceForm";
 import InvoiceDetail from "./pages/InvoiceDetail";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import Install from "./pages/Install";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +53,7 @@ function App() {
             <Route path="/invoices/edit/:id" element={<InvoiceForm />} />
             <Route path="/invoices/:id" element={<InvoiceDetail />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/install" element={<Install />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
