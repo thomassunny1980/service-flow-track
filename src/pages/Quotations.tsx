@@ -13,7 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Eye, CheckCircle, XCircle, Trash2, RefreshCw, Edit } from "lucide-react";
+import { Plus, Search, Eye, CheckCircle, XCircle, Trash2, RefreshCw, Edit, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format, isPast, parseISO, addDays } from "date-fns";
 import {
@@ -291,9 +291,20 @@ const Quotations = () => {
                               className="text-red-600 hover:text-red-700"
                               onClick={() => updateStatus(quotation.id, 'rejected')}
                             >
-                              <XCircle className="h-4 w-4" />
+                            <XCircle className="h-4 w-4" />
                             </Button>
                           </>
+                        )}
+                        {quotation.status === 'approved' && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-green-600 hover:text-green-700"
+                            onClick={() => navigate(`/invoices/new?quotation=${quotation.id}`)}
+                            title="Convert to Invoice"
+                          >
+                            <FileText className="h-4 w-4" />
+                          </Button>
                         )}
                         {isExpiredQuotation(quotation.status, quotation.validity_date) && (
                           <>
