@@ -13,7 +13,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Eye, Trash2 } from "lucide-react";
+import { Plus, Search, Eye, Trash2, CreditCard } from "lucide-react";
+import InvoicePaymentDialog from "@/components/InvoicePaymentDialog";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from "date-fns";
 import {
@@ -39,6 +40,7 @@ interface Invoice {
   subtotal: number;
   tax_amount: number | null;
   total_amount: number;
+  amount_paid: number | null;
   status: string;
   due_date: string | null;
   created_at: string;
@@ -49,6 +51,8 @@ const Invoices = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -214,6 +218,20 @@ const Invoices = () => {
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
+                        {invoice.status !== 'paid' && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-green-600 hover:text-green-700"
+                            onClick={() => {
+                              setSelectedInvoice(invoice);
+                              setPaymentDialogOpen(true);
+                            }}
+                            title="Record Payment"
+                          >
+                            <CreditCard className="h-4 w-4" />
+                          </Button>
+                        )}
                         {userRole === 'admin' && (
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
@@ -246,6 +264,17 @@ const Invoices = () => {
           </Table>
         </div>
       </div>
+
+      {selectedInvoice && (
+        <InvoicePaymentDialog
+          invoiceId={selectedInvoice.id}
+          totalAmount={selectedInvoice.total_amount}
+          currentAmountPaid={selectedInvoice.amount_paid || 0}
+          open={paymentDialogOpen}
+          onOpenChange={setPaymentDialogOpen}
+          onComplete={fetchInvoices}
+        />
+      )}
     </Layout>
   );
 };

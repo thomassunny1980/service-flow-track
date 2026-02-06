@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Printer, Edit, CheckCircle, XCircle, Download } from "lucide-react";
+import { ArrowLeft, Printer, Edit, CheckCircle, XCircle, Download, FileText } from "lucide-react";
 import { format, parseISO, isPast } from "date-fns";
 import PrintTemplate, { getPrintStyles } from "@/components/PrintTemplate";
 import { escapeHtml } from "@/lib/htmlEscape";
@@ -279,6 +279,16 @@ const QuotationDetail = () => {
                   Reject
                 </Button>
               </>
+            )}
+            {quotation.status === 'approved' && (
+              <Button
+                variant="outline"
+                className="text-green-600 border-green-600"
+                onClick={() => navigate(`/invoices/new?quotation=${id}`)}
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                Convert to Invoice
+              </Button>
             )}
             <Button variant="outline" onClick={() => navigate(`/quotations/edit/${id}`)}>
               <Edit className="h-4 w-4 mr-2" />
