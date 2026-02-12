@@ -110,6 +110,7 @@ export type Database = {
           invoice_number: string | null
           items: Json
           notes: string | null
+          payment_mode: string | null
           quotation_id: string | null
           status: string
           subtotal: number
@@ -131,6 +132,7 @@ export type Database = {
           invoice_number?: string | null
           items?: Json
           notes?: string | null
+          payment_mode?: string | null
           quotation_id?: string | null
           status?: string
           subtotal?: number
@@ -152,6 +154,7 @@ export type Database = {
           invoice_number?: string | null
           items?: Json
           notes?: string | null
+          payment_mode?: string | null
           quotation_id?: string | null
           status?: string
           subtotal?: number
@@ -184,6 +187,7 @@ export type Database = {
           external_service_center: string | null
           external_tracking_number: string | null
           id: string
+          payment_mode: string | null
           payment_status: string | null
           product_name: string
           received_by: string | null
@@ -206,6 +210,7 @@ export type Database = {
           external_service_center?: string | null
           external_tracking_number?: string | null
           id?: string
+          payment_mode?: string | null
           payment_status?: string | null
           product_name: string
           received_by?: string | null
@@ -228,6 +233,7 @@ export type Database = {
           external_service_center?: string | null
           external_tracking_number?: string | null
           id?: string
+          payment_mode?: string | null
           payment_status?: string | null
           product_name?: string
           received_by?: string | null
