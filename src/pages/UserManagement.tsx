@@ -215,6 +215,7 @@ const UserManagement = () => {
             email: editFormData.email !== editingUser.profiles?.email ? editFormData.email : undefined,
             fullName: editFormData.fullName !== editingUser.profiles?.full_name ? editFormData.fullName : undefined,
             role: editFormData.role !== editingUser.role ? editFormData.role : undefined,
+            password: editFormData.password || undefined,
           }),
         }
       );
