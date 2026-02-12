@@ -24,6 +24,7 @@ const CompletionDialog = ({ productId, existingServiceCharge, open, onOpenChange
   const [serviceCharge, setServiceCharge] = useState("");
   const [amountPaid, setAmountPaid] = useState("");
   const [paymentStatus, setPaymentStatus] = useState<"pending" | "paid" | "partial">("paid");
+  const [paymentMode, setPaymentMode] = useState("cash");
   const [deliveredTo, setDeliveredTo] = useState("");
   const [receivedBy, setReceivedBy] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -104,6 +105,7 @@ const CompletionDialog = ({ productId, existingServiceCharge, open, onOpenChange
           service_charge: charge,
           amount_paid: paid,
           payment_status: paymentStatus,
+          payment_mode: paymentMode,
           completed_date: new Date().toISOString(),
           delivered_to: deliveredTo,
           received_by: receivedBy,
@@ -174,6 +176,21 @@ const CompletionDialog = ({ productId, existingServiceCharge, open, onOpenChange
                 <p className="text-sm font-medium">Balance Due: ₹{calculateBalance().toFixed(2)}</p>
               </div>
             )}
+          </div>
+
+          <div>
+            <Label htmlFor="paymentMode">Payment Mode</Label>
+            <Select value={paymentMode} onValueChange={setPaymentMode}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="cash">Cash</SelectItem>
+                <SelectItem value="bank">Bank Transfer</SelectItem>
+                <SelectItem value="upi">UPI</SelectItem>
+                <SelectItem value="card">Card</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div>

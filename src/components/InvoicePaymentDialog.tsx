@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +25,7 @@ const InvoicePaymentDialog = ({
   onComplete 
 }: InvoicePaymentDialogProps) => {
   const [additionalPayment, setAdditionalPayment] = useState("");
+  const [paymentMode, setPaymentMode] = useState("cash");
   const [submitting, setSubmitting] = useState(false);
 
   const calculateNewTotal = () => {
@@ -63,6 +65,7 @@ const InvoicePaymentDialog = ({
         .update({
           amount_paid: newTotal,
           status: getPaymentStatus(),
+          payment_mode: paymentMode,
         })
         .eq("id", invoiceId);
 
@@ -117,6 +120,21 @@ const InvoicePaymentDialog = ({
               value={additionalPayment}
               onChange={(e) => setAdditionalPayment(e.target.value)}
             />
+          </div>
+
+          <div>
+            <Label htmlFor="paymentMode">Payment Mode</Label>
+            <Select value={paymentMode} onValueChange={setPaymentMode}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="cash">Cash</SelectItem>
+                <SelectItem value="bank">Bank Transfer</SelectItem>
+                <SelectItem value="upi">UPI</SelectItem>
+                <SelectItem value="card">Card</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {additionalPayment && parseFloat(additionalPayment) > 0 && (

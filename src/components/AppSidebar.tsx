@@ -22,6 +22,7 @@ import {
   Boxes,
   FileText,
   Receipt,
+  BookOpen,
   Users,
   Settings,
   UserCircle,
@@ -37,6 +38,7 @@ const mainNavItems = [
   { title: "Inventory", url: "/inventory", icon: Boxes },
   { title: "Quotations", url: "/quotations", icon: FileText },
   { title: "Invoices", url: "/invoices", icon: Receipt },
+  { title: "Cashbook", url: "/cashbook", icon: BookOpen },
 ];
 
 const adminNavItems = [

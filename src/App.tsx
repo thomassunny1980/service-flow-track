@@ -19,6 +19,7 @@ import Inventory from "./pages/Inventory";
 import Invoices from "./pages/Invoices";
 import InvoiceForm from "./pages/InvoiceForm";
 import InvoiceDetail from "./pages/InvoiceDetail";
+import Cashbook from "./pages/Cashbook";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Install from "./pages/Install";
@@ -52,6 +53,7 @@ function App() {
             <Route path="/invoices/new" element={<InvoiceForm />} />
             <Route path="/invoices/edit/:id" element={<InvoiceForm />} />
             <Route path="/invoices/:id" element={<InvoiceDetail />} />
+            <Route path="/cashbook" element={<Cashbook />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/install" element={<Install />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
