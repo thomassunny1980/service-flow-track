@@ -21,7 +21,7 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
   }, [onComplete]);
 
   return (
-    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gradient-to-br from-primary via-primary/95 to-primary/80 overflow-hidden">
+    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white overflow-hidden">
       {/* Logo */}
       <div className="animate-[bounce_2s_ease-in-out_infinite] mb-4">
         <img
@@ -32,17 +32,17 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
       </div>
 
       {/* Company Name */}
-      <h1 className="text-3xl font-extrabold text-primary-foreground tracking-wider mb-1">
+      <h1 className="text-3xl font-extrabold text-primary tracking-wider mb-1">
         I-TECH COMPUTERS
       </h1>
-      <p className="text-primary-foreground/70 text-sm mb-10 tracking-widest uppercase">
+      <p className="text-primary/70 text-sm mb-10 tracking-widest uppercase">
         Service Management
       </p>
 
       {/* Progress Bar */}
       <div className="w-64 mb-8">
-        <Progress value={progress} className="h-2 bg-primary-foreground/20 [&>div]:bg-accent" />
-        <p className="text-primary-foreground/60 text-xs text-center mt-2">
+        <Progress value={progress} className="h-2 bg-gray-300 [&>div]:bg-accent" />
+        <p className="text-primary/60 text-xs text-center mt-2">
           Loading... {progress}%
         </p>
       </div>
@@ -129,7 +129,7 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
           </div>
         </div>
         {/* Ground line */}
-        <div className="absolute bottom-2 left-0 right-0 h-px bg-primary-foreground/30" />
+        <div className="absolute bottom-2 left-0 right-0 h-px bg-gray-300" />
       </div>
     </div>
   );
