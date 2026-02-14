@@ -116,6 +116,22 @@ All colors MUST be HSL.
   }
 }
 
+@keyframes run {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes swing {
+  0% { transform: rotate(-15deg); }
+  100% { transform: rotate(15deg); }
+}
+
+@keyframes kick {
+  0% { transform: rotate(-20deg); }
+  100% { transform: rotate(20deg); }
+}
+
 @media print {
   .receipt-container {
     max-width: 100%;
