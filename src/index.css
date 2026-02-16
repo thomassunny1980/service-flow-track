@@ -113,6 +113,52 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    overscroll-behavior: none;
+  }
+}
+
+/* PWA Safe Area Support */
+.pwa-safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+.pwa-safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.pwa-safe-left {
+  padding-left: env(safe-area-inset-left);
+}
+.pwa-safe-right {
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Mobile card list styles */
+.mobile-card-list .mobile-card-item {
+  @apply p-4 border-b border-border last:border-b-0;
+}
+
+/* Mobile table override - hide on small screens */
+@media (max-width: 768px) {
+  .mobile-card-list .desktop-table {
+    display: none;
+  }
+
+  /* Better touch targets */
+  button, a, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Prevent horizontal overflow */
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-card-list .mobile-cards {
+    display: none;
   }
 }
 

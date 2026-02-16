@@ -178,90 +178,140 @@ const Invoices = () => {
           </div>
         </div>
 
-        <div className="border rounded-lg">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Invoice #</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Items</TableHead>
-                <TableHead>Total</TableHead>
-                <TableHead>Due Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredInvoices.length === 0 ? (
+        <div className="mobile-card-list">
+          {/* Mobile Card View */}
+          <div className="mobile-cards space-y-3">
+            {filteredInvoices.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">No invoices found</div>
+            ) : (
+              filteredInvoices.map((invoice) => (
+                <div
+                  key={invoice.id}
+                  className="border rounded-lg p-4 space-y-3 bg-card cursor-pointer active:bg-muted/50 transition-colors"
+                  onClick={() => navigate(`/invoices/${invoice.id}`)}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xs text-muted-foreground">{invoice.invoice_number || "-"}</span>
+                    {getStatusBadge(invoice.status)}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">{invoice.customer_name}</p>
+                    <p className="text-xs text-muted-foreground">{Array.isArray(invoice.items) ? invoice.items.length : 0} items</p>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-base">₹{invoice.total_amount?.toFixed(2)}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {invoice.due_date ? `Due: ${format(parseISO(invoice.due_date), "dd/MM/yyyy")}` : "No due date"}
+                    </span>
+                  </div>
+                  {invoice.status !== 'paid' && (
+                    <div className="flex items-center gap-2 pt-1 border-t" onClick={(e) => e.stopPropagation()}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-green-600 border-green-600 h-9 text-xs flex-1"
+                        onClick={() => {
+                          setSelectedInvoice(invoice);
+                          setPaymentDialogOpen(true);
+                        }}
+                      >
+                        <CreditCard className="h-3.5 w-3.5 mr-1" /> Record Payment
+                      </Button>
+                      {userRole === 'admin' && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button size="sm" variant="ghost" className="text-destructive h-9">
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete Invoice</AlertDialogTitle>
+                              <AlertDialogDescription>Are you sure? This action cannot be undone.</AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => deleteInvoice(invoice.id)}>Delete</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="desktop-table border rounded-lg">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                    No invoices found
-                  </TableCell>
+                  <TableHead>Invoice #</TableHead>
+                  <TableHead>Customer</TableHead>
+                  <TableHead>Items</TableHead>
+                  <TableHead>Total</TableHead>
+                  <TableHead>Due Date</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
-              ) : (
-                filteredInvoices.map((invoice) => (
-                  <TableRow key={invoice.id}>
-                    <TableCell className="font-mono text-sm">{invoice.invoice_number || "-"}</TableCell>
-                    <TableCell className="font-medium">{invoice.customer_name}</TableCell>
-                    <TableCell>{Array.isArray(invoice.items) ? invoice.items.length : 0} items</TableCell>
-                    <TableCell>₹{invoice.total_amount?.toFixed(2)}</TableCell>
-                    <TableCell>
-                      {invoice.due_date ? format(parseISO(invoice.due_date), "dd/MM/yyyy") : "-"}
-                    </TableCell>
-                    <TableCell>{getStatusBadge(invoice.status)}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => navigate(`/invoices/${invoice.id}`)}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        {invoice.status !== 'paid' && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-green-600 hover:text-green-700"
-                            onClick={() => {
-                              setSelectedInvoice(invoice);
-                              setPaymentDialogOpen(true);
-                            }}
-                            title="Record Payment"
-                          >
-                            <CreditCard className="h-4 w-4" />
-                          </Button>
-                        )}
-                        {userRole === 'admin' && (
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="icon" className="text-destructive">
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Delete Invoice</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Are you sure you want to delete this invoice? This action cannot be undone.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => deleteInvoice(invoice.id)}>
-                                  Delete
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        )}
-                      </div>
+              </TableHeader>
+              <TableBody>
+                {filteredInvoices.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                      No invoices found
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                ) : (
+                  filteredInvoices.map((invoice) => (
+                    <TableRow key={invoice.id}>
+                      <TableCell className="font-mono text-sm">{invoice.invoice_number || "-"}</TableCell>
+                      <TableCell className="font-medium">{invoice.customer_name}</TableCell>
+                      <TableCell>{Array.isArray(invoice.items) ? invoice.items.length : 0} items</TableCell>
+                      <TableCell>₹{invoice.total_amount?.toFixed(2)}</TableCell>
+                      <TableCell>
+                        {invoice.due_date ? format(parseISO(invoice.due_date), "dd/MM/yyyy") : "-"}
+                      </TableCell>
+                      <TableCell>{getStatusBadge(invoice.status)}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Button variant="ghost" size="icon" onClick={() => navigate(`/invoices/${invoice.id}`)}>
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          {invoice.status !== 'paid' && (
+                            <Button variant="ghost" size="icon" className="text-green-600 hover:text-green-700" onClick={() => { setSelectedInvoice(invoice); setPaymentDialogOpen(true); }} title="Record Payment">
+                              <CreditCard className="h-4 w-4" />
+                            </Button>
+                          )}
+                          {userRole === 'admin' && (
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="icon" className="text-destructive">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete Invoice</AlertDialogTitle>
+                                  <AlertDialogDescription>Are you sure you want to delete this invoice? This action cannot be undone.</AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => deleteInvoice(invoice.id)}>Delete</AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       </div>
 
