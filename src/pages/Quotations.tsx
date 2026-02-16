@@ -114,7 +114,12 @@ const Quotations = () => {
         title: "Success",
         description: `Quotation ${status} successfully`,
       });
-      fetchQuotations();
+
+      if (status === 'approved') {
+        navigate(`/invoices/new?quotation=${id}`);
+      } else {
+        fetchQuotations();
+      }
     } catch (error: any) {
       toast({
         title: "Error",
