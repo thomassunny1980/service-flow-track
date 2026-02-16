@@ -70,65 +70,50 @@ Deno.serve(async (req) => {
 
     console.log('Editing user:', { userId, email, fullName, role, passwordProvided: !!password });
 
-    // Update email if provided
+    // Build a single auth update object with all changes
+    const authUpdate: Record<string, any> = {};
+    
     if (email) {
-      const { error: emailError } = await supabaseClient.auth.admin.updateUserById(
-        userId,
-        { email }
-      );
-
-      if (emailError) {
-        console.error('Email update error:', emailError);
-        throw new Error(`Failed to update email: ${emailError.message}`);
-      }
+      authUpdate.email = email;
+    }
+    
+    if (password) {
+      authUpdate.password = password;
+    }
+    
+    if (fullName) {
+      authUpdate.user_metadata = { full_name: fullName };
     }
 
-    // Update full name if provided
-    if (fullName) {
-      const { error: metadataError } = await supabaseClient.auth.admin.updateUserById(
+    // Perform a single updateUserById call with all auth changes
+    if (Object.keys(authUpdate).length > 0) {
+      console.log('Updating auth user with fields:', Object.keys(authUpdate));
+      const { error: authError } = await supabaseClient.auth.admin.updateUserById(
         userId,
-        { user_metadata: { full_name: fullName } }
+        authUpdate
       );
 
-      if (metadataError) {
-        console.error('Metadata update error:', metadataError);
-        throw new Error(`Failed to update name: ${metadataError.message}`);
+      if (authError) {
+        console.error('Auth update error:', authError);
+        throw new Error(`Failed to update user: ${authError.message}`);
       }
+      console.log('Auth user updated successfully');
+    }
 
-      // Also update profiles table
+    // Update profiles table
+    const profileUpdate: Record<string, any> = {};
+    if (fullName) profileUpdate.full_name = fullName;
+    if (email) profileUpdate.email = email;
+
+    if (Object.keys(profileUpdate).length > 0) {
       const { error: profileError } = await supabaseClient
         .from('profiles')
-        .update({ full_name: fullName })
+        .update(profileUpdate)
         .eq('id', userId);
 
       if (profileError) {
         console.error('Profile update error:', profileError);
         throw new Error(`Failed to update profile: ${profileError.message}`);
-      }
-    }
-
-    // Update email in profiles if provided
-    if (email) {
-      const { error: profileEmailError } = await supabaseClient
-        .from('profiles')
-        .update({ email })
-        .eq('id', userId);
-
-      if (profileEmailError) {
-        console.error('Profile email update error:', profileEmailError);
-      }
-    }
-
-    // Update password if provided
-    if (password) {
-      const { error: passwordError } = await supabaseClient.auth.admin.updateUserById(
-        userId,
-        { password }
-      );
-
-      if (passwordError) {
-        console.error('Password update error:', passwordError);
-        throw new Error(`Failed to update password: ${passwordError.message}`);
       }
     }
 
