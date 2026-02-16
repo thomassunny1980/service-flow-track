@@ -424,17 +424,17 @@ const Dashboard = () => {
     <Layout>
       <div className="space-y-6">
         <div>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <h1 className="text-3xl font-bold">Dashboard</h1>
-              <p className="text-muted-foreground">
+              <h1 className="text-2xl sm:text-3xl font-bold">Dashboard</h1>
+              <p className="text-muted-foreground text-sm">
                 Overview of all service operations and payments
               </p>
             </div>
             {userName && (
-              <div className="text-right">
-                <p className="text-sm text-muted-foreground">Logged in as</p>
-                <p className="text-lg font-semibold">{userName}</p>
+              <div className="text-left sm:text-right">
+                <p className="text-xs text-muted-foreground">Logged in as</p>
+                <p className="text-sm sm:text-lg font-semibold">{userName}</p>
               </div>
             )}
           </div>

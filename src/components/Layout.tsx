@@ -44,13 +44,13 @@ const Layout = ({ children }: LayoutProps) => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full">
+      <div className="min-h-[100dvh] flex w-full">
         <AppSidebar />
-        <SidebarInset className="flex-1">
-          <header className="flex h-14 items-center border-b px-4 lg:px-6">
+        <SidebarInset className="flex-1 overflow-x-hidden">
+          <header className="sticky top-0 z-40 flex h-14 items-center border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 lg:px-6 pwa-safe-top">
             <SidebarTrigger className="-ml-2" />
           </header>
-          <main className="flex-1 p-4 lg:p-6">
+          <main className="flex-1 p-3 sm:p-4 lg:p-6 pwa-safe-bottom">
             {children}
           </main>
         </SidebarInset>
