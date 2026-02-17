@@ -150,79 +150,120 @@ const Products = () => {
           </Select>
         </div>
 
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Product</TableHead>
-                <TableHead>Serial Number</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead>Service Charge</TableHead>
-                <TableHead>Amount Paid</TableHead>
-                <TableHead>Balance</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
+        <div className="mobile-card-list">
+          {/* Mobile Card View */}
+          <div className="mobile-cards space-y-3">
+            {loading ? (
+              <div className="text-center py-8 text-muted-foreground">Loading...</div>
+            ) : filteredProducts.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">No products found</div>
+            ) : (
+              filteredProducts.map((product) => (
+                <div
+                  key={product.id}
+                  className="border rounded-lg p-4 space-y-3 bg-card cursor-pointer active:bg-muted/50 transition-colors"
+                  onClick={() => navigate(`/products/${product.id}`)}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xs text-muted-foreground">{product.serial_number || "-"}</span>
+                    <StatusBadge status={product.status as any} />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">{product.product_name}</p>
+                    <p className="text-xs text-muted-foreground">{product.customer_name}</p>
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span>{product.customer_contact || "-"}</span>
+                    <span>{format(new Date(product.created_at), "MMM d, yyyy")}</span>
+                  </div>
+                  {(product.status === 'completed' || product.status === 'delivered') && product.service_charge ? (
+                    <div className="flex items-center justify-between pt-1 border-t text-sm">
+                      <span>Charge: ₹{product.service_charge.toFixed(2)}</span>
+                      {product.status === 'delivered' && product.amount_paid !== null && (
+                        <span className="font-bold">Bal: ₹{(product.service_charge - product.amount_paid).toFixed(2)}</span>
+                      )}
+                    </div>
+                  ) : null}
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="desktop-table rounded-md border">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={10} className="text-center">
-                    Loading...
-                  </TableCell>
+                  <TableHead>Product</TableHead>
+                  <TableHead>Serial Number</TableHead>
+                  <TableHead>Customer</TableHead>
+                  <TableHead>Contact</TableHead>
+                  <TableHead>Service Charge</TableHead>
+                  <TableHead>Amount Paid</TableHead>
+                  <TableHead>Balance</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Created</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              ) : filteredProducts.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={10} className="text-center">
-                    No products found
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filteredProducts.map((product) => (
-                  <TableRow key={product.id}>
-                    <TableCell className="font-medium">
-                      {product.product_name}
-                    </TableCell>
-                    <TableCell>{product.serial_number || "-"}</TableCell>
-                    <TableCell>{product.customer_name}</TableCell>
-                    <TableCell>{product.customer_contact || "-"}</TableCell>
-                    <TableCell className="text-right">
-                      {(product.status === 'completed' || product.status === 'delivered') && product.service_charge
-                        ? `₹${product.service_charge.toFixed(2)}`
-                        : "-"}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {product.status === 'delivered' && product.amount_paid !== null
-                        ? `₹${product.amount_paid.toFixed(2)}`
-                        : "-"}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {product.status === 'delivered' && product.service_charge && product.amount_paid !== null
-                        ? `₹${(product.service_charge - product.amount_paid).toFixed(2)}`
-                        : "-"}
-                    </TableCell>
-                    <TableCell>
-                      <StatusBadge status={product.status as any} />
-                    </TableCell>
-                    <TableCell>
-                      {format(new Date(product.created_at), "MMM d, yyyy")}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => navigate(`/products/${product.id}`)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={10} className="text-center">
+                      Loading...
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                ) : filteredProducts.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={10} className="text-center">
+                      No products found
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredProducts.map((product) => (
+                    <TableRow key={product.id}>
+                      <TableCell className="font-medium">
+                        {product.product_name}
+                      </TableCell>
+                      <TableCell>{product.serial_number || "-"}</TableCell>
+                      <TableCell>{product.customer_name}</TableCell>
+                      <TableCell>{product.customer_contact || "-"}</TableCell>
+                      <TableCell className="text-right">
+                        {(product.status === 'completed' || product.status === 'delivered') && product.service_charge
+                          ? `₹${product.service_charge.toFixed(2)}`
+                          : "-"}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {product.status === 'delivered' && product.amount_paid !== null
+                          ? `₹${product.amount_paid.toFixed(2)}`
+                          : "-"}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {product.status === 'delivered' && product.service_charge && product.amount_paid !== null
+                          ? `₹${(product.service_charge - product.amount_paid).toFixed(2)}`
+                          : "-"}
+                      </TableCell>
+                      <TableCell>
+                        <StatusBadge status={product.status as any} />
+                      </TableCell>
+                      <TableCell>
+                        {format(new Date(product.created_at), "MMM d, yyyy")}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => navigate(`/products/${product.id}`)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       </div>
     </Layout>
