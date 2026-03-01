@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, Trash2, ArrowLeft, Package } from "lucide-react";
 import { addDays, format } from "date-fns";
 import { CustomerSearchInput } from "@/components/CustomerSearchInput";
+import CreateInventoryItemDialog from "@/components/CreateInventoryItemDialog";
 
 interface TaxRate {
   name: string;
@@ -701,46 +702,36 @@ const QuotationForm = () => {
             <CardContent className="space-y-4">
               {items.map((item, index) => (
                 <div key={item.id} className="grid gap-4 md:grid-cols-12 items-end border-b pb-4">
-                  <div className="md:col-span-2 space-y-2">
-                    <Label>Item</Label>
-                    <Select
-                      value={item.inventory_id || "custom"}
-                      onValueChange={(value) => {
-                        if (value === "custom") {
-                          setItems(items.map(i => i.id === item.id ? { ...i, inventory_id: null, item_name: "" } : i));
-                        } else {
-                          selectInventoryItem(item.id, value);
-                        }
-                      }}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select item..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="custom">
-                          <span className="text-muted-foreground">✏️ Custom Item</span>
-                        </SelectItem>
-                        {inventoryItems.map((inv) => (
-                          <SelectItem key={inv.id} value={inv.id}>
-                            <div className="flex items-center gap-2">
-                              <Package className="h-3 w-3" />
-                              {inv.item_name} ({inv.quantity} {inv.unit || 'pcs'})
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {!item.inventory_id && (
-                      <Input
-                        value={item.item_name}
-                        onChange={(e) => updateItem(item.id, "item_name", e.target.value)}
-                        placeholder="Enter item name"
-                        className="mt-1"
-                        required
-                      />
-                    )}
-                  </div>
                   <div className="md:col-span-3 space-y-2">
+                    <Label>Item</Label>
+                    <div className="flex gap-1">
+                      <Select
+                        value={item.inventory_id || ""}
+                        onValueChange={(value) => selectInventoryItem(item.id, value)}
+                      >
+                        <SelectTrigger className="flex-1">
+                          <SelectValue placeholder="Select item..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {inventoryItems.map((inv) => (
+                            <SelectItem key={inv.id} value={inv.id}>
+                              <div className="flex items-center gap-2">
+                                <Package className="h-3 w-3" />
+                                {inv.item_name} ({inv.quantity} {inv.unit || 'pcs'})
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <CreateInventoryItemDialog
+                        onItemCreated={(newItem) => {
+                          setInventoryItems(prev => [...prev, newItem]);
+                          selectInventoryItem(item.id, newItem.id);
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div className="md:col-span-2 space-y-2">
                     <Label>Description</Label>
                     <Input
                       value={item.description}
