@@ -145,7 +145,6 @@ const InvoiceForm = () => {
       const { data, error } = await supabase
         .from("inventory")
         .select("id, item_name, item_code, sale_rate, quantity, unit")
-        .gt("quantity", 0)
         .order("item_name");
 
       if (error) throw error;
@@ -767,27 +766,38 @@ const InvoiceForm = () => {
               {items.map((item, index) => (
                 <div key={item.id} className="grid gap-4 md:grid-cols-12 items-end border-b pb-4">
                   <div className="md:col-span-2 space-y-2">
-                    <Label>Item</Label>
-                    <Select
-                      value={item.inventory_id || ""}
-                      onValueChange={(value) => selectInventoryItem(item.id, value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {inventoryItems.map((inv) => (
-                          <SelectItem key={inv.id} value={inv.id}>
-                            <div className="flex items-center gap-2">
-                              <Package className="h-3 w-3" />
-                              {inv.item_name} ({inv.quantity} left)
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Label>Item Name *</Label>
+                    <Input
+                      value={item.item_name}
+                      onChange={(e) => updateItem(item.id, "item_name", e.target.value)}
+                      placeholder="Type item name"
+                      required
+                    />
                   </div>
-                  <div className="md:col-span-3 space-y-2">
+                  {inventoryItems.length > 0 && (
+                    <div className="md:col-span-1 space-y-2">
+                      <Label>From Stock</Label>
+                      <Select
+                        value={item.inventory_id || ""}
+                        onValueChange={(value) => selectInventoryItem(item.id, value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Pick" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {inventoryItems.map((inv) => (
+                            <SelectItem key={inv.id} value={inv.id}>
+                              <div className="flex items-center gap-2">
+                                <Package className="h-3 w-3" />
+                                {inv.item_name} ({inv.quantity})
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                  <div className={`${inventoryItems.length > 0 ? 'md:col-span-2' : 'md:col-span-3'} space-y-2`}>
                     <Label>Description</Label>
                     <Input
                       value={item.description}
