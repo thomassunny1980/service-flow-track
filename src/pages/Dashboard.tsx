@@ -683,17 +683,17 @@ const Dashboard = () => {
               <h2 className="text-xl font-bold text-foreground">Invoice Payments</h2>
               <Receipt className="h-5 w-5 text-emerald-600" />
             </div>
-            <div className="grid gap-3 grid-cols-3 mb-4">
+            <div className="grid gap-3 grid-cols-1 sm:grid-cols-3 mb-4">
               <Card 
                 className="bg-card/50 backdrop-blur cursor-pointer transition-all hover:shadow-md"
                 onClick={() => navigate('/invoices')}
               >
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4 px-4">
-                  <CardTitle className="text-sm font-medium">Total Amount</CardTitle>
+                  <CardTitle className="text-xs sm:text-sm font-medium truncate pr-2">Total Amount</CardTitle>
                   <IndianRupee className="h-4 w-4 text-emerald-600" />
                 </CardHeader>
                 <CardContent className="px-4 pb-4">
-                  <div className="text-xl font-bold text-foreground">₹{invoiceSummary.totalAmount.toFixed(2)}</div>
+                  <div className="text-lg sm:text-xl font-bold text-foreground truncate">₹{invoiceSummary.totalAmount.toFixed(2)}</div>
                 </CardContent>
               </Card>
 
@@ -702,11 +702,11 @@ const Dashboard = () => {
                 onClick={() => navigate('/invoices?status=paid')}
               >
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4 px-4">
-                  <CardTitle className="text-sm font-medium">Received</CardTitle>
+                  <CardTitle className="text-xs sm:text-sm font-medium truncate pr-2">Received</CardTitle>
                   <TrendingUp className="h-4 w-4 text-green-600" />
                 </CardHeader>
                 <CardContent className="px-4 pb-4">
-                  <div className="text-xl font-bold text-green-600">₹{invoiceSummary.totalPaid.toFixed(2)}</div>
+                  <div className="text-lg sm:text-xl font-bold text-green-600 truncate">₹{invoiceSummary.totalPaid.toFixed(2)}</div>
                 </CardContent>
               </Card>
 
@@ -715,15 +715,15 @@ const Dashboard = () => {
                 onClick={() => navigate('/invoices?status=unpaid')}
               >
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4 px-4">
-                  <CardTitle className="text-sm font-medium">Balance</CardTitle>
+                  <CardTitle className="text-xs sm:text-sm font-medium truncate pr-2">Balance</CardTitle>
                   <AlertCircle className="h-4 w-4 text-red-600" />
                 </CardHeader>
                 <CardContent className="px-4 pb-4">
-                  <div className="text-xl font-bold text-red-600">₹{(invoiceSummary.totalAmount - invoiceSummary.totalPaid).toFixed(2)}</div>
+                  <div className="text-lg sm:text-xl font-bold text-red-600 truncate">₹{(invoiceSummary.totalAmount - invoiceSummary.totalPaid).toFixed(2)}</div>
                 </CardContent>
               </Card>
             </div>
-            <div className="grid gap-3 grid-cols-4">
+            <div className="grid gap-3 grid-cols-2 sm:grid-cols-4">
               <Card 
                 className="bg-card/50 backdrop-blur cursor-pointer transition-all hover:shadow-md"
                 onClick={() => navigate('/invoices?status=unpaid')}
