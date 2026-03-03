@@ -446,47 +446,47 @@ const Dashboard = () => {
             <h2 className="text-xl font-bold text-foreground">{fySummary.fyDisplayName} Summary</h2>
             <span className="text-sm text-muted-foreground">Apr {`20${fySummary.fyYear.split('-')[0]}`} - Mar {`20${fySummary.fyYear.split('-')[1]}`}</span>
           </div>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
             <Card className="bg-card/50 backdrop-blur">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Quotations Created</CardTitle>
-                <FileText className="h-4 w-4 text-blue-600" />
+                <CardTitle className="text-xs sm:text-sm font-medium truncate pr-2">Quotations Created</CardTitle>
+                <FileText className="h-4 w-4 text-blue-600 shrink-0" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-blue-600">{fySummary.quotationCount}</div>
+                <div className="text-xl sm:text-2xl font-bold text-blue-600">{fySummary.quotationCount}</div>
                 <p className="text-xs text-muted-foreground mt-1">This financial year</p>
               </CardContent>
             </Card>
 
             <Card className="bg-card/50 backdrop-blur">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Quotation Value</CardTitle>
-                <IndianRupee className="h-4 w-4 text-blue-600" />
+                <CardTitle className="text-xs sm:text-sm font-medium truncate pr-2">Quotation Value</CardTitle>
+                <IndianRupee className="h-4 w-4 text-blue-600 shrink-0" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-blue-600">₹{fySummary.quotationTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+                <div className="text-lg sm:text-2xl font-bold text-blue-600 truncate">₹{fySummary.quotationTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
                 <p className="text-xs text-muted-foreground mt-1">Total quotation amount</p>
               </CardContent>
             </Card>
 
             <Card className="bg-card/50 backdrop-blur">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Invoices Created</CardTitle>
-                <Receipt className="h-4 w-4 text-green-600" />
+                <CardTitle className="text-xs sm:text-sm font-medium truncate pr-2">Invoices Created</CardTitle>
+                <Receipt className="h-4 w-4 text-green-600 shrink-0" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-green-600">{fySummary.invoiceCount}</div>
+                <div className="text-xl sm:text-2xl font-bold text-green-600">{fySummary.invoiceCount}</div>
                 <p className="text-xs text-muted-foreground mt-1">This financial year</p>
               </CardContent>
             </Card>
 
             <Card className="bg-card/50 backdrop-blur">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Invoice Value</CardTitle>
-                <IndianRupee className="h-4 w-4 text-green-600" />
+                <CardTitle className="text-xs sm:text-sm font-medium truncate pr-2">Invoice Value</CardTitle>
+                <IndianRupee className="h-4 w-4 text-green-600 shrink-0" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-green-600">₹{fySummary.invoiceTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+                <div className="text-lg sm:text-2xl font-bold text-green-600 truncate">₹{fySummary.invoiceTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
                 <p className="text-xs text-muted-foreground mt-1">Total invoice amount</p>
               </CardContent>
             </Card>
@@ -496,17 +496,17 @@ const Dashboard = () => {
         {/* Payment Summary Section */}
         <div className="bg-gradient-to-br from-primary/5 to-accent/5 p-6 rounded-lg border border-border">
           <h2 className="text-xl font-bold text-foreground mb-4">Payment Summary</h2>
-          <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
+          <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
             <Card 
               className="bg-card/50 backdrop-blur cursor-pointer transition-all hover:shadow-md"
               onClick={() => navigate('/products?payment=all')}
             >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Amount</CardTitle>
-                <IndianRupee className="h-4 w-4 text-primary" />
+                <CardTitle className="text-xs sm:text-sm font-medium truncate pr-2">Total Amount</CardTitle>
+                <IndianRupee className="h-4 w-4 text-primary shrink-0" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-foreground">₹{paymentSummary.totalServiceAmount.toFixed(2)}</div>
+                <div className="text-lg sm:text-2xl font-bold text-foreground truncate">₹{paymentSummary.totalServiceAmount.toFixed(2)}</div>
                 <p className="text-xs text-muted-foreground mt-1">Service charges</p>
               </CardContent>
             </Card>
@@ -516,11 +516,11 @@ const Dashboard = () => {
               onClick={() => navigate('/products?payment=received')}
             >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Received</CardTitle>
-                <TrendingUp className="h-4 w-4 text-primary" />
+                <CardTitle className="text-xs sm:text-sm font-medium truncate pr-2">Received</CardTitle>
+                <TrendingUp className="h-4 w-4 text-primary shrink-0" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-primary">₹{paymentSummary.totalReceived.toFixed(2)}</div>
+                <div className="text-lg sm:text-2xl font-bold text-primary truncate">₹{paymentSummary.totalReceived.toFixed(2)}</div>
                 <p className="text-xs text-muted-foreground mt-1">Amount paid</p>
               </CardContent>
             </Card>
@@ -530,11 +530,11 @@ const Dashboard = () => {
               onClick={() => navigate('/products?payment=balance')}
             >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Balance</CardTitle>
-                <AlertCircle className="h-4 w-4 text-accent" />
+                <CardTitle className="text-xs sm:text-sm font-medium truncate pr-2">Balance</CardTitle>
+                <AlertCircle className="h-4 w-4 text-accent shrink-0" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-accent">₹{paymentSummary.totalBalance.toFixed(2)}</div>
+                <div className="text-lg sm:text-2xl font-bold text-accent truncate">₹{paymentSummary.totalBalance.toFixed(2)}</div>
                 <p className="text-xs text-muted-foreground mt-1">Outstanding</p>
               </CardContent>
             </Card>
@@ -544,11 +544,11 @@ const Dashboard = () => {
               onClick={() => navigate('/products?payment=paid')}
             >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Paid</CardTitle>
-                <CheckCircle className="h-4 w-4 text-primary" />
+                <CardTitle className="text-xs sm:text-sm font-medium truncate pr-2">Paid</CardTitle>
+                <CheckCircle className="h-4 w-4 text-primary shrink-0" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-primary">{paymentSummary.paidCount}</div>
+                <div className="text-lg sm:text-2xl font-bold text-primary">{paymentSummary.paidCount}</div>
                 <p className="text-xs text-muted-foreground mt-1">Full payments</p>
               </CardContent>
             </Card>
@@ -558,11 +558,11 @@ const Dashboard = () => {
               onClick={() => navigate('/products?payment=partial')}
             >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Partial</CardTitle>
-                <Clock className="h-4 w-4 text-amber-600" />
+                <CardTitle className="text-xs sm:text-sm font-medium truncate pr-2">Partial</CardTitle>
+                <Clock className="h-4 w-4 text-amber-600 shrink-0" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-amber-600">{paymentSummary.partialCount}</div>
+                <div className="text-lg sm:text-2xl font-bold text-amber-600">{paymentSummary.partialCount}</div>
                 <p className="text-xs text-muted-foreground mt-1">Partial paid</p>
               </CardContent>
             </Card>
@@ -572,11 +572,11 @@ const Dashboard = () => {
               onClick={() => navigate('/products?payment=pending')}
             >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Pending</CardTitle>
-                <AlertCircle className="h-4 w-4 text-accent" />
+                <CardTitle className="text-xs sm:text-sm font-medium truncate pr-2">Pending</CardTitle>
+                <AlertCircle className="h-4 w-4 text-accent shrink-0" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-accent">{paymentSummary.pendingCount}</div>
+                <div className="text-lg sm:text-2xl font-bold text-accent">{paymentSummary.pendingCount}</div>
                 <p className="text-xs text-muted-foreground mt-1">Not paid</p>
               </CardContent>
             </Card>

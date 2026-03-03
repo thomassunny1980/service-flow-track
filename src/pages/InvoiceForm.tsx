@@ -765,7 +765,7 @@ const InvoiceForm = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               {items.map((item, index) => (
-                <div key={item.id} className="border rounded-lg p-4 space-y-3">
+                <div key={item.id} className="border rounded-lg p-3 md:p-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-muted-foreground">Item {index + 1}</span>
                     <Button
@@ -779,86 +779,88 @@ const InvoiceForm = () => {
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
-                  <div className="space-y-2">
-                    <Label>Item</Label>
-                    <div className="flex gap-1">
-                      <Select
-                        value={item.inventory_id || ""}
-                        onValueChange={(value) => selectInventoryItem(item.id, value)}
-                      >
-                        <SelectTrigger className="flex-1">
-                          <SelectValue placeholder="Select item..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {inventoryItems.map((inv) => (
-                            <SelectItem key={inv.id} value={inv.id}>
-                              <div className="flex items-center gap-2">
-                                <Package className="h-3 w-3" />
-                                {inv.item_name} ({inv.quantity} {inv.unit || 'pcs'})
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <CreateInventoryItemDialog
-                        onItemCreated={(newItem) => {
-                          setInventoryItems(prev => [...prev, newItem]);
-                          selectInventoryItem(item.id, newItem.id);
-                        }}
-                      />
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+                    <div className="md:col-span-4 space-y-1">
+                      <Label className="text-xs">Item</Label>
+                      <div className="flex gap-1">
+                        <Select
+                          value={item.inventory_id || ""}
+                          onValueChange={(value) => selectInventoryItem(item.id, value)}
+                        >
+                          <SelectTrigger className="flex-1 min-w-0">
+                            <SelectValue placeholder="Select item..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {inventoryItems.map((inv) => (
+                              <SelectItem key={inv.id} value={inv.id}>
+                                <div className="flex items-center gap-2">
+                                  <Package className="h-3 w-3 shrink-0" />
+                                  <span className="truncate">{inv.item_name} ({inv.quantity} {inv.unit || 'pcs'})</span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <CreateInventoryItemDialog
+                          onItemCreated={(newItem) => {
+                            setInventoryItems(prev => [...prev, newItem]);
+                            selectInventoryItem(item.id, newItem.id);
+                          }}
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Description</Label>
-                    <Input
-                      value={item.description}
-                      onChange={(e) => updateItem(item.id, "description", e.target.value)}
-                      placeholder="Item description"
-                    />
-                  </div>
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="space-y-2">
-                      <Label>Qty</Label>
+                    <div className="md:col-span-2 space-y-1">
+                      <Label className="text-xs">Description</Label>
                       <Input
-                        type="text"
-                        inputMode="decimal"
-                        value={item.quantity}
-                        onChange={(e) => updateItem(item.id, "quantity", e.target.value)}
-                        placeholder="0"
+                        value={item.description}
+                        onChange={(e) => updateItem(item.id, "description", e.target.value)}
+                        placeholder="Description"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label>Price (₹)</Label>
-                      <Input
-                        type="text"
-                        inputMode="decimal"
-                        value={item.unit_price}
-                        onChange={(e) => updateItem(item.id, "unit_price", e.target.value)}
-                        placeholder="0.00"
-                      />
+                    <div className="grid grid-cols-4 gap-2 md:col-span-6 md:grid-cols-4">
+                      <div className="space-y-1">
+                        <Label className="text-xs">Qty</Label>
+                        <Input
+                          type="text"
+                          inputMode="decimal"
+                          value={item.quantity}
+                          onChange={(e) => updateItem(item.id, "quantity", e.target.value)}
+                          placeholder="0"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Price (₹)</Label>
+                        <Input
+                          type="text"
+                          inputMode="decimal"
+                          value={item.unit_price}
+                          onChange={(e) => updateItem(item.id, "unit_price", e.target.value)}
+                          placeholder="0.00"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Tax</Label>
+                        <Select
+                          value={item.tax_name}
+                          onValueChange={(value) => updateItemTax(item.id, value)}
+                        >
+                          <SelectTrigger className="min-w-0">
+                            <SelectValue placeholder="Tax" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {taxRates.map((tax) => (
+                              <SelectItem key={tax.name} value={tax.name}>
+                                {tax.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Total (₹)</Label>
+                        <Input value={item.total.toFixed(2)} readOnly className="bg-muted" />
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label>Total (₹)</Label>
-                      <Input value={item.total.toFixed(2)} readOnly className="bg-muted" />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Tax</Label>
-                    <Select
-                      value={item.tax_name}
-                      onValueChange={(value) => updateItemTax(item.id, value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select tax" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {taxRates.map((tax) => (
-                          <SelectItem key={tax.name} value={tax.name}>
-                            {tax.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
                   </div>
                 </div>
               ))}
