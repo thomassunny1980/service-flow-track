@@ -765,8 +765,21 @@ const InvoiceForm = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               {items.map((item, index) => (
-                <div key={item.id} className="grid gap-4 md:grid-cols-12 items-end border-b pb-4">
-                  <div className="md:col-span-3 space-y-2">
+                <div key={item.id} className="border rounded-lg p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-muted-foreground">Item {index + 1}</span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeItem(item.id)}
+                      disabled={items.length === 1}
+                      className="text-destructive h-8 w-8"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="space-y-2">
                     <Label>Item</Label>
                     <div className="flex gap-1">
                       <Select
@@ -795,7 +808,7 @@ const InvoiceForm = () => {
                       />
                     </div>
                   </div>
-                  <div className="md:col-span-2 space-y-2">
+                  <div className="space-y-2">
                     <Label>Description</Label>
                     <Input
                       value={item.description}
@@ -803,27 +816,33 @@ const InvoiceForm = () => {
                       placeholder="Item description"
                     />
                   </div>
-                  <div className="md:col-span-1 space-y-2">
-                    <Label>Qty</Label>
-                    <Input
-                      type="text"
-                      inputMode="decimal"
-                      value={item.quantity}
-                      onChange={(e) => updateItem(item.id, "quantity", e.target.value)}
-                      placeholder="0"
-                    />
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="space-y-2">
+                      <Label>Qty</Label>
+                      <Input
+                        type="text"
+                        inputMode="decimal"
+                        value={item.quantity}
+                        onChange={(e) => updateItem(item.id, "quantity", e.target.value)}
+                        placeholder="0"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Price (₹)</Label>
+                      <Input
+                        type="text"
+                        inputMode="decimal"
+                        value={item.unit_price}
+                        onChange={(e) => updateItem(item.id, "unit_price", e.target.value)}
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Total (₹)</Label>
+                      <Input value={item.total.toFixed(2)} readOnly className="bg-muted" />
+                    </div>
                   </div>
-                  <div className="md:col-span-2 space-y-2">
-                    <Label>Unit Price (₹)</Label>
-                    <Input
-                      type="text"
-                      inputMode="decimal"
-                      value={item.unit_price}
-                      onChange={(e) => updateItem(item.id, "unit_price", e.target.value)}
-                      placeholder="0.00"
-                    />
-                  </div>
-                  <div className="md:col-span-2 space-y-2">
+                  <div className="space-y-2">
                     <Label>Tax</Label>
                     <Select
                       value={item.tax_name}
@@ -840,22 +859,6 @@ const InvoiceForm = () => {
                         ))}
                       </SelectContent>
                     </Select>
-                  </div>
-                  <div className="md:col-span-1 space-y-2">
-                    <Label>Total (₹)</Label>
-                    <Input value={item.total.toFixed(2)} readOnly className="bg-muted" />
-                  </div>
-                  <div className="md:col-span-1">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeItem(item.id)}
-                      disabled={items.length === 1}
-                      className="text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
                   </div>
                 </div>
               ))}
