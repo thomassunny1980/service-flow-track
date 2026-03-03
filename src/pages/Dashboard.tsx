@@ -728,8 +728,8 @@ const Dashboard = () => {
                 className="bg-card/50 backdrop-blur cursor-pointer transition-all hover:shadow-md"
                 onClick={() => navigate('/invoices?status=unpaid')}
               >
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4 px-4">
-                  <CardTitle className="text-sm font-medium">Unpaid</CardTitle>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4 px-3">
+                  <CardTitle className="text-xs sm:text-sm font-medium truncate pr-1">Unpaid</CardTitle>
                   <AlertCircle className="h-4 w-4 text-red-600" />
                 </CardHeader>
                 <CardContent className="px-4 pb-4">
@@ -741,8 +741,8 @@ const Dashboard = () => {
                 className="bg-card/50 backdrop-blur cursor-pointer transition-all hover:shadow-md"
                 onClick={() => navigate('/invoices?status=partial')}
               >
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4 px-4">
-                  <CardTitle className="text-sm font-medium">Partial</CardTitle>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4 px-3">
+                  <CardTitle className="text-xs sm:text-sm font-medium truncate pr-1">Partial</CardTitle>
                   <CreditCard className="h-4 w-4 text-amber-600" />
                 </CardHeader>
                 <CardContent className="px-4 pb-4">
@@ -754,8 +754,8 @@ const Dashboard = () => {
                 className="bg-card/50 backdrop-blur cursor-pointer transition-all hover:shadow-md"
                 onClick={() => navigate('/invoices?status=paid')}
               >
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4 px-4">
-                  <CardTitle className="text-sm font-medium">Paid</CardTitle>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4 px-3">
+                  <CardTitle className="text-xs sm:text-sm font-medium truncate pr-1">Paid</CardTitle>
                   <CheckCircle className="h-4 w-4 text-green-600" />
                 </CardHeader>
                 <CardContent className="px-4 pb-4">
@@ -767,8 +767,8 @@ const Dashboard = () => {
                 className="bg-card/50 backdrop-blur cursor-pointer transition-all hover:shadow-md"
                 onClick={() => navigate('/invoices')}
               >
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4 px-4">
-                  <CardTitle className="text-sm font-medium">Total</CardTitle>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4 px-3">
+                  <CardTitle className="text-xs sm:text-sm font-medium truncate pr-1">Total</CardTitle>
                   <Receipt className="h-4 w-4 text-emerald-600" />
                 </CardHeader>
                 <CardContent className="px-4 pb-4">
