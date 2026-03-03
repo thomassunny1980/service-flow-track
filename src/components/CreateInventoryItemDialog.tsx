@@ -106,23 +106,32 @@ const CreateInventoryItemDialog = ({ onItemCreated }: CreateInventoryItemDialogP
           <DialogDescription>Create a new inventory item</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid gap-4 grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="new_item_name">Item Name *</Label>
-              <Input
-                id="new_item_name"
-                value={formData.item_name}
-                onChange={(e) => setFormData({ ...formData, item_name: e.target.value })}
-                required
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="new_item_name">Item Name *</Label>
+            <Input
+              id="new_item_name"
+              value={formData.item_name}
+              onChange={(e) => setFormData({ ...formData, item_name: e.target.value })}
+              required
+            />
+          </div>
+          <div className="grid gap-3 grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="new_item_code">Item Code</Label>
               <Input
                 id="new_item_code"
                 value={formData.item_code}
                 onChange={(e) => setFormData({ ...formData, item_code: e.target.value })}
-                placeholder="e.g., SKU001"
+                placeholder="SKU001"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="new_unit">Unit</Label>
+              <Input
+                id="new_unit"
+                value={formData.unit}
+                onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
+                placeholder="pcs, kg"
               />
             </div>
           </div>
@@ -134,7 +143,7 @@ const CreateInventoryItemDialog = ({ onItemCreated }: CreateInventoryItemDialogP
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             />
           </div>
-          <div className="grid gap-4 grid-cols-2">
+          <div className="grid gap-3 grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="new_purchase_rate">Purchase Rate (₹)</Label>
               <Input
@@ -158,7 +167,7 @@ const CreateInventoryItemDialog = ({ onItemCreated }: CreateInventoryItemDialogP
               />
             </div>
           </div>
-          <div className="grid gap-4 grid-cols-3">
+          <div className="grid gap-3 grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="new_quantity">Quantity</Label>
               <Input
@@ -167,15 +176,6 @@ const CreateInventoryItemDialog = ({ onItemCreated }: CreateInventoryItemDialogP
                 min="0"
                 value={formData.quantity}
                 onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 0 })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="new_unit">Unit</Label>
-              <Input
-                id="new_unit"
-                value={formData.unit}
-                onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-                placeholder="pcs, kg"
               />
             </div>
             <div className="space-y-2">
