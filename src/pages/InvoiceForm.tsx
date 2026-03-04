@@ -785,28 +785,32 @@ const InvoiceForm = () => {
                       <div className="space-y-1">
                         <Label className="text-xs">Item</Label>
                         <div className="flex gap-1">
-                          <Select
-                            value={item.inventory_id || ""}
-                            onValueChange={(value) => selectInventoryItem(item.id, value)}
-                          >
-                            <SelectTrigger className="flex-1 min-w-0">
-                              <SelectValue placeholder="Select item..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {inventoryItems.map((inv) => (
-                                <SelectItem key={inv.id} value={inv.id}>
-                                  <div className="flex items-center gap-2">
-                                    <Package className="h-3 w-3 shrink-0" />
-                                    <span className="truncate">{inv.item_name} ({inv.quantity} {inv.unit || 'pcs'})</span>
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          <InventoryItemSelect
+                            inventoryItems={inventoryItems}
+                            value={item.inventory_id}
+                            onSelect={(invId) => selectInventoryItem(item.id, invId)}
+                          />
                           <CreateInventoryItemDialog
                             onItemCreated={(newItem) => {
                               setInventoryItems(prev => [...prev, newItem]);
-                              selectInventoryItem(item.id, newItem.id);
+                              // Directly apply item data to avoid race condition
+                              setItems(prev => prev.map(i => {
+                                if (i.id === item.id) {
+                                  const qty = typeof i.quantity === 'string' ? parseFloat(i.quantity) || 0 : i.quantity;
+                                  const subtotal = qty * newItem.sale_rate;
+                                  const taxCalc = calculateItemTax(subtotal, i.tax_rate);
+                                  return {
+                                    ...i,
+                                    inventory_id: newItem.id,
+                                    item_name: newItem.item_name,
+                                    unit_price: newItem.sale_rate,
+                                    unit: newItem.unit || 'Nos',
+                                    ...taxCalc,
+                                    total: subtotal + taxCalc.tax_amount,
+                                  };
+                                }
+                                return i;
+                              }));
                             }}
                           />
                         </div>
