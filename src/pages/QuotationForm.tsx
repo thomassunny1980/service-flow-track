@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Trash2, ArrowLeft, Package } from "lucide-react";
+import InventoryItemSelect from "@/components/InventoryItemSelect";
 import { addDays, format } from "date-fns";
 import { CustomerSearchInput } from "@/components/CustomerSearchInput";
 import CreateInventoryItemDialog from "@/components/CreateInventoryItemDialog";
