@@ -58,6 +58,7 @@ const CreateInventoryItemDialog = ({ onItemCreated }: CreateInventoryItemDialogP
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setSaving(true);
 
     try {
