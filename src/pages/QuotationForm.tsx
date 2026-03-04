@@ -715,45 +715,47 @@ const QuotationForm = () => {
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-                    <div className="md:col-span-4 space-y-1">
-                      <Label className="text-xs">Item</Label>
-                      <div className="flex gap-1">
-                        <Select
-                          value={item.inventory_id || ""}
-                          onValueChange={(value) => selectInventoryItem(item.id, value)}
-                        >
-                          <SelectTrigger className="flex-1 min-w-0">
-                            <SelectValue placeholder="Select item..." />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {inventoryItems.map((inv) => (
-                              <SelectItem key={inv.id} value={inv.id}>
-                                <div className="flex items-center gap-2">
-                                  <Package className="h-3 w-3 shrink-0" />
-                                  <span className="truncate">{inv.item_name} ({inv.quantity} {inv.unit || 'pcs'})</span>
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <CreateInventoryItemDialog
-                          onItemCreated={(newItem) => {
-                            setInventoryItems(prev => [...prev, newItem]);
-                            selectInventoryItem(item.id, newItem.id);
-                          }}
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label className="text-xs">Item</Label>
+                        <div className="flex gap-1">
+                          <Select
+                            value={item.inventory_id || ""}
+                            onValueChange={(value) => selectInventoryItem(item.id, value)}
+                          >
+                            <SelectTrigger className="flex-1 min-w-0">
+                              <SelectValue placeholder="Select item..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {inventoryItems.map((inv) => (
+                                <SelectItem key={inv.id} value={inv.id}>
+                                  <div className="flex items-center gap-2">
+                                    <Package className="h-3 w-3 shrink-0" />
+                                    <span className="truncate">{inv.item_name} ({inv.quantity} {inv.unit || 'pcs'})</span>
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <CreateInventoryItemDialog
+                            onItemCreated={(newItem) => {
+                              setInventoryItems(prev => [...prev, newItem]);
+                              selectInventoryItem(item.id, newItem.id);
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Description</Label>
+                        <Input
+                          value={item.description}
+                          onChange={(e) => updateItem(item.id, "description", e.target.value)}
+                          placeholder="Description"
                         />
                       </div>
                     </div>
-                    <div className="md:col-span-2 space-y-1">
-                      <Label className="text-xs">Description</Label>
-                      <Input
-                        value={item.description}
-                        onChange={(e) => updateItem(item.id, "description", e.target.value)}
-                        placeholder="Description"
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 gap-2 md:col-span-6 md:grid-cols-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       <div className="space-y-1">
                         <Label className="text-xs">Qty</Label>
                         <Input
