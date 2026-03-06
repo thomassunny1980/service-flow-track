@@ -801,7 +801,6 @@ const QuotationForm = () => {
                       <Input value={item.total.toFixed(2)} readOnly className="bg-muted" />
                     </div>
                   </div>
-                  </div>
                 </div>
               ))}
 
