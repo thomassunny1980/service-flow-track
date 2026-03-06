@@ -532,65 +532,55 @@ const PrintTemplate = ({
               </tr>
             ))}
             
-            {/* Tax rows */}
-            {isInterState ? (
-              <tr className="tax-row">
-                <td></td>
-                <td className="text-right"><strong><em>IGST</em></strong></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td className="text-right">{igstTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-              </tr>
-            ) : (
-              <>
-                <tr className="tax-row">
-                  <td></td>
-                  <td className="text-right"><strong><em>CGST</em></strong></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td className="text-right">{cgstTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                </tr>
-                <tr className="tax-row">
-                  <td></td>
-                  <td className="text-right"><strong><em>SGST</em></strong></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td className="text-right">{sgstTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                </tr>
-              </>
-            )}
+            {/* Tax rows - grouped by rate */}
+            {(() => {
+              const taxGroups: { [rate: number]: { cgst: number; sgst: number; igst: number } } = {};
+              items.forEach(item => {
+                const rate = item.tax_rate || 0;
+                if (rate === 0) return;
+                if (!taxGroups[rate]) taxGroups[rate] = { cgst: 0, sgst: 0, igst: 0 };
+                if (isInterState) {
+                  taxGroups[rate].igst += item.igst_amount || item.tax_amount || 0;
+                } else {
+                  taxGroups[rate].cgst += item.cgst_amount || (item.tax_amount || 0) / 2;
+                  taxGroups[rate].sgst += item.sgst_amount || (item.tax_amount || 0) / 2;
+                }
+              });
+              const rates = Object.keys(taxGroups).map(Number).sort((a, b) => a - b);
+
+              return isInterState ? (
+                rates.map(rate => (
+                  <tr key={`igst-${rate}`} className="tax-row">
+                    <td></td>
+                    <td className="text-right"><strong><em>IGST @ {rate}%</em></strong></td>
+                    <td></td><td></td><td></td><td></td><td></td>
+                    <td className="text-right">{taxGroups[rate].igst.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                  </tr>
+                ))
+              ) : (
+                rates.flatMap(rate => [
+                  <tr key={`cgst-${rate}`} className="tax-row">
+                    <td></td>
+                    <td className="text-right"><strong><em>CGST @ {rate / 2}%</em></strong></td>
+                    <td></td><td></td><td></td><td></td><td></td>
+                    <td className="text-right">{taxGroups[rate].cgst.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                  </tr>,
+                  <tr key={`sgst-${rate}`} className="tax-row">
+                    <td></td>
+                    <td className="text-right"><strong><em>SGST @ {rate / 2}%</em></strong></td>
+                    <td></td><td></td><td></td><td></td><td></td>
+                    <td className="text-right">{taxGroups[rate].sgst.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                  </tr>
+                ])
+              );
+            })()}
             
             {/* Round Off row */}
             <tr className="tax-row">
               <td></td>
               <td className="text-right"><strong><em>Round Off</em></strong></td>
-              <td className="text-center">0 %</td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td className="text-right">{roundOff >= 0 ? roundOff.toFixed(2) : roundOff.toFixed(2)}</td>
-            </tr>
-            
-            {/* Empty row before total */}
-            <tr>
-              <td>&nbsp;</td>
-              <td>&nbsp;</td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
+              <td></td><td></td><td></td><td></td><td></td>
+              <td className="text-right">{roundOff.toFixed(2)}</td>
             </tr>
             
             {/* Total row */}
