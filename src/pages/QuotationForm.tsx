@@ -717,94 +717,90 @@ const QuotationForm = () => {
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
-                  <div className="space-y-3">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <Label className="text-xs">Item</Label>
-                        <div className="flex gap-1">
-                          <InventoryItemSelect
-                            inventoryItems={inventoryItems}
-                            value={item.inventory_id}
-                            onSelect={(invId) => selectInventoryItem(item.id, invId)}
-                          />
-                          <CreateInventoryItemDialog
-                            onItemCreated={(newItem) => {
-                              setInventoryItems(prev => [...prev, newItem]);
-                              // Directly apply item data to avoid race condition
-                              setItems(prev => prev.map(i => {
-                                if (i.id === item.id) {
-                                  const qty = typeof i.quantity === 'string' ? parseFloat(i.quantity) || 0 : i.quantity;
-                                  const subtotal = qty * newItem.sale_rate;
-                                  const taxCalc = calculateItemTax(subtotal, i.tax_rate);
-                                  return {
-                                    ...i,
-                                    inventory_id: newItem.id,
-                                    item_name: newItem.item_name,
-                                    unit_price: newItem.sale_rate,
-                                    unit: newItem.unit || 'Nos',
-                                    ...taxCalc,
-                                    total: subtotal + taxCalc.tax_amount,
-                                  };
-                                }
-                                return i;
-                              }));
-                            }}
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">Description</Label>
-                        <Input
-                          value={item.description}
-                          onChange={(e) => updateItem(item.id, "description", e.target.value)}
-                          placeholder="Description"
+                  <div className="grid grid-cols-2 sm:grid-cols-12 gap-2 items-end">
+                    <div className="col-span-2 sm:col-span-3 space-y-1">
+                      <Label className="text-xs">Item</Label>
+                      <div className="flex gap-1">
+                        <InventoryItemSelect
+                          inventoryItems={inventoryItems}
+                          value={item.inventory_id}
+                          onSelect={(invId) => selectInventoryItem(item.id, invId)}
+                        />
+                        <CreateInventoryItemDialog
+                          onItemCreated={(newItem) => {
+                            setInventoryItems(prev => [...prev, newItem]);
+                            setItems(prev => prev.map(i => {
+                              if (i.id === item.id) {
+                                const qty = typeof i.quantity === 'string' ? parseFloat(i.quantity) || 0 : i.quantity;
+                                const stotal = qty * newItem.sale_rate;
+                                const taxCalc = calculateItemTax(stotal, i.tax_rate);
+                                return {
+                                  ...i,
+                                  inventory_id: newItem.id,
+                                  item_name: newItem.item_name,
+                                  unit_price: newItem.sale_rate,
+                                  unit: newItem.unit || 'Nos',
+                                  ...taxCalc,
+                                  total: stotal + taxCalc.tax_amount,
+                                };
+                              }
+                              return i;
+                            }));
+                          }}
                         />
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                      <div className="space-y-1">
-                        <Label className="text-xs">Qty</Label>
-                        <Input
-                          type="text"
-                          inputMode="decimal"
-                          value={item.quantity}
-                          onChange={(e) => updateItem(item.id, "quantity", e.target.value)}
-                          placeholder="0"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">Price (₹)</Label>
-                        <Input
-                          type="text"
-                          inputMode="decimal"
-                          value={item.unit_price}
-                          onChange={(e) => updateItem(item.id, "unit_price", e.target.value)}
-                          placeholder="0.00"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">Tax</Label>
-                        <Select
-                          value={item.tax_name}
-                          onValueChange={(value) => updateItemTax(item.id, value)}
-                        >
-                          <SelectTrigger className="min-w-0">
-                            <SelectValue placeholder="Tax" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {taxRates.map((tax) => (
-                              <SelectItem key={tax.name} value={tax.name}>
-                                {tax.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">Total (₹)</Label>
-                        <Input value={item.total.toFixed(2)} readOnly className="bg-muted" />
-                      </div>
+                    <div className="col-span-2 sm:col-span-3 space-y-1">
+                      <Label className="text-xs">Description</Label>
+                      <Input
+                        value={item.description}
+                        onChange={(e) => updateItem(item.id, "description", e.target.value)}
+                        placeholder="Description"
+                      />
                     </div>
+                    <div className="col-span-1 sm:col-span-1 space-y-1">
+                      <Label className="text-xs">Qty</Label>
+                      <Input
+                        type="text"
+                        inputMode="decimal"
+                        value={item.quantity}
+                        onChange={(e) => updateItem(item.id, "quantity", e.target.value)}
+                        placeholder="0"
+                      />
+                    </div>
+                    <div className="col-span-1 sm:col-span-2 space-y-1">
+                      <Label className="text-xs">Price (₹)</Label>
+                      <Input
+                        type="text"
+                        inputMode="decimal"
+                        value={item.unit_price}
+                        onChange={(e) => updateItem(item.id, "unit_price", e.target.value)}
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div className="col-span-1 sm:col-span-2 space-y-1">
+                      <Label className="text-xs">Tax</Label>
+                      <Select
+                        value={item.tax_name}
+                        onValueChange={(value) => updateItemTax(item.id, value)}
+                      >
+                        <SelectTrigger className="min-w-0">
+                          <SelectValue placeholder="Tax" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {taxRates.map((tax) => (
+                            <SelectItem key={tax.name} value={tax.name}>
+                              {tax.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="col-span-1 sm:col-span-1 space-y-1">
+                      <Label className="text-xs">Total (₹)</Label>
+                      <Input value={item.total.toFixed(2)} readOnly className="bg-muted" />
+                    </div>
+                  </div>
                   </div>
                 </div>
               ))}
