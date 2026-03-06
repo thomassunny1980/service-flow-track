@@ -535,8 +535,9 @@ const InvoiceForm = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (e.target !== e.currentTarget) return;
     setLoading(true);
 
     try {
