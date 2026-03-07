@@ -417,6 +417,9 @@ const PrintTemplate = ({
                 {shopAddress && <p>{shopAddress}</p>}
                 {shopSettings?.shop_gst && <p>GSTIN/UIN: {shopSettings.shop_gst}</p>}
                 {shopSettings?.shop_state && <p>State Name : {shopSettings.shop_state}, Code : {shopStateCode}</p>}
+                {shopSettings?.shop_phone && (
+                  <p>Phone : {shopSettings.shop_phone.split(",").map(p => p.trim()).filter(Boolean).join(" / ")}</p>
+                )}
                 {shopSettings?.shop_email && <p>E-Mail : {shopSettings.shop_email}</p>}
               </div>
             </div>
@@ -469,7 +472,7 @@ const PrintTemplate = ({
 
         {/* Customer Section */}
         <div className="customer-section">
-          <p className="customer-label">{type === 'QUOTATION' ? 'Invoice to' : 'Bill to'}</p>
+          <p className="customer-label">Buyer</p>
           <p><b>{customerName}</b></p>
           {customerAddress && <p>{customerAddress}</p>}
           {customerContact && <p>{customerContact}</p>}
