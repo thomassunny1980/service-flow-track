@@ -416,36 +416,84 @@ const Settings = () => {
                   </div>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-3">
+                <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="shop_phone">Phone</Label>
-                    <Input
-                      id="shop_phone"
-                      value={settings.shop_phone || ""}
-                      onChange={(e) => updateField("shop_phone", e.target.value)}
-                      disabled={!isAdmin}
-                      placeholder="+91 XXXXXXXXXX"
-                    />
+                    <Label>Phone Numbers</Label>
+                    {(settings.shop_phone || "").split(",").filter(Boolean).length === 0 ? (
+                      <div className="flex gap-2">
+                        <Input
+                          value=""
+                          onChange={(e) => updateField("shop_phone", e.target.value)}
+                          disabled={!isAdmin}
+                          placeholder="+91 XXXXXXXXXX"
+                        />
+                        {isAdmin && (
+                          <Button type="button" variant="outline" size="icon" onClick={() => {
+                            const current = settings.shop_phone || "";
+                            updateField("shop_phone", current ? current + "," : ",");
+                          }}>
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    ) : (
+                      (settings.shop_phone || "").split(",").map((phone, index, arr) => (
+                        <div key={index} className="flex gap-2">
+                          <Input
+                            value={phone.trim()}
+                            onChange={(e) => {
+                              const phones = (settings.shop_phone || "").split(",");
+                              phones[index] = e.target.value;
+                              updateField("shop_phone", phones.join(","));
+                            }}
+                            disabled={!isAdmin}
+                            placeholder="+91 XXXXXXXXXX"
+                          />
+                          {isAdmin && (
+                            <div className="flex gap-1">
+                              {index === arr.length - 1 && (
+                                <Button type="button" variant="outline" size="icon" onClick={() => {
+                                  updateField("shop_phone", (settings.shop_phone || "") + ",");
+                                }}>
+                                  <Plus className="h-4 w-4" />
+                                </Button>
+                              )}
+                              {arr.length > 1 && (
+                                <Button type="button" variant="outline" size="icon" onClick={() => {
+                                  const phones = (settings.shop_phone || "").split(",");
+                                  phones.splice(index, 1);
+                                  updateField("shop_phone", phones.join(","));
+                                }}>
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ))
+                    )}
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="shop_email">Email</Label>
-                    <Input
-                      id="shop_email"
-                      type="email"
-                      value={settings.shop_email || ""}
-                      onChange={(e) => updateField("shop_email", e.target.value)}
-                      disabled={!isAdmin}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="shop_website">Website</Label>
-                    <Input
-                      id="shop_website"
-                      value={settings.shop_website || ""}
-                      onChange={(e) => updateField("shop_website", e.target.value)}
-                      disabled={!isAdmin}
-                      placeholder="https://..."
-                    />
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="shop_email">Email</Label>
+                      <Input
+                        id="shop_email"
+                        type="email"
+                        value={settings.shop_email || ""}
+                        onChange={(e) => updateField("shop_email", e.target.value)}
+                        disabled={!isAdmin}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="shop_website">Website</Label>
+                      <Input
+                        id="shop_website"
+                        value={settings.shop_website || ""}
+                        onChange={(e) => updateField("shop_website", e.target.value)}
+                        disabled={!isAdmin}
+                        placeholder="https://..."
+                      />
+                    </div>
                   </div>
                 </div>
               </CardContent>
