@@ -68,6 +68,7 @@ const QuotationDetail = () => {
   const { toast } = useToast();
   const [quotation, setQuotation] = useState<Quotation | null>(null);
   const [shopSettings, setShopSettings] = useState<ShopSettings | null>(null);
+  const [createdByName, setCreatedByName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const printRef = useRef<HTMLDivElement>(null);
 
@@ -98,6 +99,17 @@ const QuotationDetail = () => {
         customer_state: (quotationRes.data as any).customer_state || null,
       } as Quotation;
       setQuotation(quotationData);
+
+      // Fetch creator name
+      const createdById = (quotationRes.data as any).created_by;
+      if (createdById) {
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("id", createdById)
+          .maybeSingle();
+        if (profileData) setCreatedByName(profileData.full_name);
+      }
 
       if (settingsRes.data) {
         setShopSettings(settingsRes.data as ShopSettings);
@@ -260,6 +272,7 @@ const QuotationDetail = () => {
               <h1 className="text-2xl font-bold">Quotation Details</h1>
               <p className="text-muted-foreground">
                 Created on {format(parseISO(quotation.created_at), "dd MMM yyyy")}
+                {createdByName && <span> by <strong>{createdByName}</strong></span>}
               </p>
             </div>
           </div>

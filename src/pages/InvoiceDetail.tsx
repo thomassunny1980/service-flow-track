@@ -67,6 +67,7 @@ const InvoiceDetail = () => {
   const { toast } = useToast();
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [shopSettings, setShopSettings] = useState<ShopSettings | null>(null);
+  const [createdByName, setCreatedByName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const printRef = useRef<HTMLDivElement>(null);
 
@@ -95,6 +96,17 @@ const InvoiceDetail = () => {
         customer_state: (invoiceRes.data as any).customer_state || null,
       } as Invoice;
       setInvoice(invoiceData);
+
+      // Fetch creator name
+      const createdById = (invoiceRes.data as any).created_by;
+      if (createdById) {
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("id", createdById)
+          .maybeSingle();
+        if (profileData) setCreatedByName(profileData.full_name);
+      }
 
       if (settingsRes.data) {
         setShopSettings(settingsRes.data as ShopSettings);
@@ -225,6 +237,7 @@ const InvoiceDetail = () => {
               <h1 className="text-2xl font-bold">Invoice Details</h1>
               <p className="text-muted-foreground">
                 Created on {format(parseISO(invoice.created_at), "dd MMM yyyy")}
+                {createdByName && <span> by <strong>{createdByName}</strong></span>}
               </p>
             </div>
           </div>
