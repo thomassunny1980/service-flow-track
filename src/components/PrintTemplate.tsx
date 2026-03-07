@@ -534,7 +534,12 @@ const PrintTemplate = ({
                 <td>&nbsp;</td>
               </tr>
             ))}
-            
+          </tbody>
+        </table>
+
+        {/* Tax, Round Off & Total Table - Separate from items */}
+        <table className="items-table" style={{ borderTop: '2px solid #000' }}>
+          <tbody>
             {/* Tax rows - grouped by rate */}
             {(() => {
               const taxGroups: { [rate: number]: { cgst: number; sgst: number; igst: number } } = {};
@@ -553,49 +558,49 @@ const PrintTemplate = ({
 
               return isInterState ? (
                 rates.map(rate => (
-                  <tr key={`igst-${rate}`} className="tax-row">
-                    <td></td>
+                  <tr key={`igst-${rate}`}>
+                    <td style={{ width: '30px' }}></td>
                     <td className="text-right"><strong><em>IGST @ {rate}%</em></strong></td>
-                    <td></td><td></td><td></td><td></td><td></td>
-                    <td className="text-right">{taxGroups[rate].igst.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td style={{ width: '45px' }}></td><td style={{ width: '50px' }}></td><td style={{ width: '55px' }}></td><td style={{ width: '70px' }}></td><td style={{ width: '35px' }}></td>
+                    <td className="text-right" style={{ width: '80px' }}>{taxGroups[rate].igst.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                   </tr>
                 ))
               ) : (
                 rates.flatMap(rate => [
-                  <tr key={`cgst-${rate}`} className="tax-row">
-                    <td></td>
+                  <tr key={`cgst-${rate}`}>
+                    <td style={{ width: '30px' }}></td>
                     <td className="text-right"><strong><em>CGST @ {rate / 2}%</em></strong></td>
-                    <td></td><td></td><td></td><td></td><td></td>
-                    <td className="text-right">{taxGroups[rate].cgst.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td style={{ width: '45px' }}></td><td style={{ width: '50px' }}></td><td style={{ width: '55px' }}></td><td style={{ width: '70px' }}></td><td style={{ width: '35px' }}></td>
+                    <td className="text-right" style={{ width: '80px' }}>{taxGroups[rate].cgst.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                   </tr>,
-                  <tr key={`sgst-${rate}`} className="tax-row">
-                    <td></td>
+                  <tr key={`sgst-${rate}`}>
+                    <td style={{ width: '30px' }}></td>
                     <td className="text-right"><strong><em>SGST @ {rate / 2}%</em></strong></td>
-                    <td></td><td></td><td></td><td></td><td></td>
-                    <td className="text-right">{taxGroups[rate].sgst.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td style={{ width: '45px' }}></td><td style={{ width: '50px' }}></td><td style={{ width: '55px' }}></td><td style={{ width: '70px' }}></td><td style={{ width: '35px' }}></td>
+                    <td className="text-right" style={{ width: '80px' }}>{taxGroups[rate].sgst.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                   </tr>
                 ])
               );
             })()}
             
             {/* Round Off row */}
-            <tr className="tax-row">
-              <td></td>
+            <tr>
+              <td style={{ width: '30px' }}></td>
               <td className="text-right"><strong><em>Round Off</em></strong></td>
-              <td></td><td></td><td></td><td></td><td></td>
-              <td className="text-right">{roundOff.toFixed(2)}</td>
+              <td style={{ width: '45px' }}></td><td style={{ width: '50px' }}></td><td style={{ width: '55px' }}></td><td style={{ width: '70px' }}></td><td style={{ width: '35px' }}></td>
+              <td className="text-right" style={{ width: '80px' }}>{roundOff.toFixed(2)}</td>
             </tr>
             
             {/* Total row */}
             <tr className="total-row">
-              <td></td>
+              <td style={{ width: '30px' }}></td>
               <td className="text-right"><strong>Total</strong></td>
-              <td></td>
-              <td></td>
-              <td className="text-center"><b>{totalQuantity}</b> Nos</td>
-              <td></td>
-              <td></td>
-              <td className="text-right"><b>₹ {roundedTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b></td>
+              <td style={{ width: '45px' }}></td>
+              <td style={{ width: '50px' }}></td>
+              <td className="text-center" style={{ width: '55px' }}><b>{totalQuantity}</b> Nos</td>
+              <td style={{ width: '70px' }}></td>
+              <td style={{ width: '35px' }}></td>
+              <td className="text-right" style={{ width: '80px' }}><b>₹ {roundedTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b></td>
             </tr>
           </tbody>
         </table>
