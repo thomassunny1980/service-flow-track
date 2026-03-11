@@ -1,0 +1,1 @@
+ALTER TABLE public.quotations ADD COLUMN advance_paid numeric DEFAULT 0;

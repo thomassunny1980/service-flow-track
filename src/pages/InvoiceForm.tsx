@@ -97,6 +97,7 @@ const InvoiceForm = () => {
     due_date: format(addDays(new Date(), 30), "yyyy-MM-dd"),
     notes: "",
     status: "unpaid",
+    amount_paid: 0,
   });
   const [items, setItems] = useState<InvoiceItem[]>([
     { id: crypto.randomUUID(), inventory_id: null, item_name: "", description: "", quantity: 1, unit_price: 0, tax_rate: 18, tax_name: "GST 18%", tax_amount: 0, cgst_amount: 0, sgst_amount: 0, igst_amount: 0, total: 0 },
@@ -285,6 +286,7 @@ const InvoiceForm = () => {
       if (error) throw error;
 
       if (data) {
+        const advancePaid = Number((data as any).advance_paid || 0);
         setFormData({
           customer_name: data.customer_name,
           customer_contact: data.customer_contact || "",
@@ -294,7 +296,8 @@ const InvoiceForm = () => {
           invoice_date: format(new Date(), "yyyy-MM-dd"),
           due_date: format(addDays(new Date(), 30), "yyyy-MM-dd"),
           notes: data.notes || "",
-          status: "unpaid",
+          status: advancePaid > 0 ? "partial" : "unpaid",
+          amount_paid: advancePaid,
         });
         const quotationItems = (data.items as unknown as InvoiceItem[]) || [];
         setItems(quotationItems.map(item => ({
@@ -339,6 +342,7 @@ const InvoiceForm = () => {
           due_date: data.due_date || format(addDays(new Date(), 30), "yyyy-MM-dd"),
           notes: data.notes || "",
           status: data.status || "unpaid",
+          amount_paid: Number(data.amount_paid || 0),
         });
         const fetchedItems = (data.items as unknown as InvoiceItem[]) || [];
         setItems(fetchedItems.map(item => ({
@@ -566,6 +570,7 @@ const InvoiceForm = () => {
         subtotal: subtotal,
         tax_amount: taxAmount,
         total_amount: total,
+        amount_paid: formData.amount_paid || 0,
         quotation_id: quotationId || null,
         created_by: session.user.id,
       };

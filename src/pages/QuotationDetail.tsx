@@ -6,10 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Printer, Edit, CheckCircle, XCircle, Download, FileText } from "lucide-react";
+import { ArrowLeft, Printer, Edit, CheckCircle, XCircle, Download, FileText, IndianRupee } from "lucide-react";
 import { format, parseISO, isPast } from "date-fns";
 import PrintTemplate, { getPrintStyles } from "@/components/PrintTemplate";
 import { escapeHtml } from "@/lib/htmlEscape";
+import AdvancePaymentDialog from "@/components/AdvancePaymentDialog";
 
 interface QuotationItem {
   id: string;
@@ -41,6 +42,7 @@ interface Quotation {
   status: 'pending' | 'approved' | 'rejected';
   notes: string | null;
   created_at: string;
+  advance_paid: number;
 }
 
 interface ShopSettings {
@@ -70,6 +72,7 @@ const QuotationDetail = () => {
   const [shopSettings, setShopSettings] = useState<ShopSettings | null>(null);
   const [createdByName, setCreatedByName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [advanceDialogOpen, setAdvanceDialogOpen] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -97,6 +100,7 @@ const QuotationDetail = () => {
         total_amount: Number(quotationRes.data.total_amount),
         customer_address: (quotationRes.data as any).customer_address || null,
         customer_state: (quotationRes.data as any).customer_state || null,
+        advance_paid: Number((quotationRes.data as any).advance_paid || 0),
       } as Quotation;
       setQuotation(quotationData);
 
@@ -144,6 +148,29 @@ const QuotationDetail = () => {
       } else {
         fetchData();
       }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSaveAdvance = async (amount: number) => {
+    try {
+      const { error } = await supabase
+        .from("quotations")
+        .update({ advance_paid: amount } as any)
+        .eq("id", id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `Advance payment of ₹${amount.toLocaleString('en-IN')} recorded`,
+      });
+      fetchData();
     } catch (error: any) {
       toast({
         title: "Error",
@@ -299,14 +326,24 @@ const QuotationDetail = () => {
               </>
             )}
             {quotation.status === 'approved' && (
-              <Button
-                variant="outline"
-                className="text-green-600 border-green-600"
-                onClick={() => navigate(`/invoices/new?quotation=${id}`)}
-              >
-                <FileText className="h-4 w-4 mr-2" />
-                Convert to Invoice
-              </Button>
+              <>
+                <Button
+                  variant="outline"
+                  className="text-blue-600 border-blue-600"
+                  onClick={() => setAdvanceDialogOpen(true)}
+                >
+                  <IndianRupee className="h-4 w-4 mr-2" />
+                  {quotation.advance_paid > 0 ? `Advance: ₹${quotation.advance_paid.toLocaleString('en-IN')}` : 'Record Advance'}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="text-green-600 border-green-600"
+                  onClick={() => navigate(`/invoices/new?quotation=${id}`)}
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  Convert to Invoice
+                </Button>
+              </>
             )}
             <Button variant="outline" onClick={() => navigate(`/quotations/edit/${id}`)}>
               <Edit className="h-4 w-4 mr-2" />
@@ -338,6 +375,7 @@ const QuotationDetail = () => {
                 subtotal={quotation.subtotal}
                 taxAmount={quotation.tax_amount}
                 totalAmount={quotation.total_amount}
+                amountPaid={quotation.advance_paid}
                 createdDate={format(parseISO(quotation.created_at), "d-MMM-yyyy")}
                 validityDate={format(parseISO(quotation.validity_date), "d-MMM-yyyy")}
                 status={quotation.status}
@@ -348,6 +386,15 @@ const QuotationDetail = () => {
           </CardContent>
         </Card>
       </div>
+      {quotation && (
+        <AdvancePaymentDialog
+          open={advanceDialogOpen}
+          onOpenChange={setAdvanceDialogOpen}
+          currentAdvance={quotation.advance_paid}
+          totalAmount={quotation.total_amount}
+          onSave={handleSaveAdvance}
+        />
+      )}
     </Layout>
   );
 };

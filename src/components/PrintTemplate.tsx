@@ -605,12 +605,12 @@ const PrintTemplate = ({
               <td className="text-right" style={{ width: '80px' }}><b>₹ {roundedTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b></td>
             </tr>
             
-            {/* Amount Paid & Balance Due for invoices */}
-            {type === 'INVOICE' && amountPaid != null && amountPaid > 0 && (
+            {/* Amount Paid / Advance & Balance Due */}
+            {amountPaid != null && amountPaid > 0 && (
               <>
                 <tr>
                   <td style={{ width: '30px' }}></td>
-                  <td className="text-right"><strong><em>Less: Amount Paid</em></strong></td>
+                  <td className="text-right"><strong><em>{type === 'QUOTATION' ? 'Less: Advance Paid' : 'Less: Amount Paid'}</em></strong></td>
                   <td style={{ width: '45px' }}></td><td style={{ width: '50px' }}></td><td style={{ width: '55px' }}></td><td style={{ width: '70px' }}></td><td style={{ width: '35px' }}></td>
                   <td className="text-right" style={{ width: '80px' }}>₹ {amountPaid.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                 </tr>
