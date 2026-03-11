@@ -157,6 +157,29 @@ const QuotationDetail = () => {
     }
   };
 
+  const handleSaveAdvance = async (amount: number) => {
+    try {
+      const { error } = await supabase
+        .from("quotations")
+        .update({ advance_paid: amount } as any)
+        .eq("id", id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `Advance payment of ₹${amount.toLocaleString('en-IN')} recorded`,
+      });
+      fetchData();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   const handlePrint = () => {
     const printContent = printRef.current;
     if (!printContent) return;
