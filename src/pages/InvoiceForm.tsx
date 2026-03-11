@@ -342,6 +342,7 @@ const InvoiceForm = () => {
           due_date: data.due_date || format(addDays(new Date(), 30), "yyyy-MM-dd"),
           notes: data.notes || "",
           status: data.status || "unpaid",
+          amount_paid: Number(data.amount_paid || 0),
         });
         const fetchedItems = (data.items as unknown as InvoiceItem[]) || [];
         setItems(fetchedItems.map(item => ({
