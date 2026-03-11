@@ -42,6 +42,7 @@ interface Quotation {
   status: 'pending' | 'approved' | 'rejected';
   notes: string | null;
   created_at: string;
+  advance_paid: number;
 }
 
 interface ShopSettings {
