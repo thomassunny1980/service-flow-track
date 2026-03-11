@@ -97,6 +97,7 @@ const InvoiceForm = () => {
     due_date: format(addDays(new Date(), 30), "yyyy-MM-dd"),
     notes: "",
     status: "unpaid",
+    amount_paid: 0,
   });
   const [items, setItems] = useState<InvoiceItem[]>([
     { id: crypto.randomUUID(), inventory_id: null, item_name: "", description: "", quantity: 1, unit_price: 0, tax_rate: 18, tax_name: "GST 18%", tax_amount: 0, cgst_amount: 0, sgst_amount: 0, igst_amount: 0, total: 0 },
