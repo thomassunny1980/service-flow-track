@@ -285,6 +285,7 @@ const InvoiceForm = () => {
       if (error) throw error;
 
       if (data) {
+        const advancePaid = Number((data as any).advance_paid || 0);
         setFormData({
           customer_name: data.customer_name,
           customer_contact: data.customer_contact || "",
@@ -294,7 +295,8 @@ const InvoiceForm = () => {
           invoice_date: format(new Date(), "yyyy-MM-dd"),
           due_date: format(addDays(new Date(), 30), "yyyy-MM-dd"),
           notes: data.notes || "",
-          status: "unpaid",
+          status: advancePaid > 0 ? "partial" : "unpaid",
+          amount_paid: advancePaid,
         });
         const quotationItems = (data.items as unknown as InvoiceItem[]) || [];
         setItems(quotationItems.map(item => ({
