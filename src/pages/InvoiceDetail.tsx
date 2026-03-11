@@ -36,6 +36,7 @@ interface Invoice {
   subtotal: number;
   tax_amount: number;
   total_amount: number;
+  amount_paid: number;
   due_date: string | null;
   status: string;
   notes: string | null;
@@ -92,6 +93,7 @@ const InvoiceDetail = () => {
         subtotal: Number(invoiceRes.data.subtotal),
         tax_amount: Number(invoiceRes.data.tax_amount),
         total_amount: Number(invoiceRes.data.total_amount),
+        amount_paid: Number(invoiceRes.data.amount_paid || 0),
         customer_address: (invoiceRes.data as any).customer_address || null,
         customer_state: (invoiceRes.data as any).customer_state || null,
       } as Invoice;
@@ -273,6 +275,7 @@ const InvoiceDetail = () => {
                 subtotal={invoice.subtotal}
                 taxAmount={invoice.tax_amount}
                 totalAmount={invoice.total_amount}
+                amountPaid={invoice.amount_paid}
                 createdDate={format(parseISO(invoice.created_at), "d-MMM-yyyy")}
                 dueDate={invoice.due_date ? format(parseISO(invoice.due_date), "d-MMM-yyyy") : null}
                 status={invoice.status}
