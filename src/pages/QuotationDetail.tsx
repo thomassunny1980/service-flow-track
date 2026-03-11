@@ -326,14 +326,24 @@ const QuotationDetail = () => {
               </>
             )}
             {quotation.status === 'approved' && (
-              <Button
-                variant="outline"
-                className="text-green-600 border-green-600"
-                onClick={() => navigate(`/invoices/new?quotation=${id}`)}
-              >
-                <FileText className="h-4 w-4 mr-2" />
-                Convert to Invoice
-              </Button>
+              <>
+                <Button
+                  variant="outline"
+                  className="text-blue-600 border-blue-600"
+                  onClick={() => setAdvanceDialogOpen(true)}
+                >
+                  <IndianRupee className="h-4 w-4 mr-2" />
+                  {quotation.advance_paid > 0 ? `Advance: ₹${quotation.advance_paid.toLocaleString('en-IN')}` : 'Record Advance'}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="text-green-600 border-green-600"
+                  onClick={() => navigate(`/invoices/new?quotation=${id}`)}
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  Convert to Invoice
+                </Button>
+              </>
             )}
             <Button variant="outline" onClick={() => navigate(`/quotations/edit/${id}`)}>
               <Edit className="h-4 w-4 mr-2" />
