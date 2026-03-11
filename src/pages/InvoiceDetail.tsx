@@ -36,6 +36,7 @@ interface Invoice {
   subtotal: number;
   tax_amount: number;
   total_amount: number;
+  amount_paid: number;
   due_date: string | null;
   status: string;
   notes: string | null;
