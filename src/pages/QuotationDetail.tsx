@@ -6,10 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Printer, Edit, CheckCircle, XCircle, Download, FileText } from "lucide-react";
+import { ArrowLeft, Printer, Edit, CheckCircle, XCircle, Download, FileText, IndianRupee } from "lucide-react";
 import { format, parseISO, isPast } from "date-fns";
 import PrintTemplate, { getPrintStyles } from "@/components/PrintTemplate";
 import { escapeHtml } from "@/lib/htmlEscape";
+import AdvancePaymentDialog from "@/components/AdvancePaymentDialog";
 
 interface QuotationItem {
   id: string;
