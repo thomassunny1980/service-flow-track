@@ -375,6 +375,7 @@ const QuotationDetail = () => {
                 subtotal={quotation.subtotal}
                 taxAmount={quotation.tax_amount}
                 totalAmount={quotation.total_amount}
+                amountPaid={quotation.advance_paid}
                 createdDate={format(parseISO(quotation.created_at), "d-MMM-yyyy")}
                 validityDate={format(parseISO(quotation.validity_date), "d-MMM-yyyy")}
                 status={quotation.status}
