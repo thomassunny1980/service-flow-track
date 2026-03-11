@@ -570,6 +570,7 @@ const InvoiceForm = () => {
         subtotal: subtotal,
         tax_amount: taxAmount,
         total_amount: total,
+        amount_paid: formData.amount_paid || 0,
         quotation_id: quotationId || null,
         created_by: session.user.id,
       };
