@@ -72,6 +72,7 @@ const QuotationDetail = () => {
   const [shopSettings, setShopSettings] = useState<ShopSettings | null>(null);
   const [createdByName, setCreatedByName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [advanceDialogOpen, setAdvanceDialogOpen] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
