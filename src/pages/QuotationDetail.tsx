@@ -386,10 +386,6 @@ const QuotationDetail = () => {
           </CardContent>
         </Card>
       </div>
-    </Layout>
-  );
-};
-
       {quotation && (
         <AdvancePaymentDialog
           open={advanceDialogOpen}
