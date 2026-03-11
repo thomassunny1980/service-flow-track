@@ -390,4 +390,17 @@ const QuotationDetail = () => {
   );
 };
 
+      {quotation && (
+        <AdvancePaymentDialog
+          open={advanceDialogOpen}
+          onOpenChange={setAdvanceDialogOpen}
+          currentAdvance={quotation.advance_paid}
+          totalAmount={quotation.total_amount}
+          onSave={handleSaveAdvance}
+        />
+      )}
+    </Layout>
+  );
+};
+
 export default QuotationDetail;
