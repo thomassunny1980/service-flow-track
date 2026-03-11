@@ -66,6 +66,7 @@ interface PrintTemplateProps {
   subtotal: number;
   taxAmount: number;
   totalAmount: number;
+  amountPaid?: number;
   createdDate: string;
   validityDate?: string;
   dueDate?: string | null;
