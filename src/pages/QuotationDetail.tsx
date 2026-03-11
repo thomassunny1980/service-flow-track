@@ -100,6 +100,7 @@ const QuotationDetail = () => {
         total_amount: Number(quotationRes.data.total_amount),
         customer_address: (quotationRes.data as any).customer_address || null,
         customer_state: (quotationRes.data as any).customer_state || null,
+        advance_paid: Number((quotationRes.data as any).advance_paid || 0),
       } as Quotation;
       setQuotation(quotationData);
 
