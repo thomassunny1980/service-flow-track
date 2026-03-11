@@ -275,6 +275,7 @@ const InvoiceDetail = () => {
                 subtotal={invoice.subtotal}
                 taxAmount={invoice.tax_amount}
                 totalAmount={invoice.total_amount}
+                amountPaid={invoice.amount_paid}
                 createdDate={format(parseISO(invoice.created_at), "d-MMM-yyyy")}
                 dueDate={invoice.due_date ? format(parseISO(invoice.due_date), "d-MMM-yyyy") : null}
                 status={invoice.status}
