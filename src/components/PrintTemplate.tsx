@@ -341,6 +341,7 @@ const PrintTemplate = ({
   subtotal,
   taxAmount,
   totalAmount,
+  amountPaid,
   createdDate,
   validityDate,
   dueDate,
