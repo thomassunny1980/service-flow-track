@@ -93,6 +93,7 @@ const InvoiceDetail = () => {
         subtotal: Number(invoiceRes.data.subtotal),
         tax_amount: Number(invoiceRes.data.tax_amount),
         total_amount: Number(invoiceRes.data.total_amount),
+        amount_paid: Number(invoiceRes.data.amount_paid || 0),
         customer_address: (invoiceRes.data as any).customer_address || null,
         customer_state: (invoiceRes.data as any).customer_state || null,
       } as Invoice;
