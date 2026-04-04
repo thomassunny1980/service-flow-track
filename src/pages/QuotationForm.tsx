@@ -76,6 +76,7 @@ const QuotationForm = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [previewNumber, setPreviewNumber] = useState<string | null>(null);
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [shopState, setShopState] = useState<string>("Kerala");
