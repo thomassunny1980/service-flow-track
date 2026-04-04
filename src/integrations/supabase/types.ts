@@ -545,6 +545,14 @@ export type Database = {
     }
     Functions: {
       cleanup_expired_quotations: { Args: never; Returns: undefined }
+      generate_next_invoice_number: {
+        Args: { p_invoice_date: string }
+        Returns: string
+      }
+      generate_next_quotation_number: {
+        Args: { p_quotation_date: string }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
