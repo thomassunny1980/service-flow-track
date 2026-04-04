@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -76,6 +77,7 @@ const QuotationForm = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [previewNumber, setPreviewNumber] = useState<string | null>(null);
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [shopState, setShopState] = useState<string>("Kerala");
@@ -120,7 +122,7 @@ const QuotationForm = () => {
     try {
       const { data, error } = await supabase
         .from("shop_settings")
-        .select("tax_rates, quotation_prefix, quotation_year_format, quotation_number_digits, last_quotation_number, shop_state")
+        .select("tax_rates, quotation_prefix, quotation_year_format, quotation_number_digits, last_quotation_number, quotation_fy_year, auto_reset_quotation_sequence, shop_state")
         .limit(1)
         .maybeSingle();
 
@@ -131,6 +133,21 @@ const QuotationForm = () => {
       }
       if (data?.shop_state) {
         setShopState(data.shop_state);
+      }
+
+      // Generate preview number for new quotations
+      if (!id && data) {
+        const d = data as any;
+        const prefix = d.quotation_prefix || "QT";
+        const yearFormat = d.quotation_year_format || "FY-YY";
+        const digits = d.quotation_number_digits || 4;
+        const autoReset = d.auto_reset_quotation_sequence ?? true;
+        const storedFy = d.quotation_fy_year || null;
+        const lastNum = d.last_quotation_number || 0;
+        const currentFY = getCurrentFYKey(formData.quotation_date);
+        const nextNum = (autoReset && storedFy !== currentFY) ? 1 : lastNum + 1;
+        const yearPart = getFinancialYearStringFromDate(formData.quotation_date, yearFormat);
+        setPreviewNumber(`${prefix}${yearPart ? `-${yearPart}` : ""}-${String(nextNum).padStart(digits, "0")}`);
       }
     } catch (error) {
       console.log("Using default tax rates");
@@ -531,10 +548,17 @@ const QuotationForm = () => {
           <Button variant="ghost" size="icon" onClick={() => navigate("/quotations")}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div>
-            <h1 className="text-2xl font-bold">
-              {id ? "Edit Quotation" : "New Quotation"}
-            </h1>
+          <div className="flex-1">
+            <div className="flex items-center gap-3 flex-wrap">
+              <h1 className="text-2xl font-bold">
+                {id ? "Edit Quotation" : "New Quotation"}
+              </h1>
+              {!id && previewNumber && (
+                <Badge variant="outline" className="text-sm font-mono">
+                  {previewNumber}
+                </Badge>
+              )}
+            </div>
             <p className="text-muted-foreground">
               {id ? "Update quotation details" : "Create a new quotation for a customer"}
             </p>
