@@ -197,53 +197,11 @@ const QuotationForm = () => {
 
   const generateQuotationNumber = async (): Promise<string> => {
     try {
-      const { data, error } = await supabase
-        .from("shop_settings")
-        .select("quotation_prefix, quotation_year_format, quotation_number_digits, last_quotation_number, quotation_fy_year, quotation_fy_last_number, auto_reset_quotation_sequence, id")
-        .limit(1)
-        .maybeSingle();
-
+      const { data, error } = await supabase.rpc('generate_next_quotation_number', {
+        p_quotation_date: formData.quotation_date,
+      });
       if (error) throw error;
-
-      const prefix = (data as any)?.quotation_prefix || "QT";
-      const yearFormat = (data as any)?.quotation_year_format || "FY-YY";
-      const digits = (data as any)?.quotation_number_digits || 4;
-      const autoReset = (data as any)?.auto_reset_quotation_sequence ?? true;
-      const storedFyYear = (data as any)?.quotation_fy_year || null;
-      
-      // Get financial year based on the quotation date
-      const currentFY = getCurrentFYKey(formData.quotation_date);
-      
-      let newNumber: number;
-      
-      if (autoReset && storedFyYear !== currentFY) {
-        // New financial year - reset to 1
-        newNumber = 1;
-        await supabase
-          .from("shop_settings")
-          .update({ 
-            last_quotation_number: newNumber,
-            quotation_fy_year: currentFY,
-            quotation_fy_last_number: newNumber
-          } as any)
-          .eq("id", data?.id);
-      } else {
-        // Same financial year - increment
-        const lastNumber = (data as any)?.last_quotation_number || 0;
-        newNumber = lastNumber + 1;
-        await supabase
-          .from("shop_settings")
-          .update({ 
-            last_quotation_number: newNumber,
-            quotation_fy_year: currentFY,
-            quotation_fy_last_number: newNumber
-          } as any)
-          .eq("id", data?.id);
-      }
-
-      const yearPart = getFinancialYearStringFromDate(formData.quotation_date, yearFormat);
-
-      return `${prefix}${yearPart ? `-${yearPart}` : ""}-${String(newNumber).padStart(digits, "0")}`;
+      return data as string;
     } catch (error) {
       console.error("Error generating quotation number:", error);
       return `QT-${Date.now()}`;
