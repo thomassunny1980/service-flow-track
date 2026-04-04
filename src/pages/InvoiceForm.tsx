@@ -203,53 +203,11 @@ const InvoiceForm = () => {
 
   const generateInvoiceNumber = async (): Promise<string> => {
     try {
-      const { data, error } = await supabase
-        .from("shop_settings")
-        .select("invoice_prefix, invoice_year_format, invoice_number_digits, last_invoice_number, invoice_fy_year, invoice_fy_last_number, auto_reset_invoice_sequence, id")
-        .limit(1)
-        .maybeSingle();
-
+      const { data, error } = await supabase.rpc('generate_next_invoice_number', {
+        p_invoice_date: formData.invoice_date,
+      });
       if (error) throw error;
-
-      const prefix = (data as any)?.invoice_prefix || "INV";
-      const yearFormat = (data as any)?.invoice_year_format || "FY-YY";
-      const digits = (data as any)?.invoice_number_digits || 4;
-      const autoReset = (data as any)?.auto_reset_invoice_sequence ?? true;
-      const storedFyYear = (data as any)?.invoice_fy_year || null;
-      
-      // Get financial year based on the invoice date
-      const currentFY = getCurrentFYKey(formData.invoice_date);
-      
-      let newNumber: number;
-      
-      if (autoReset && storedFyYear !== currentFY) {
-        // New financial year - reset to 1
-        newNumber = 1;
-        await supabase
-          .from("shop_settings")
-          .update({ 
-            last_invoice_number: newNumber,
-            invoice_fy_year: currentFY,
-            invoice_fy_last_number: newNumber
-          } as any)
-          .eq("id", data?.id);
-      } else {
-        // Same financial year - increment
-        const lastNumber = (data as any)?.last_invoice_number || 0;
-        newNumber = lastNumber + 1;
-        await supabase
-          .from("shop_settings")
-          .update({ 
-            last_invoice_number: newNumber,
-            invoice_fy_year: currentFY,
-            invoice_fy_last_number: newNumber
-          } as any)
-          .eq("id", data?.id);
-      }
-
-      const yearPart = getFinancialYearStringFromDate(formData.invoice_date, yearFormat);
-
-      return `${prefix}${yearPart ? `-${yearPart}` : ""}-${String(newNumber).padStart(digits, "0")}`;
+      return data as string;
     } catch (error) {
       console.error("Error generating invoice number:", error);
       return `INV-${Date.now()}`;
