@@ -547,10 +547,17 @@ const QuotationForm = () => {
           <Button variant="ghost" size="icon" onClick={() => navigate("/quotations")}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div>
-            <h1 className="text-2xl font-bold">
-              {id ? "Edit Quotation" : "New Quotation"}
-            </h1>
+          <div className="flex-1">
+            <div className="flex items-center gap-3 flex-wrap">
+              <h1 className="text-2xl font-bold">
+                {id ? "Edit Quotation" : "New Quotation"}
+              </h1>
+              {!id && previewNumber && (
+                <Badge variant="outline" className="text-sm font-mono">
+                  {previewNumber}
+                </Badge>
+              )}
+            </div>
             <p className="text-muted-foreground">
               {id ? "Update quotation details" : "Create a new quotation for a customer"}
             </p>

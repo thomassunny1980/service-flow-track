@@ -600,10 +600,17 @@ const InvoiceForm = () => {
           <Button variant="ghost" size="icon" onClick={() => navigate("/invoices")}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div>
-            <h1 className="text-2xl font-bold">
-              {id ? "Edit Invoice" : quotationId ? "Convert to Invoice" : "New Invoice"}
-            </h1>
+          <div className="flex-1">
+            <div className="flex items-center gap-3 flex-wrap">
+              <h1 className="text-2xl font-bold">
+                {id ? "Edit Invoice" : quotationId ? "Convert to Invoice" : "New Invoice"}
+              </h1>
+              {!id && previewNumber && (
+                <Badge variant="outline" className="text-sm font-mono">
+                  {previewNumber}
+                </Badge>
+              )}
+            </div>
             <p className="text-muted-foreground">
               {id ? "Update invoice details" : "Create a new invoice"}
             </p>
