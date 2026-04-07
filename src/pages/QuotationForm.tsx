@@ -214,11 +214,28 @@ const QuotationForm = () => {
 
   const generateQuotationNumber = async (): Promise<string> => {
     try {
-      const { data, error } = await supabase.rpc('generate_next_quotation_number', {
-        p_quotation_date: formData.quotation_date,
-      });
-      if (error) throw error;
-      return data as string;
+      for (let attempt = 0; attempt < 5; attempt += 1) {
+        const { data, error } = await supabase.rpc('generate_next_quotation_number', {
+          p_quotation_date: formData.quotation_date,
+        });
+
+        if (error) throw error;
+
+        const candidate = data as string;
+
+        const { count, error: duplicateCheckError } = await supabase
+          .from("quotations")
+          .select("id", { count: "exact", head: true })
+          .eq("quotation_number", candidate);
+
+        if (duplicateCheckError) throw duplicateCheckError;
+
+        if (!count) {
+          return candidate;
+        }
+      }
+
+      throw new Error("Unable to generate a unique quotation number");
     } catch (error) {
       console.error("Error generating quotation number:", error);
       return `QT-${Date.now()}`;

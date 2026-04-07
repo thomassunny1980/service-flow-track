@@ -220,11 +220,28 @@ const InvoiceForm = () => {
 
   const generateInvoiceNumber = async (): Promise<string> => {
     try {
-      const { data, error } = await supabase.rpc('generate_next_invoice_number', {
-        p_invoice_date: formData.invoice_date,
-      });
-      if (error) throw error;
-      return data as string;
+      for (let attempt = 0; attempt < 5; attempt += 1) {
+        const { data, error } = await supabase.rpc('generate_next_invoice_number', {
+          p_invoice_date: formData.invoice_date,
+        });
+
+        if (error) throw error;
+
+        const candidate = data as string;
+
+        const { count, error: duplicateCheckError } = await supabase
+          .from("invoices")
+          .select("id", { count: "exact", head: true })
+          .eq("invoice_number", candidate);
+
+        if (duplicateCheckError) throw duplicateCheckError;
+
+        if (!count) {
+          return candidate;
+        }
+      }
+
+      throw new Error("Unable to generate a unique invoice number");
     } catch (error) {
       console.error("Error generating invoice number:", error);
       return `INV-${Date.now()}`;
