@@ -244,7 +244,7 @@ const InvoiceForm = () => {
       throw new Error("Unable to generate a unique invoice number");
     } catch (error) {
       console.error("Error generating invoice number:", error);
-      return `INV-${Date.now()}`;
+      throw new Error("Unable to generate invoice number. Please try again.");
     }
   };
 

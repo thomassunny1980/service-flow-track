@@ -238,7 +238,7 @@ const QuotationForm = () => {
       throw new Error("Unable to generate a unique quotation number");
     } catch (error) {
       console.error("Error generating quotation number:", error);
-      return `QT-${Date.now()}`;
+      throw new Error("Unable to generate quotation number. Please try again.");
     }
   };
 
