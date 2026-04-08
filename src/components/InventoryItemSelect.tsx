@@ -43,15 +43,15 @@ const InventoryItemSelect = ({ inventoryItems, value, onSelect }: InventoryItemS
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="flex-1 min-w-0 justify-between font-normal h-10"
+          className="flex-1 min-w-0 justify-between font-normal h-auto min-h-10 whitespace-normal text-left py-2"
         >
-          <span className="truncate">
+          <span className="break-words line-clamp-2">
             {selectedItem ? selectedItem.item_name : "Select item..."}
           </span>
           <ChevronsUpDown className="ml-1 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[280px] p-0" align="start">
+      <PopoverContent className="w-[320px] p-0" align="start">
         <div className="flex items-center border-b px-3 py-2">
           <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
           <Input
@@ -81,7 +81,7 @@ const InventoryItemSelect = ({ inventoryItems, value, onSelect }: InventoryItemS
               >
                 <Check className={cn("h-3 w-3 shrink-0", value === inv.id ? "opacity-100" : "opacity-0")} />
                 <Package className="h-3 w-3 shrink-0 text-muted-foreground" />
-                <span className="truncate">{inv.item_name}</span>
+                <span className="break-words text-left">{inv.item_name}</span>
                 <span className="ml-auto text-xs text-muted-foreground shrink-0">
                   {inv.quantity} {inv.unit || 'pcs'}
                 </span>
