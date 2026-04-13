@@ -254,6 +254,24 @@ export const getPrintStyles = () => `
   .amount-words-section strong {
     font-weight: bold;
   }
+
+  .terms-section {
+    border-top: 1px solid #000;
+    padding: 8px;
+    font-size: 10px;
+    page-break-inside: avoid;
+  }
+
+  .terms-section h4 {
+    font-size: 10px;
+    text-decoration: underline;
+    margin-bottom: 4px;
+  }
+
+  .terms-section p {
+    white-space: pre-line;
+    line-height: 1.4;
+  }
   
   .footer-section {
     display: table;
@@ -402,6 +420,7 @@ const PrintTemplate = ({
 
   const shopStateCode = getStateCode(shopSettings?.shop_state);
   const customerStateCode = getStateCode(customerState);
+  const termsAndConditions = shopSettings?.terms_and_conditions?.trim() || "";
 
   return (
     <div className="print-template">
@@ -635,17 +654,18 @@ const PrintTemplate = ({
           <strong>INR {numberToWords(roundedTotal)}</strong>
         </div>
 
+        {termsAndConditions && (
+          <div className="terms-section">
+            <h4>Terms & Conditions</h4>
+            <p>{termsAndConditions}</p>
+          </div>
+        )}
+
         {/* Footer section with Declaration and Bank Details */}
         <div className="footer-section">
           <div className="declaration-section">
             <h4>Declaration</h4>
-            <p>We declare that this invoice shows the actual price of the goods described and that all particulars are true and correct.</p>
-            {shopSettings?.terms_and_conditions && (
-              <div style={{ marginTop: '8px' }}>
-                <h4>Terms & Conditions</h4>
-                <p style={{ whiteSpace: 'pre-line', fontSize: '9px' }}>{shopSettings.terms_and_conditions}</p>
-              </div>
-            )}
+            <p>We declare that this {type.toLowerCase()} shows the actual price of the goods described and that all particulars are true and correct.</p>
           </div>
           <div className="bank-signature-section">
             <div className="bank-details">
