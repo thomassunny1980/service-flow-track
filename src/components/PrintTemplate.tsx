@@ -640,6 +640,12 @@ const PrintTemplate = ({
           <div className="declaration-section">
             <h4>Declaration</h4>
             <p>We declare that this invoice shows the actual price of the goods described and that all particulars are true and correct.</p>
+            {shopSettings?.terms_and_conditions && (
+              <div style={{ marginTop: '8px' }}>
+                <h4>Terms & Conditions</h4>
+                <p style={{ whiteSpace: 'pre-line', fontSize: '9px' }}>{shopSettings.terms_and_conditions}</p>
+              </div>
+            )}
           </div>
           <div className="bank-signature-section">
             <div className="bank-details">
