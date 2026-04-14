@@ -85,7 +85,13 @@ const QuotationDetail = () => {
     try {
       const [quotationRes, settingsRes] = await Promise.all([
         supabase.from("quotations").select("*").eq("id", id).single(),
-        supabase.from("shop_settings").select("*").limit(1).maybeSingle()
+        supabase
+          .from("shop_settings")
+          .select("*")
+          .order("updated_at", { ascending: false })
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle()
       ]);
 
       if (quotationRes.error) throw quotationRes.error;

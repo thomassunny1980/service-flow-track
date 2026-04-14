@@ -123,6 +123,8 @@ const QuotationForm = () => {
       const { data, error } = await supabase
         .from("shop_settings")
         .select("tax_rates, quotation_prefix, quotation_year_format, quotation_number_digits, last_quotation_number, quotation_fy_year, auto_reset_quotation_sequence, shop_state")
+        .order("updated_at", { ascending: false })
+        .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
 

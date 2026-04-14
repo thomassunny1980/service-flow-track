@@ -82,7 +82,13 @@ const InvoiceDetail = () => {
     try {
       const [invoiceRes, settingsRes] = await Promise.all([
         supabase.from("invoices").select("*").eq("id", id).single(),
-        supabase.from("shop_settings").select("*").limit(1).maybeSingle()
+        supabase
+          .from("shop_settings")
+          .select("*")
+          .order("updated_at", { ascending: false })
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle()
       ]);
 
       if (invoiceRes.error) throw invoiceRes.error;
