@@ -129,6 +129,8 @@ const InvoiceForm = () => {
       const { data, error } = await supabase
         .from("shop_settings")
         .select("tax_rates, shop_state, invoice_prefix, invoice_year_format, invoice_number_digits, last_invoice_number, invoice_fy_year, auto_reset_invoice_sequence")
+        .order("updated_at", { ascending: false })
+        .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
 

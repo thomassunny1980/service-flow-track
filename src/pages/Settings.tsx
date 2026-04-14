@@ -153,6 +153,8 @@ const Settings = () => {
       const { data, error } = await supabase
         .from("shop_settings")
         .select("*")
+        .order("updated_at", { ascending: false })
+        .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
 
