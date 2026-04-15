@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Building2, CreditCard, FileText, Save, Percent, Plus, Trash2, Hash, RotateCcw } from "lucide-react";
+import RichTextEditor from "@/components/RichTextEditor";
 import { Switch } from "@/components/ui/switch";
 import {
   Select,
@@ -822,10 +823,9 @@ const Settings = () => {
               <CardContent>
                 <div className="space-y-2">
                   <Label htmlFor="terms_and_conditions">Terms & Conditions</Label>
-                  <Textarea
-                    id="terms_and_conditions"
+                  <RichTextEditor
                     value={settings.terms_and_conditions || ""}
-                    onChange={(e) => updateField("terms_and_conditions", e.target.value)}
+                    onChange={(val) => updateField("terms_and_conditions", val)}
                     disabled={!isAdmin}
                     placeholder="Enter your default terms and conditions..."
                     rows={10}
