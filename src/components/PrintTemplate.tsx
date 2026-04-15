@@ -657,7 +657,10 @@ const PrintTemplate = ({
         {termsAndConditions && (
           <div className="terms-section" style={{ borderTop: '1px solid #000', padding: '8px', fontSize: '10px', pageBreakInside: 'avoid' }}>
             <h4 style={{ fontSize: '10px', textDecoration: 'underline', marginBottom: '4px', fontWeight: 'bold' }}>Terms & Conditions</h4>
-            <p style={{ whiteSpace: 'pre-line', lineHeight: '1.4', margin: 0 }}>{termsAndConditions}</p>
+            <div
+              style={{ lineHeight: '1.4', margin: 0 }}
+              dangerouslySetInnerHTML={{ __html: termsAndConditions }}
+            />
           </div>
         )}
 
