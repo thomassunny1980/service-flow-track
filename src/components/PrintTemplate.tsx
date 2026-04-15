@@ -659,7 +659,7 @@ const PrintTemplate = ({
             <h4 style={{ fontSize: '10px', textDecoration: 'underline', marginBottom: '4px', fontWeight: 'bold' }}>Terms & Conditions</h4>
             <div
               style={{ lineHeight: '1.4', margin: 0 }}
-              dangerouslySetInnerHTML={{ __html: termsAndConditions }}
+              dangerouslySetInnerHTML={{ __html: `<style>.terms-content b, .terms-content strong { font-weight: bold; } .terms-content i, .terms-content em { font-style: italic; } .terms-content u { text-decoration: underline; } .terms-content ul { list-style-type: disc; padding-left: 16px; margin: 2px 0; } .terms-content ol { list-style-type: decimal; padding-left: 16px; margin: 2px 0; } .terms-content li { margin: 1px 0; }</style><div class="terms-content">${termsAndConditions}</div>` }}
             />
           </div>
         )}
