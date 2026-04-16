@@ -25,6 +25,11 @@ import Cashbook from "./pages/Cashbook";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Install from "./pages/Install";
+import Companies from "./pages/Companies";
+import Assets from "./pages/Assets";
+import AssetForm from "./pages/AssetForm";
+import AssetDetail from "./pages/AssetDetail";
+import AssetPrint from "./pages/AssetPrint";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +65,11 @@ function App() {
             <Route path="/invoices/edit/:id" element={<InvoiceForm />} />
             <Route path="/invoices/:id" element={<InvoiceDetail />} />
             <Route path="/cashbook" element={<Cashbook />} />
+            <Route path="/companies" element={<Companies />} />
+            <Route path="/assets" element={<Assets />} />
+            <Route path="/assets/new" element={<AssetForm />} />
+            <Route path="/assets/print" element={<AssetPrint />} />
+            <Route path="/assets/:id" element={<AssetDetail />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/install" element={<Install />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
