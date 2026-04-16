@@ -28,6 +28,8 @@ import {
   UserCircle,
   LogOut,
   Download,
+  Building2,
+  QrCode,
 } from "lucide-react";
 import logo from "@/assets/itechlogo.png";
 import { toast } from "sonner";
@@ -39,6 +41,8 @@ const mainNavItems = [
   { title: "Quotations", url: "/quotations", icon: FileText },
   { title: "Invoices", url: "/invoices", icon: Receipt },
   { title: "Cashbook", url: "/cashbook", icon: BookOpen },
+  { title: "Companies", url: "/companies", icon: Building2 },
+  { title: "Asset Tags", url: "/assets", icon: QrCode },
 ];
 
 const adminNavItems = [
