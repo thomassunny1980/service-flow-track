@@ -14,6 +14,80 @@ export type Database = {
   }
   public: {
     Tables: {
+      assets: {
+        Row: {
+          asset_code: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          location: string | null
+          mac_address: string | null
+          product_type: string | null
+          serial_number: string | null
+          updated_at: string
+        }
+        Insert: {
+          asset_code: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          location?: string | null
+          mac_address?: string | null
+          product_type?: string | null
+          serial_number?: string | null
+          updated_at?: string
+        }
+        Update: {
+          asset_code?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          location?: string | null
+          mac_address?: string | null
+          product_type?: string | null
+          serial_number?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assets_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      companies: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       customers: {
         Row: {
           address: string | null
