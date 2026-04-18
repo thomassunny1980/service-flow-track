@@ -513,11 +513,12 @@ const QuotationForm = () => {
 
       const { subtotal, taxAmount, total } = calculateTotals();
 
-      // Convert string values to numbers for storage
+      // Convert string values to numbers for storage; persist inclusive flag per-item
       const itemsForStorage = items.map(item => ({
         ...item,
         quantity: typeof item.quantity === 'string' ? parseFloat(item.quantity) || 0 : item.quantity,
         unit_price: typeof item.unit_price === 'string' ? parseFloat(item.unit_price) || 0 : item.unit_price,
+        price_inclusive: formData.price_inclusive_tax,
       }));
 
       const avgTaxRate = subtotal > 0 ? (taxAmount / subtotal) * 100 : 0;
@@ -717,12 +718,26 @@ const QuotationForm = () => {
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
+            <CardHeader className="flex flex-row items-center justify-between gap-3 flex-wrap">
               <CardTitle>Items</CardTitle>
-              <Button type="button" variant="outline" size="sm" onClick={addItem}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Item
-              </Button>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="price_inclusive_tax"
+                    checked={formData.price_inclusive_tax}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, price_inclusive_tax: checked })
+                    }
+                  />
+                  <Label htmlFor="price_inclusive_tax" className="text-sm cursor-pointer">
+                    Price includes tax
+                  </Label>
+                </div>
+                <Button type="button" variant="outline" size="sm" onClick={addItem}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Item
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               {items.map((item, index) => (
