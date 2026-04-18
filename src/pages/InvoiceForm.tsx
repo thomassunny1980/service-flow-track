@@ -59,8 +59,10 @@ interface InvoiceItem {
   cgst_amount: number;
   sgst_amount: number;
   igst_amount: number;
+  taxable_amount?: number;
   total: number;
   unit?: string;
+  price_inclusive?: boolean;
 }
 
 const INDIAN_STATES = [
@@ -311,6 +313,20 @@ const InvoiceForm = () => {
           amount_paid: advancePaid,
         });
         const quotationItems = (data.items as unknown as InvoiceItem[]) || [];
+        const inclusive = quotationItems.length > 0 && !!quotationItems[0].price_inclusive;
+        setFormData({
+          customer_name: data.customer_name,
+          customer_contact: data.customer_contact || "",
+          customer_email: data.customer_email || "",
+          customer_address: (data as any).customer_address || "",
+          customer_state: (data as any).customer_state || "Kerala",
+          invoice_date: format(new Date(), "yyyy-MM-dd"),
+          due_date: format(addDays(new Date(), 30), "yyyy-MM-dd"),
+          notes: data.notes || "",
+          status: advancePaid > 0 ? "partial" : "unpaid",
+          amount_paid: advancePaid,
+          price_inclusive_tax: inclusive,
+        });
         setItems(quotationItems.map(item => ({
           ...item,
           inventory_id: item.inventory_id ?? null,
