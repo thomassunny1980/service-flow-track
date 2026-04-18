@@ -437,14 +437,14 @@ const QuotationForm = () => {
     );
   };
 
-  // Recalculate taxes when customer state changes
+  // Recalculate taxes when customer state or inclusive toggle changes
   useEffect(() => {
     setItems(prevItems =>
       prevItems.map(item => {
         const qty = typeof item.quantity === 'string' ? parseFloat(item.quantity) || 0 : item.quantity;
         const price = typeof item.unit_price === 'string' ? parseFloat(item.unit_price) || 0 : item.unit_price;
-        const subtotal = qty * price;
-        const taxCalc = calculateItemTax(subtotal, item.tax_rate);
+        const gross = qty * price;
+        const taxCalc = calculateItemTax(gross, item.tax_rate);
         return {
           ...item,
           ...taxCalc,
@@ -452,10 +452,11 @@ const QuotationForm = () => {
         };
       })
     );
-  }, [formData.customer_state]);
+  }, [formData.customer_state, formData.price_inclusive_tax]);
 
   const calculateTotals = () => {
     const subtotal = items.reduce((sum, item) => {
+      if (typeof item.taxable_amount === 'number') return sum + item.taxable_amount;
       const qty = typeof item.quantity === 'string' ? parseFloat(item.quantity) || 0 : item.quantity;
       const price = typeof item.unit_price === 'string' ? parseFloat(item.unit_price) || 0 : item.unit_price;
       return sum + (qty * price);
