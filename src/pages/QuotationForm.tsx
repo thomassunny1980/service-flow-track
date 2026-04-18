@@ -259,6 +259,8 @@ const QuotationForm = () => {
       if (error) throw error;
 
       if (data) {
+        const fetchedItems = (data.items as unknown as QuotationItem[]) || [];
+        const inclusive = fetchedItems.length > 0 && !!fetchedItems[0].price_inclusive;
         setFormData({
           customer_name: data.customer_name,
           customer_contact: data.customer_contact || "",
@@ -268,8 +270,8 @@ const QuotationForm = () => {
           validity_date: data.validity_date,
           quotation_date: data.created_at ? format(new Date(data.created_at), "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
           notes: data.notes || "",
+          price_inclusive_tax: inclusive,
         });
-        const fetchedItems = (data.items as unknown as QuotationItem[]) || [];
         setItems(fetchedItems.map(item => ({
           ...item,
           inventory_id: item.inventory_id ?? null,
@@ -309,15 +311,30 @@ const QuotationForm = () => {
     return customerStateLower !== "" && shopStateLower !== "" && customerStateLower !== shopStateLower;
   };
 
-  const calculateItemTax = (subtotal: number, taxRate: number) => {
-    const taxAmount = (subtotal * taxRate) / 100;
+  // When grossAmount is qty*price. If inclusive=true, the price already contains tax;
+  // taxable = grossAmount / (1 + rate/100), tax = grossAmount - taxable, line total = grossAmount.
+  // If inclusive=false, taxable = grossAmount, tax = grossAmount * rate/100, line total = grossAmount + tax.
+  const calculateItemTax = (grossAmount: number, taxRate: number, inclusive = formData.price_inclusive_tax) => {
     const interState = isInterState();
-    
+    let taxable: number;
+    let taxAmount: number;
+    let lineTotal: number;
+    if (inclusive && taxRate > 0) {
+      taxable = grossAmount / (1 + taxRate / 100);
+      taxAmount = grossAmount - taxable;
+      lineTotal = grossAmount;
+    } else {
+      taxable = grossAmount;
+      taxAmount = (grossAmount * taxRate) / 100;
+      lineTotal = grossAmount + taxAmount;
+    }
     return {
+      taxable_amount: taxable,
       tax_amount: taxAmount,
       cgst_amount: interState ? 0 : taxAmount / 2,
       sgst_amount: interState ? 0 : taxAmount / 2,
       igst_amount: interState ? taxAmount : 0,
+      line_total: lineTotal,
     };
   };
 
