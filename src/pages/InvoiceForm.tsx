@@ -359,6 +359,8 @@ const InvoiceForm = () => {
       if (error) throw error;
 
       if (data) {
+        const fetchedItems = (data.items as unknown as InvoiceItem[]) || [];
+        const inclusive = fetchedItems.length > 0 && !!fetchedItems[0].price_inclusive;
         setFormData({
           customer_name: data.customer_name,
           customer_contact: data.customer_contact || "",
@@ -370,8 +372,8 @@ const InvoiceForm = () => {
           notes: data.notes || "",
           status: data.status || "unpaid",
           amount_paid: Number(data.amount_paid || 0),
+          price_inclusive_tax: inclusive,
         });
-        const fetchedItems = (data.items as unknown as InvoiceItem[]) || [];
         setItems(fetchedItems.map(item => ({
           ...item,
           inventory_id: item.inventory_id ?? null,
