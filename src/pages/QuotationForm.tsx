@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Trash2, ArrowLeft, Package } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import InventoryItemSelect from "@/components/InventoryItemSelect";
 import { addDays, format } from "date-fns";
 import { CustomerSearchInput } from "@/components/CustomerSearchInput";
@@ -58,8 +59,10 @@ interface QuotationItem {
   cgst_amount: number;
   sgst_amount: number;
   igst_amount: number;
+  taxable_amount?: number;
   total: number;
   unit?: string;
+  price_inclusive?: boolean;
 }
 
 const INDIAN_STATES = [
@@ -96,6 +99,7 @@ const QuotationForm = () => {
     validity_date: format(addDays(new Date(), 15), "yyyy-MM-dd"),
     quotation_date: format(new Date(), "yyyy-MM-dd"),
     notes: "",
+    price_inclusive_tax: false,
   });
   const [items, setItems] = useState<QuotationItem[]>([
     { id: crypto.randomUUID(), inventory_id: null, item_name: "", description: "", quantity: 1, unit_price: 0, tax_rate: 18, tax_name: "GST 18%", tax_amount: 0, cgst_amount: 0, sgst_amount: 0, igst_amount: 0, total: 0 },
