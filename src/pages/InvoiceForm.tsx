@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Trash2, ArrowLeft, Package } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import InventoryItemSelect from "@/components/InventoryItemSelect";
 import { addDays, format } from "date-fns";
 import { CustomerSearchInput } from "@/components/CustomerSearchInput";
@@ -100,6 +101,7 @@ const InvoiceForm = () => {
     notes: "",
     status: "unpaid",
     amount_paid: 0,
+    price_inclusive_tax: false,
   });
   const [items, setItems] = useState<InvoiceItem[]>([
     { id: crypto.randomUUID(), inventory_id: null, item_name: "", description: "", quantity: 1, unit_price: 0, tax_rate: 18, tax_name: "GST 18%", tax_amount: 0, cgst_amount: 0, sgst_amount: 0, igst_amount: 0, total: 0 },
@@ -257,15 +259,30 @@ const InvoiceForm = () => {
     return customerStateLower !== "" && shopStateLower !== "" && customerStateLower !== shopStateLower;
   };
 
-  const calculateItemTax = (subtotal: number, taxRate: number) => {
-    const taxAmount = (subtotal * taxRate) / 100;
+  // When grossAmount is qty*price. If inclusive=true, the price already contains tax;
+  // taxable = grossAmount / (1 + rate/100), tax = grossAmount - taxable, line total = grossAmount.
+  // If inclusive=false, taxable = grossAmount, tax = grossAmount * rate/100, line total = grossAmount + tax.
+  const calculateItemTax = (grossAmount: number, taxRate: number, inclusive = formData.price_inclusive_tax) => {
     const interState = isInterState();
-    
+    let taxable: number;
+    let taxAmount: number;
+    let lineTotal: number;
+    if (inclusive && taxRate > 0) {
+      taxable = grossAmount / (1 + taxRate / 100);
+      taxAmount = grossAmount - taxable;
+      lineTotal = grossAmount;
+    } else {
+      taxable = grossAmount;
+      taxAmount = (grossAmount * taxRate) / 100;
+      lineTotal = grossAmount + taxAmount;
+    }
     return {
+      taxable_amount: taxable,
       tax_amount: taxAmount,
       cgst_amount: interState ? 0 : taxAmount / 2,
       sgst_amount: interState ? 0 : taxAmount / 2,
       igst_amount: interState ? taxAmount : 0,
+      line_total: lineTotal,
     };
   };
 
