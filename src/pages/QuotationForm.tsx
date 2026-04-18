@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Trash2, ArrowLeft, Package } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import InventoryItemSelect from "@/components/InventoryItemSelect";
 import { addDays, format } from "date-fns";
 import { CustomerSearchInput } from "@/components/CustomerSearchInput";
@@ -58,8 +59,10 @@ interface QuotationItem {
   cgst_amount: number;
   sgst_amount: number;
   igst_amount: number;
+  taxable_amount?: number;
   total: number;
   unit?: string;
+  price_inclusive?: boolean;
 }
 
 const INDIAN_STATES = [
@@ -96,6 +99,7 @@ const QuotationForm = () => {
     validity_date: format(addDays(new Date(), 15), "yyyy-MM-dd"),
     quotation_date: format(new Date(), "yyyy-MM-dd"),
     notes: "",
+    price_inclusive_tax: false,
   });
   const [items, setItems] = useState<QuotationItem[]>([
     { id: crypto.randomUUID(), inventory_id: null, item_name: "", description: "", quantity: 1, unit_price: 0, tax_rate: 18, tax_name: "GST 18%", tax_amount: 0, cgst_amount: 0, sgst_amount: 0, igst_amount: 0, total: 0 },
@@ -255,6 +259,8 @@ const QuotationForm = () => {
       if (error) throw error;
 
       if (data) {
+        const fetchedItems = (data.items as unknown as QuotationItem[]) || [];
+        const inclusive = fetchedItems.length > 0 && !!fetchedItems[0].price_inclusive;
         setFormData({
           customer_name: data.customer_name,
           customer_contact: data.customer_contact || "",
@@ -264,8 +270,8 @@ const QuotationForm = () => {
           validity_date: data.validity_date,
           quotation_date: data.created_at ? format(new Date(data.created_at), "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
           notes: data.notes || "",
+          price_inclusive_tax: inclusive,
         });
-        const fetchedItems = (data.items as unknown as QuotationItem[]) || [];
         setItems(fetchedItems.map(item => ({
           ...item,
           inventory_id: item.inventory_id ?? null,
@@ -305,15 +311,30 @@ const QuotationForm = () => {
     return customerStateLower !== "" && shopStateLower !== "" && customerStateLower !== shopStateLower;
   };
 
-  const calculateItemTax = (subtotal: number, taxRate: number) => {
-    const taxAmount = (subtotal * taxRate) / 100;
+  // When grossAmount is qty*price. If inclusive=true, the price already contains tax;
+  // taxable = grossAmount / (1 + rate/100), tax = grossAmount - taxable, line total = grossAmount.
+  // If inclusive=false, taxable = grossAmount, tax = grossAmount * rate/100, line total = grossAmount + tax.
+  const calculateItemTax = (grossAmount: number, taxRate: number, inclusive = formData.price_inclusive_tax) => {
     const interState = isInterState();
-    
+    let taxable: number;
+    let taxAmount: number;
+    let lineTotal: number;
+    if (inclusive && taxRate > 0) {
+      taxable = grossAmount / (1 + taxRate / 100);
+      taxAmount = grossAmount - taxable;
+      lineTotal = grossAmount;
+    } else {
+      taxable = grossAmount;
+      taxAmount = (grossAmount * taxRate) / 100;
+      lineTotal = grossAmount + taxAmount;
+    }
     return {
+      taxable_amount: taxable,
       tax_amount: taxAmount,
       cgst_amount: interState ? 0 : taxAmount / 2,
       sgst_amount: interState ? 0 : taxAmount / 2,
       igst_amount: interState ? taxAmount : 0,
+      line_total: lineTotal,
     };
   };
 
@@ -360,7 +381,7 @@ const QuotationForm = () => {
             unit_price: inventoryItem.sale_rate,
             unit: inventoryItem.unit || 'Nos',
             ...taxCalc,
-            total: subtotal + taxCalc.tax_amount,
+            total: taxCalc.line_total,
           };
         }
         return item;
@@ -382,7 +403,7 @@ const QuotationForm = () => {
             return {
               ...updatedItem,
               ...taxCalc,
-              total: subtotal + taxCalc.tax_amount,
+              total: taxCalc.line_total,
             };
           }
           return updatedItem;
@@ -408,7 +429,7 @@ const QuotationForm = () => {
             tax_rate: selectedTax.rate,
             tax_name: selectedTax.name,
             ...taxCalc,
-            total: subtotal + taxCalc.tax_amount,
+            total: taxCalc.line_total,
           };
         }
         return item;
@@ -416,25 +437,26 @@ const QuotationForm = () => {
     );
   };
 
-  // Recalculate taxes when customer state changes
+  // Recalculate taxes when customer state or inclusive toggle changes
   useEffect(() => {
     setItems(prevItems =>
       prevItems.map(item => {
         const qty = typeof item.quantity === 'string' ? parseFloat(item.quantity) || 0 : item.quantity;
         const price = typeof item.unit_price === 'string' ? parseFloat(item.unit_price) || 0 : item.unit_price;
-        const subtotal = qty * price;
-        const taxCalc = calculateItemTax(subtotal, item.tax_rate);
+        const gross = qty * price;
+        const taxCalc = calculateItemTax(gross, item.tax_rate);
         return {
           ...item,
           ...taxCalc,
-          total: subtotal + taxCalc.tax_amount,
+          total: taxCalc.line_total,
         };
       })
     );
-  }, [formData.customer_state]);
+  }, [formData.customer_state, formData.price_inclusive_tax]);
 
   const calculateTotals = () => {
     const subtotal = items.reduce((sum, item) => {
+      if (typeof item.taxable_amount === 'number') return sum + item.taxable_amount;
       const qty = typeof item.quantity === 'string' ? parseFloat(item.quantity) || 0 : item.quantity;
       const price = typeof item.unit_price === 'string' ? parseFloat(item.unit_price) || 0 : item.unit_price;
       return sum + (qty * price);
@@ -491,11 +513,12 @@ const QuotationForm = () => {
 
       const { subtotal, taxAmount, total } = calculateTotals();
 
-      // Convert string values to numbers for storage
+      // Convert string values to numbers for storage; persist inclusive flag per-item
       const itemsForStorage = items.map(item => ({
         ...item,
         quantity: typeof item.quantity === 'string' ? parseFloat(item.quantity) || 0 : item.quantity,
         unit_price: typeof item.unit_price === 'string' ? parseFloat(item.unit_price) || 0 : item.unit_price,
+        price_inclusive: formData.price_inclusive_tax,
       }));
 
       const avgTaxRate = subtotal > 0 ? (taxAmount / subtotal) * 100 : 0;
@@ -695,12 +718,26 @@ const QuotationForm = () => {
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
+            <CardHeader className="flex flex-row items-center justify-between gap-3 flex-wrap">
               <CardTitle>Items</CardTitle>
-              <Button type="button" variant="outline" size="sm" onClick={addItem}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Item
-              </Button>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="price_inclusive_tax"
+                    checked={formData.price_inclusive_tax}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, price_inclusive_tax: checked })
+                    }
+                  />
+                  <Label htmlFor="price_inclusive_tax" className="text-sm cursor-pointer">
+                    Price includes tax
+                  </Label>
+                </div>
+                <Button type="button" variant="outline" size="sm" onClick={addItem}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Item
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               {items.map((item, index) => (
@@ -742,7 +779,7 @@ const QuotationForm = () => {
                                   unit_price: newItem.sale_rate,
                                   unit: newItem.unit || 'Nos',
                                   ...taxCalc,
-                                  total: stotal + taxCalc.tax_amount,
+                                  total: taxCalc.line_total,
                                 };
                               }
                               return i;
@@ -770,7 +807,9 @@ const QuotationForm = () => {
                       />
                     </div>
                     <div className="col-span-1 sm:col-span-2 space-y-1">
-                      <Label className="text-xs">Price (₹)</Label>
+                      <Label className="text-xs">
+                        Price (₹) {formData.price_inclusive_tax && <span className="text-muted-foreground">(incl. tax)</span>}
+                      </Label>
                       <Input
                         type="text"
                         inputMode="decimal"
