@@ -879,7 +879,9 @@ const InvoiceForm = () => {
                       />
                     </div>
                     <div className="col-span-1 sm:col-span-2 space-y-1">
-                      <Label className="text-xs">Price (₹)</Label>
+                      <Label className="text-xs">
+                        Price (₹) {formData.price_inclusive_tax && <span className="text-muted-foreground">(incl. tax)</span>}
+                      </Label>
                       <Input
                         type="text"
                         inputMode="decimal"
