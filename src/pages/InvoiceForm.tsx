@@ -437,7 +437,7 @@ const InvoiceForm = () => {
             unit_price: inventoryItem.sale_rate,
             unit: inventoryItem.unit || 'Nos',
             ...taxCalc,
-            total: subtotal + taxCalc.tax_amount,
+            total: taxCalc.line_total,
           };
         }
         return item;
@@ -458,7 +458,7 @@ const InvoiceForm = () => {
             return {
               ...updatedItem,
               ...taxCalc,
-              total: subtotal + taxCalc.tax_amount,
+              total: taxCalc.line_total,
             };
           }
           return updatedItem;
@@ -484,7 +484,7 @@ const InvoiceForm = () => {
             tax_rate: selectedTax.rate,
             tax_name: selectedTax.name,
             ...taxCalc,
-            total: subtotal + taxCalc.tax_amount,
+            total: taxCalc.line_total,
           };
         }
         return item;
@@ -503,7 +503,7 @@ const InvoiceForm = () => {
         return {
           ...item,
           ...taxCalc,
-          total: subtotal + taxCalc.tax_amount,
+          total: taxCalc.line_total,
         };
       })
     );
@@ -834,7 +834,7 @@ const InvoiceForm = () => {
                                   unit_price: newItem.sale_rate,
                                   unit: newItem.unit || 'Nos',
                                   ...taxCalc,
-                                  total: stotal + taxCalc.tax_amount,
+                                  total: taxCalc.line_total,
                                 };
                               }
                               return i;

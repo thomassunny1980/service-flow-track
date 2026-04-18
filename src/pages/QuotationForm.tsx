@@ -360,7 +360,7 @@ const QuotationForm = () => {
             unit_price: inventoryItem.sale_rate,
             unit: inventoryItem.unit || 'Nos',
             ...taxCalc,
-            total: subtotal + taxCalc.tax_amount,
+            total: taxCalc.line_total,
           };
         }
         return item;
@@ -382,7 +382,7 @@ const QuotationForm = () => {
             return {
               ...updatedItem,
               ...taxCalc,
-              total: subtotal + taxCalc.tax_amount,
+              total: taxCalc.line_total,
             };
           }
           return updatedItem;
@@ -408,7 +408,7 @@ const QuotationForm = () => {
             tax_rate: selectedTax.rate,
             tax_name: selectedTax.name,
             ...taxCalc,
-            total: subtotal + taxCalc.tax_amount,
+            total: taxCalc.line_total,
           };
         }
         return item;
@@ -427,7 +427,7 @@ const QuotationForm = () => {
         return {
           ...item,
           ...taxCalc,
-          total: subtotal + taxCalc.tax_amount,
+          total: taxCalc.line_total,
         };
       })
     );
@@ -742,7 +742,7 @@ const QuotationForm = () => {
                                   unit_price: newItem.sale_rate,
                                   unit: newItem.unit || 'Nos',
                                   ...taxCalc,
-                                  total: stotal + taxCalc.tax_amount,
+                                  total: taxCalc.line_total,
                                 };
                               }
                               return i;
