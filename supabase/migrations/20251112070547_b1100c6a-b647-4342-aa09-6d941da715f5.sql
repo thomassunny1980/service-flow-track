@@ -1,0 +1,3 @@
+-- Add staff and customer roles to the enum
+ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'staff';
+ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'customer';

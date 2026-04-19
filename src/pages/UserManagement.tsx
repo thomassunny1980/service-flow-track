@@ -1,0 +1,479 @@
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import Layout from "@/components/Layout";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { toast } from "sonner";
+import { UserPlus, Trash2, Pencil } from "lucide-react";
+import { z } from "zod";
+
+const userSchema = z.object({
+  email: z.string().trim().email("Invalid email address").max(255),
+  fullName: z.string().trim().min(2, "Name must be at least 2 characters").max(100),
+  password: z.string()
+    .min(12, "Password must be at least 12 characters")
+    .max(72, "Password must not exceed 72 characters")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number")
+    .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
+  role: z.enum(["admin", "staff"]),
+});
+
+interface UserRole {
+  id: string;
+  user_id: string;
+  role: string;
+  profiles?: {
+    full_name: string;
+    email: string;
+  };
+}
+
+const UserManagement = () => {
+  const [loading, setLoading] = useState(false);
+  const [users, setUsers] = useState<UserRole[]>([]);
+  const [formData, setFormData] = useState({
+    email: "",
+    fullName: "",
+    password: "",
+    role: "staff",
+  });
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<UserRole | null>(null);
+  const [editFormData, setEditFormData] = useState({
+    email: "",
+    fullName: "",
+    role: "staff",
+    password: "",
+  });
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("user_roles")
+        .select("id, user_id, role")
+        .in("role", ["admin", "staff"]);
+
+      if (error) throw error;
+      
+      // Fetch profiles separately for the user IDs
+      if (data && data.length > 0) {
+        const userIds = data.map(u => u.user_id);
+        const { data: profilesData } = await supabase
+          .from("profiles")
+          .select("id, full_name, email")
+          .in("id", userIds);
+        
+        // Merge the data
+        const usersWithProfiles = data.map(user => ({
+          ...user,
+          profiles: profilesData?.find(p => p.id === user.user_id) || { full_name: "Unknown", email: "" }
+        }));
+        
+        setUsers(usersWithProfiles);
+      } else {
+        setUsers([]);
+      }
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error("Error fetching users:", error);
+      }
+      toast.error("Failed to load users");
+    }
+  };
+
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const validated = userSchema.parse(formData);
+      
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      
+      if (!token) {
+        throw new Error("Not authenticated");
+      }
+
+      // Call edge function to create user
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-staff`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            email: validated.email,
+            password: validated.password,
+            fullName: validated.fullName,
+            role: validated.role,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to create user");
+      }
+
+      toast.success(`${validated.role === 'admin' ? 'Admin' : 'Staff'} account created successfully!`);
+      setFormData({ email: "", fullName: "", password: "", role: "staff" });
+      fetchUsers();
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+      } else {
+        toast.error(error.message || "Failed to create user");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditUser = (user: UserRole) => {
+    setEditingUser(user);
+    setEditFormData({
+      email: user.profiles?.email || "",
+      fullName: user.profiles?.full_name || "",
+      role: user.role as "admin" | "staff",
+      password: "",
+    });
+    setEditDialogOpen(true);
+  };
+
+  const handleUpdateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      
+      if (!token) {
+        throw new Error("Not authenticated");
+      }
+
+      if (!editingUser) {
+        throw new Error("No user selected");
+      }
+
+      // Validate email if changed
+      if (editFormData.email && editFormData.email !== editingUser.profiles?.email) {
+        const emailSchema = z.string().trim().email("Invalid email address").max(255);
+        emailSchema.parse(editFormData.email);
+      }
+
+      // Validate full name if changed
+      if (editFormData.fullName && editFormData.fullName !== editingUser.profiles?.full_name) {
+        const nameSchema = z.string().trim().min(2, "Name must be at least 2 characters").max(100);
+        nameSchema.parse(editFormData.fullName);
+      }
+
+      // Call edge function to update user
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/edit-staff`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            userId: editingUser.user_id,
+            email: editFormData.email !== editingUser.profiles?.email ? editFormData.email : undefined,
+            fullName: editFormData.fullName !== editingUser.profiles?.full_name ? editFormData.fullName : undefined,
+            role: editFormData.role !== editingUser.role ? editFormData.role : undefined,
+            password: editFormData.password || undefined,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to update user");
+      }
+
+      toast.success("User updated successfully!");
+      setEditDialogOpen(false);
+      setEditingUser(null);
+      fetchUsers();
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+      } else {
+        toast.error(error.message || "Failed to update user");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm("Are you sure you want to delete this user?")) return;
+
+    try {
+      const { error } = await supabase
+        .from("user_roles")
+        .delete()
+        .eq("user_id", userId);
+
+      if (error) throw error;
+
+      toast.success("User deleted successfully");
+      fetchUsers();
+    } catch (error) {
+      toast.error("Failed to delete user");
+    }
+  };
+
+  return (
+    <Layout>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold">User Management</h1>
+          <p className="text-muted-foreground">
+            Create and manage admin and staff accounts
+          </p>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <UserPlus className="h-5 w-5" />
+                Create New User
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleCreateUser} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">Full Name *</Label>
+                  <Input
+                    id="fullName"
+                    value={formData.fullName}
+                    onChange={(e) =>
+                      setFormData({ ...formData, fullName: e.target.value })
+                    }
+                    required
+                    maxLength={100}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                    required
+                    maxLength={255}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password *</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) =>
+                      setFormData({ ...formData, password: e.target.value })
+                    }
+                    required
+                    maxLength={72}
+                    placeholder="Min. 12 characters, mix of upper/lower/number/special"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="role">Role *</Label>
+                  <Select
+                    value={formData.role}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, role: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="staff">Staff</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? "Creating..." : "Create User"}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Admin & Staff Users</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead className="w-[100px]">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {users.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell>
+                        {user.profiles?.full_name || "Unknown"}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {user.profiles?.email || "N/A"}
+                      </TableCell>
+                      <TableCell className="capitalize">{user.role}</TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleEditUser(user)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDeleteUser(user.user_id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit User</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleUpdateUser} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="editFullName">Full Name</Label>
+                <Input
+                  id="editFullName"
+                  value={editFormData.fullName}
+                  onChange={(e) =>
+                    setEditFormData({ ...editFormData, fullName: e.target.value })
+                  }
+                  required
+                  maxLength={100}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="editEmail">Email</Label>
+                <Input
+                  id="editEmail"
+                  type="email"
+                  value={editFormData.email}
+                  onChange={(e) =>
+                    setEditFormData({ ...editFormData, email: e.target.value })
+                  }
+                  required
+                  maxLength={255}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="editRole">Role</Label>
+                <Select
+                  value={editFormData.role}
+                  onValueChange={(value) =>
+                    setEditFormData({ ...editFormData, role: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="staff">Staff</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="editPassword">New Password (optional)</Label>
+                <Input
+                  id="editPassword"
+                  type="password"
+                  value={editFormData.password}
+                  onChange={(e) =>
+                    setEditFormData({ ...editFormData, password: e.target.value })
+                  }
+                  placeholder="Leave blank to keep current password"
+                  minLength={12}
+                  maxLength={72}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Leave blank to keep the current password. If changing, must be at least 12 characters.
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button type="submit" disabled={loading}>
+                  {loading ? "Updating..." : "Update User"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setEditDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </Layout>
+  );
+};
+
+export default UserManagement;

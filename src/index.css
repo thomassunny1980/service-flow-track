@@ -1,0 +1,192 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 47% 11%;
+
+    --primary: 240 100% 25%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 240 60% 95%;
+    --secondary-foreground: 240 100% 25%;
+
+    --muted: 240 20% 96%;
+    --muted-foreground: 240 10% 47%;
+
+    --accent: 0 100% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 240 20% 91%;
+    --input: 240 20% 91%;
+    --ring: 240 100% 25%;
+
+    --radius: 0.5rem;
+
+    /* Status colors */
+    --status-received: 240 100% 25%;
+    --status-in-progress: 38 92% 50%;
+    --status-awaiting-parts: 25 95% 53%;
+    --status-completed: 142 76% 36%;
+    --status-external: 271 91% 65%;
+    --status-ready: 189 94% 43%;
+    --status-delivered: 160 84% 39%;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 100% 25%;
+    --sidebar-primary: 240 100% 25%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 60% 95%;
+    --sidebar-accent-foreground: 240 100% 25%;
+    --sidebar-border: 240 20% 91%;
+    --sidebar-ring: 240 100% 25%;
+  }
+
+  .dark {
+    --background: 222.2 47% 11%;
+    --foreground: 210 40% 98%;
+
+    --card: 217 33% 17%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 217 33% 17%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 240 100% 35%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 240 30% 17%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 240 20% 17%;
+    --muted-foreground: 240 15% 65%;
+
+    --accent: 0 100% 60%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 240 20% 25%;
+    --input: 240 20% 25%;
+    --ring: 240 100% 35%;
+
+    /* Status colors - adjusted for dark mode */
+    --status-received: 240 100% 35%;
+    --status-in-progress: 38 92% 50%;
+    --status-awaiting-parts: 25 95% 53%;
+    --status-completed: 142 76% 36%;
+    --status-external: 271 91% 65%;
+    --status-ready: 189 94% 43%;
+    --status-delivered: 160 84% 39%;
+
+    --sidebar-background: 240 30% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 240 100% 35%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 20% 15%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 20% 20%;
+    --sidebar-ring: 240 100% 35%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    overscroll-behavior: none;
+  }
+}
+
+/* PWA Safe Area Support */
+.pwa-safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+.pwa-safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.pwa-safe-left {
+  padding-left: env(safe-area-inset-left);
+}
+.pwa-safe-right {
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Mobile card list styles */
+.mobile-card-list .mobile-card-item {
+  @apply p-4 border-b border-border last:border-b-0;
+}
+
+/* Mobile table override - hide on small screens */
+@media (max-width: 768px) {
+  .mobile-card-list .desktop-table {
+    display: none;
+  }
+
+  /* Better touch targets */
+  button, a, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Prevent horizontal overflow */
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-card-list .mobile-cards {
+    display: none;
+  }
+}
+
+@keyframes run {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes swing {
+  0% { transform: rotate(-15deg); }
+  100% { transform: rotate(15deg); }
+}
+
+@keyframes kick {
+  0% { transform: rotate(-20deg); }
+  100% { transform: rotate(20deg); }
+}
+
+@media print {
+  .receipt-container {
+    max-width: 100%;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  
+  body {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}
