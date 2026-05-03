@@ -69,16 +69,7 @@ const Quotations = () => {
       setUserRole(roles[0].role);
     }
 
-    await cleanupExpiredQuotations();
     fetchQuotations();
-  };
-
-  const cleanupExpiredQuotations = async () => {
-    try {
-      await supabase.rpc('cleanup_expired_quotations');
-    } catch (error) {
-      console.log("Cleanup function not available or already run");
-    }
   };
 
   const fetchQuotations = async () => {
