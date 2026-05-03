@@ -140,9 +140,10 @@ const Invoices = () => {
 
   const filteredInvoices = invoices.filter(
     (inv) =>
-      inv.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      inv.invoice_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      inv.customer_contact?.toLowerCase().includes(searchTerm.toLowerCase())
+      (inv.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        inv.invoice_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        inv.customer_contact?.toLowerCase().includes(searchTerm.toLowerCase())) &&
+      matchesDateFilter(inv.created_at, dateFilter)
   );
 
   if (loading) {
