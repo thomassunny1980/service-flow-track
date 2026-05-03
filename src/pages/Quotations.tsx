@@ -79,7 +79,8 @@ const Quotations = () => {
       const { data, error } = await supabase
         .from("quotations")
         .select("*")
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(5000);
 
       if (error) throw error;
       setQuotations((data || []) as Quotation[]);
