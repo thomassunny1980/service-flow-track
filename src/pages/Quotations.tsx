@@ -195,8 +195,10 @@ const Quotations = () => {
 
   const filteredQuotations = quotations.filter(
     (q) =>
-      q.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      q.customer_contact?.toLowerCase().includes(searchTerm.toLowerCase())
+      (q.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        q.customer_contact?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        q.quotation_number?.toLowerCase().includes(searchTerm.toLowerCase())) &&
+      matchesDateFilter(q.created_at, dateFilter)
   );
 
   if (loading) {
