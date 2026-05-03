@@ -28,6 +28,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import DateRangeFilter, { DateFilterValue, defaultDateFilter, matchesDateFilter } from "@/components/DateRangeFilter";
 
 interface Invoice {
   id: string;
@@ -50,6 +51,7 @@ const Invoices = () => {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [dateFilter, setDateFilter] = useState<DateFilterValue>(defaultDateFilter);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
@@ -84,7 +86,8 @@ const Invoices = () => {
       const { data, error } = await supabase
         .from("invoices")
         .select("*")
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(5000);
 
       if (error) throw error;
       setInvoices((data || []) as Invoice[]);
@@ -137,9 +140,10 @@ const Invoices = () => {
 
   const filteredInvoices = invoices.filter(
     (inv) =>
-      inv.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      inv.invoice_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      inv.customer_contact?.toLowerCase().includes(searchTerm.toLowerCase())
+      (inv.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        inv.invoice_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        inv.customer_contact?.toLowerCase().includes(searchTerm.toLowerCase())) &&
+      matchesDateFilter(inv.created_at, dateFilter)
   );
 
   if (loading) {
@@ -166,7 +170,7 @@ const Invoices = () => {
           </Button>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -176,6 +180,7 @@ const Invoices = () => {
               className="pl-10"
             />
           </div>
+          <DateRangeFilter value={dateFilter} onChange={setDateFilter} />
         </div>
 
         <div className="mobile-card-list">

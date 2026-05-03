@@ -27,6 +27,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import DateRangeFilter, { DateFilterValue, defaultDateFilter, matchesDateFilter } from "@/components/DateRangeFilter";
 
 interface Quotation {
   id: string;
@@ -45,6 +46,7 @@ const Quotations = () => {
   const [quotations, setQuotations] = useState<Quotation[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [dateFilter, setDateFilter] = useState<DateFilterValue>(defaultDateFilter);
   const [userRole, setUserRole] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -77,7 +79,8 @@ const Quotations = () => {
       const { data, error } = await supabase
         .from("quotations")
         .select("*")
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(5000);
 
       if (error) throw error;
       setQuotations((data || []) as Quotation[]);
@@ -193,8 +196,10 @@ const Quotations = () => {
 
   const filteredQuotations = quotations.filter(
     (q) =>
-      q.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      q.customer_contact?.toLowerCase().includes(searchTerm.toLowerCase())
+      (q.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        q.customer_contact?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        q.quotation_number?.toLowerCase().includes(searchTerm.toLowerCase())) &&
+      matchesDateFilter(q.created_at, dateFilter)
   );
 
   if (loading) {
@@ -221,7 +226,7 @@ const Quotations = () => {
           </Button>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -231,6 +236,7 @@ const Quotations = () => {
               className="pl-10"
             />
           </div>
+          <DateRangeFilter value={dateFilter} onChange={setDateFilter} />
         </div>
 
         <div className="mobile-card-list">
