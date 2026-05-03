@@ -225,7 +225,7 @@ const Quotations = () => {
           </Button>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -235,6 +235,7 @@ const Quotations = () => {
               className="pl-10"
             />
           </div>
+          <DateRangeFilter value={dateFilter} onChange={setDateFilter} />
         </div>
 
         <div className="mobile-card-list">
