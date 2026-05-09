@@ -1,0 +1,1 @@
+ALTER VIEW public.party_balances SET (security_invoker = true);
