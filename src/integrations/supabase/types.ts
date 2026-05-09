@@ -95,8 +95,11 @@ export type Database = {
           created_at: string
           created_by: string | null
           email: string | null
+          gstin: string | null
           id: string
           name: string
+          opening_balance: number
+          party_type: string
           state: string | null
           updated_at: string
         }
@@ -106,8 +109,11 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           email?: string | null
+          gstin?: string | null
           id?: string
           name: string
+          opening_balance?: number
+          party_type?: string
           state?: string | null
           updated_at?: string
         }
@@ -117,8 +123,11 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           email?: string | null
+          gstin?: string | null
           id?: string
           name?: string
+          opening_balance?: number
+          party_type?: string
           state?: string | null
           updated_at?: string
         }
@@ -246,6 +255,51 @@ export type Database = {
           },
         ]
       }
+      ledger_transactions: {
+        Row: {
+          created_at: string
+          credit: number
+          customer_id: string
+          debit: number
+          id: string
+          notes: string | null
+          reference_id: string | null
+          reference_no: string | null
+          reference_table: string | null
+          running_balance: number
+          transaction_date: string
+          transaction_type: string
+        }
+        Insert: {
+          created_at?: string
+          credit?: number
+          customer_id: string
+          debit?: number
+          id?: string
+          notes?: string | null
+          reference_id?: string | null
+          reference_no?: string | null
+          reference_table?: string | null
+          running_balance?: number
+          transaction_date?: string
+          transaction_type: string
+        }
+        Update: {
+          created_at?: string
+          credit?: number
+          customer_id?: string
+          debit?: number
+          id?: string
+          notes?: string | null
+          reference_id?: string | null
+          reference_no?: string | null
+          reference_table?: string | null
+          running_balance?: number
+          transaction_date?: string
+          transaction_type?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           amount_paid: number | null
@@ -339,6 +393,66 @@ export type Database = {
           full_name?: string
           id?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      purchases: {
+        Row: {
+          balance_amount: number
+          created_at: string
+          created_by: string | null
+          id: string
+          invoice_no: string | null
+          items: Json
+          notes: string | null
+          paid_amount: number
+          payment_mode: string | null
+          payment_type: string
+          purchase_date: string
+          subtotal: number
+          tax_amount: number
+          total_amount: number
+          updated_at: string
+          vendor_id: string
+          vendor_name: string
+        }
+        Insert: {
+          balance_amount?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          invoice_no?: string | null
+          items?: Json
+          notes?: string | null
+          paid_amount?: number
+          payment_mode?: string | null
+          payment_type?: string
+          purchase_date?: string
+          subtotal?: number
+          tax_amount?: number
+          total_amount?: number
+          updated_at?: string
+          vendor_id: string
+          vendor_name: string
+        }
+        Update: {
+          balance_amount?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          invoice_no?: string | null
+          items?: Json
+          notes?: string | null
+          paid_amount?: number
+          payment_mode?: string | null
+          payment_type?: string
+          purchase_date?: string
+          subtotal?: number
+          tax_amount?: number
+          total_amount?: number
+          updated_at?: string
+          vendor_id?: string
+          vendor_name?: string
         }
         Relationships: []
       }
@@ -616,6 +730,42 @@ export type Database = {
         }
         Relationships: []
       }
+      party_balances: {
+        Row: {
+          balance: number | null
+          contact: string | null
+          customer_id: string | null
+          gstin: string | null
+          name: string | null
+          opening_balance: number | null
+          party_type: string | null
+          total_paid_to_vendor: number | null
+          total_purchases: number | null
+        }
+        Insert: {
+          balance?: never
+          contact?: string | null
+          customer_id?: string | null
+          gstin?: string | null
+          name?: string | null
+          opening_balance?: number | null
+          party_type?: string | null
+          total_paid_to_vendor?: never
+          total_purchases?: never
+        }
+        Update: {
+          balance?: never
+          contact?: string | null
+          customer_id?: string | null
+          gstin?: string | null
+          name?: string | null
+          opening_balance?: number | null
+          party_type?: string | null
+          total_paid_to_vendor?: never
+          total_purchases?: never
+        }
+        Relationships: []
+      }
     }
     Functions: {
       cleanup_expired_quotations: { Args: never; Returns: undefined }
@@ -633,6 +783,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      recalculate_party_balance: {
+        Args: { p_customer_id: string }
+        Returns: undefined
       }
     }
     Enums: {

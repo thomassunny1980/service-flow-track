@@ -30,6 +30,8 @@ import {
   Download,
   Building2,
   QrCode,
+  ShoppingCart,
+  Contact,
 } from "lucide-react";
 import logo from "@/assets/itechlogo.png";
 import { toast } from "sonner";
@@ -40,6 +42,10 @@ const mainNavItems = [
   { title: "Inventory", url: "/inventory", icon: Boxes },
   { title: "Quotations", url: "/quotations", icon: FileText },
   { title: "Invoices", url: "/invoices", icon: Receipt },
+  { title: "Quotations", url: "/quotations", icon: FileText },
+  { title: "Invoices", url: "/invoices", icon: Receipt },
+  { title: "Purchases", url: "/purchases", icon: ShoppingCart },
+  { title: "Parties", url: "/parties", icon: Contact },
   { title: "Cashbook", url: "/cashbook", icon: BookOpen },
   { title: "Companies", url: "/companies", icon: Building2 },
   { title: "Asset Tags", url: "/assets", icon: QrCode },
