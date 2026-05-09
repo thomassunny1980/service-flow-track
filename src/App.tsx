@@ -30,6 +30,12 @@ import Assets from "./pages/Assets";
 import AssetForm from "./pages/AssetForm";
 import AssetDetail from "./pages/AssetDetail";
 import AssetPrint from "./pages/AssetPrint";
+import Parties from "./pages/Parties";
+import PartyForm from "./pages/PartyForm";
+import PartyLedger from "./pages/PartyLedger";
+import Purchases from "./pages/Purchases";
+import PurchaseForm from "./pages/PurchaseForm";
+import PurchaseDetail from "./pages/PurchaseDetail";
 
 const queryClient = new QueryClient();
 
