@@ -77,6 +77,14 @@ function App() {
             <Route path="/assets/print" element={<AssetPrint />} />
             <Route path="/assets/:id" element={<AssetDetail />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/parties" element={<Parties />} />
+            <Route path="/parties/new" element={<PartyForm />} />
+            <Route path="/parties/edit/:id" element={<PartyForm />} />
+            <Route path="/parties/:id" element={<PartyLedger />} />
+            <Route path="/purchases" element={<Purchases />} />
+            <Route path="/purchases/new" element={<PurchaseForm />} />
+            <Route path="/purchases/edit/:id" element={<PurchaseForm />} />
+            <Route path="/purchases/:id" element={<PurchaseDetail />} />
             <Route path="/install" element={<Install />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
