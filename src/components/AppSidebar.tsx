@@ -30,6 +30,8 @@ import {
   Download,
   Building2,
   QrCode,
+  ShoppingCart,
+  Contact,
 } from "lucide-react";
 import logo from "@/assets/itechlogo.png";
 import { toast } from "sonner";
