@@ -244,6 +244,8 @@ const Settings = () => {
           bank_branch: settings.bank_branch || null,
           upi_id: settings.upi_id || null,
           terms_and_conditions: settings.terms_and_conditions || null,
+          invoice_terms: settings.invoice_terms || null,
+          quotation_terms: settings.quotation_terms || null,
           tax_rates: JSON.parse(JSON.stringify(settings.tax_rates)),
           quotation_prefix: settings.quotation_prefix,
           quotation_year_format: settings.quotation_year_format,
