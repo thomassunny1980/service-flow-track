@@ -42,8 +42,6 @@ const mainNavItems = [
   { title: "Inventory", url: "/inventory", icon: Boxes },
   { title: "Quotations", url: "/quotations", icon: FileText },
   { title: "Invoices", url: "/invoices", icon: Receipt },
-  { title: "Quotations", url: "/quotations", icon: FileText },
-  { title: "Invoices", url: "/invoices", icon: Receipt },
   { title: "Purchases", url: "/purchases", icon: ShoppingCart },
   { title: "Parties", url: "/parties", icon: Contact },
   { title: "Cashbook", url: "/cashbook", icon: BookOpen },
