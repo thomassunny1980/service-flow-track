@@ -569,6 +569,7 @@ export type Database = {
           invoice_fy_year: string | null
           invoice_number_digits: number | null
           invoice_prefix: string | null
+          invoice_terms: string | null
           invoice_year_format: string | null
           last_invoice_number: number | null
           last_quotation_number: number | null
@@ -576,6 +577,7 @@ export type Database = {
           quotation_fy_year: string | null
           quotation_number_digits: number | null
           quotation_prefix: string | null
+          quotation_terms: string | null
           quotation_year_format: string | null
           shop_address: string | null
           shop_city: string | null
@@ -605,6 +607,7 @@ export type Database = {
           invoice_fy_year?: string | null
           invoice_number_digits?: number | null
           invoice_prefix?: string | null
+          invoice_terms?: string | null
           invoice_year_format?: string | null
           last_invoice_number?: number | null
           last_quotation_number?: number | null
@@ -612,6 +615,7 @@ export type Database = {
           quotation_fy_year?: string | null
           quotation_number_digits?: number | null
           quotation_prefix?: string | null
+          quotation_terms?: string | null
           quotation_year_format?: string | null
           shop_address?: string | null
           shop_city?: string | null
@@ -641,6 +645,7 @@ export type Database = {
           invoice_fy_year?: string | null
           invoice_number_digits?: number | null
           invoice_prefix?: string | null
+          invoice_terms?: string | null
           invoice_year_format?: string | null
           last_invoice_number?: number | null
           last_quotation_number?: number | null
@@ -648,6 +653,7 @@ export type Database = {
           quotation_fy_year?: string | null
           quotation_number_digits?: number | null
           quotation_prefix?: string | null
+          quotation_terms?: string | null
           quotation_year_format?: string | null
           shop_address?: string | null
           shop_city?: string | null

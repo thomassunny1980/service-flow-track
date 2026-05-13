@@ -43,6 +43,8 @@ interface ShopSettings {
   bank_branch: string | null;
   upi_id: string | null;
   terms_and_conditions: string | null;
+  invoice_terms: string | null;
+  quotation_terms: string | null;
   tax_rates: TaxRate[];
   quotation_prefix: string;
   quotation_year_format: string;
@@ -107,6 +109,8 @@ const Settings = () => {
     bank_branch: "",
     upi_id: "",
     terms_and_conditions: "",
+    invoice_terms: "",
+    quotation_terms: "",
     tax_rates: [
       { name: "GST 18%", rate: 18 },
       { name: "GST 12%", rate: 12 },
@@ -180,6 +184,8 @@ const Settings = () => {
           bank_branch: data.bank_branch || "",
           upi_id: data.upi_id || "",
           terms_and_conditions: data.terms_and_conditions || "",
+          invoice_terms: (data as any).invoice_terms || "",
+          quotation_terms: (data as any).quotation_terms || "",
           tax_rates: (data.tax_rates as unknown as TaxRate[]) || [
             { name: "GST 18%", rate: 18 },
             { name: "GST 12%", rate: 12 },
@@ -238,6 +244,8 @@ const Settings = () => {
           bank_branch: settings.bank_branch || null,
           upi_id: settings.upi_id || null,
           terms_and_conditions: settings.terms_and_conditions || null,
+          invoice_terms: settings.invoice_terms || null,
+          quotation_terms: settings.quotation_terms || null,
           tax_rates: JSON.parse(JSON.stringify(settings.tax_rates)),
           quotation_prefix: settings.quotation_prefix,
           quotation_year_format: settings.quotation_year_format,
@@ -813,26 +821,49 @@ const Settings = () => {
           </TabsContent>
 
           <TabsContent value="terms">
-            <Card>
-              <CardHeader>
-                <CardTitle>Terms & Conditions</CardTitle>
-                <CardDescription>
-                  Default terms that will appear on quotations
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <Label htmlFor="terms_and_conditions">Terms & Conditions</Label>
-                  <RichTextEditor
-                    value={settings.terms_and_conditions || ""}
-                    onChange={(val) => updateField("terms_and_conditions", val)}
-                    disabled={!isAdmin}
-                    placeholder="Enter your default terms and conditions..."
-                    rows={10}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+            <div className="grid gap-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Quotation Terms & Conditions</CardTitle>
+                  <CardDescription>
+                    Default terms that will appear on quotations
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <Label htmlFor="quotation_terms">Quotation Terms</Label>
+                    <RichTextEditor
+                      value={settings.quotation_terms || ""}
+                      onChange={(val) => updateField("quotation_terms", val)}
+                      disabled={!isAdmin}
+                      placeholder="Enter quotation terms and conditions..."
+                      rows={10}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Invoice Terms & Conditions</CardTitle>
+                  <CardDescription>
+                    Default terms that will appear on invoices
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <Label htmlFor="invoice_terms">Invoice Terms</Label>
+                    <RichTextEditor
+                      value={settings.invoice_terms || ""}
+                      onChange={(val) => updateField("invoice_terms", val)}
+                      disabled={!isAdmin}
+                      placeholder="Enter invoice terms and conditions..."
+                      rows={10}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
 
