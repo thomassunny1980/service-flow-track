@@ -422,7 +422,10 @@ const PrintTemplate = ({
 
   const shopStateCode = getStateCode(shopSettings?.shop_state);
   const customerStateCode = getStateCode(customerState);
-  const termsAndConditions = shopSettings?.terms_and_conditions?.trim() || "";
+  const typeSpecificTerms = type === 'INVOICE'
+    ? shopSettings?.invoice_terms
+    : shopSettings?.quotation_terms;
+  const termsAndConditions = (typeSpecificTerms?.trim() || shopSettings?.terms_and_conditions?.trim() || "");
 
   return (
     <div className="print-template">
