@@ -821,26 +821,49 @@ const Settings = () => {
           </TabsContent>
 
           <TabsContent value="terms">
-            <Card>
-              <CardHeader>
-                <CardTitle>Terms & Conditions</CardTitle>
-                <CardDescription>
-                  Default terms that will appear on quotations
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <Label htmlFor="terms_and_conditions">Terms & Conditions</Label>
-                  <RichTextEditor
-                    value={settings.terms_and_conditions || ""}
-                    onChange={(val) => updateField("terms_and_conditions", val)}
-                    disabled={!isAdmin}
-                    placeholder="Enter your default terms and conditions..."
-                    rows={10}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+            <div className="grid gap-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Quotation Terms & Conditions</CardTitle>
+                  <CardDescription>
+                    Default terms that will appear on quotations
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <Label htmlFor="quotation_terms">Quotation Terms</Label>
+                    <RichTextEditor
+                      value={settings.quotation_terms || ""}
+                      onChange={(val) => updateField("quotation_terms", val)}
+                      disabled={!isAdmin}
+                      placeholder="Enter quotation terms and conditions..."
+                      rows={10}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Invoice Terms & Conditions</CardTitle>
+                  <CardDescription>
+                    Default terms that will appear on invoices
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <Label htmlFor="invoice_terms">Invoice Terms</Label>
+                    <RichTextEditor
+                      value={settings.invoice_terms || ""}
+                      onChange={(val) => updateField("invoice_terms", val)}
+                      disabled={!isAdmin}
+                      placeholder="Enter invoice terms and conditions..."
+                      rows={10}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
 
