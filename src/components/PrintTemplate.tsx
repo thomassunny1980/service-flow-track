@@ -422,18 +422,27 @@ const PrintTemplate = ({
 
   const shopStateCode = getStateCode(shopSettings?.shop_state);
   const customerStateCode = getStateCode(customerState);
-  const typeSpecificTerms = type === 'INVOICE'
-    ? shopSettings?.invoice_terms
-    : shopSettings?.quotation_terms;
-  // Use only the type-specific terms. Strip HTML to detect truly empty rich-text content
-  // (e.g. "<p><br></p>") so empty editors don't accidentally fall back to legacy terms.
   const stripHtml = (html?: string | null) =>
-    (html || "").replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
-  const hasTypeSpecific = stripHtml(typeSpecificTerms) !== "";
-  const hasLegacy = stripHtml(shopSettings?.terms_and_conditions) !== "";
-  const termsAndConditions = hasTypeSpecific
-    ? (typeSpecificTerms as string)
-    : (hasLegacy ? (shopSettings?.terms_and_conditions as string) : "");
+    (html || "")
+      .replace(/<[^>]*>/g, "")
+      .replace(/&nbsp;|&#160;/gi, " ")
+      .replace(/&amp;/gi, "&")
+      .trim();
+
+  const getTermsForDocument = () => {
+    if (!shopSettings) return "";
+
+    const typeSpecificTerms = type === 'INVOICE'
+      ? shopSettings.invoice_terms
+      : shopSettings.quotation_terms;
+
+    if (stripHtml(typeSpecificTerms) !== "") return typeSpecificTerms || "";
+    return stripHtml(shopSettings.terms_and_conditions) !== ""
+      ? shopSettings.terms_and_conditions || ""
+      : "";
+  };
+
+  const termsAndConditions = getTermsForDocument();
 
   return (
     <div className="print-template">
