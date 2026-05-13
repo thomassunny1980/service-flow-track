@@ -43,6 +43,8 @@ interface ShopSettings {
   bank_branch: string | null;
   upi_id: string | null;
   terms_and_conditions: string | null;
+  invoice_terms: string | null;
+  quotation_terms: string | null;
   tax_rates: TaxRate[];
   quotation_prefix: string;
   quotation_year_format: string;
