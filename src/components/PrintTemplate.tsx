@@ -425,7 +425,15 @@ const PrintTemplate = ({
   const typeSpecificTerms = type === 'INVOICE'
     ? shopSettings?.invoice_terms
     : shopSettings?.quotation_terms;
-  const termsAndConditions = (typeSpecificTerms?.trim() || shopSettings?.terms_and_conditions?.trim() || "");
+  // Use only the type-specific terms. Strip HTML to detect truly empty rich-text content
+  // (e.g. "<p><br></p>") so empty editors don't accidentally fall back to legacy terms.
+  const stripHtml = (html?: string | null) =>
+    (html || "").replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
+  const hasTypeSpecific = stripHtml(typeSpecificTerms) !== "";
+  const hasLegacy = stripHtml(shopSettings?.terms_and_conditions) !== "";
+  const termsAndConditions = hasTypeSpecific
+    ? (typeSpecificTerms as string)
+    : (hasLegacy ? (shopSettings?.terms_and_conditions as string) : "");
 
   return (
     <div className="print-template">
