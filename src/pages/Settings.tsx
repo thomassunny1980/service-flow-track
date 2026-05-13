@@ -109,6 +109,8 @@ const Settings = () => {
     bank_branch: "",
     upi_id: "",
     terms_and_conditions: "",
+    invoice_terms: "",
+    quotation_terms: "",
     tax_rates: [
       { name: "GST 18%", rate: 18 },
       { name: "GST 12%", rate: 12 },
