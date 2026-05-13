@@ -52,6 +52,8 @@ interface ShopSettings {
   bank_branch: string | null;
   upi_id: string | null;
   terms_and_conditions: string | null;
+  invoice_terms?: string | null;
+  quotation_terms?: string | null;
 }
 
 interface PrintTemplateProps {
