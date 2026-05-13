@@ -184,6 +184,8 @@ const Settings = () => {
           bank_branch: data.bank_branch || "",
           upi_id: data.upi_id || "",
           terms_and_conditions: data.terms_and_conditions || "",
+          invoice_terms: (data as any).invoice_terms || "",
+          quotation_terms: (data as any).quotation_terms || "",
           tax_rates: (data.tax_rates as unknown as TaxRate[]) || [
             { name: "GST 18%", rate: 18 },
             { name: "GST 12%", rate: 12 },
