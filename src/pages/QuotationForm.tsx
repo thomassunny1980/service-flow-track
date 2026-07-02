@@ -489,7 +489,7 @@ const QuotationForm = () => {
           })
           .eq("id", existingCustomer.id);
       } else {
-        await supabase.from("customers").insert([{
+        await supabase.from("customers").insert([{ tenant_id: undefined as any,
           name: formData.customer_name,
           contact: formData.customer_contact || null,
           email: formData.customer_email || null,
@@ -559,7 +559,7 @@ const QuotationForm = () => {
         
         const { error } = await supabase
           .from("quotations")
-          .insert([{ ...quotationData, quotation_number: quotationNumber }]);
+          .insert([{ tenant_id: undefined as any, ...quotationData, quotation_number: quotationNumber }]);
 
         if (error) throw error;
 

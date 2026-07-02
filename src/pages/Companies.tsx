@@ -72,7 +72,7 @@ const Companies = () => {
       }
 
       const { data: { session } } = await supabase.auth.getSession();
-      const { error } = await supabase.from("companies").insert({
+      const { error } = await supabase.from("companies").insert({ tenant_id: undefined as any,
         name: name.trim(),
         logo_url,
         created_by: session?.user?.id,

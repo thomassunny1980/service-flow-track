@@ -545,7 +545,7 @@ const InvoiceForm = () => {
           })
           .eq("id", existingCustomer.id);
       } else {
-        await supabase.from("customers").insert([{
+        await supabase.from("customers").insert([{ tenant_id: undefined as any,
           name: formData.customer_name,
           contact: formData.customer_contact || null,
           email: formData.customer_email || null,
@@ -615,7 +615,7 @@ const InvoiceForm = () => {
         
         const { error } = await supabase
           .from("invoices")
-          .insert([{ ...invoiceData, invoice_number: invoiceNumber }]);
+          .insert([{ tenant_id: undefined as any, ...invoiceData, invoice_number: invoiceNumber }]);
 
         if (error) throw error;
 
