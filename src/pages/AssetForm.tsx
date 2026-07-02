@@ -39,7 +39,7 @@ const AssetForm = () => {
     setSaving(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const { error } = await supabase.from("assets").insert({
+      const { error } = await supabase.from("assets").insert({ tenant_id: undefined as any,
         asset_code: "", // trigger will generate
         company_id: companyId,
         location: location.trim() || null,

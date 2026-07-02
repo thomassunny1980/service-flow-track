@@ -141,7 +141,7 @@ const ProductForm = () => {
         customerId = customerData.customerId;
         tempPassword = customerData.tempPassword;
 
-        const { error } = await supabase.from("products").insert({
+        const { error } = await supabase.from("products").insert({ tenant_id: undefined as any,
           product_name: productData.product_name,
           serial_number: productData.serial_number,
           customer_name: productData.customer_name,

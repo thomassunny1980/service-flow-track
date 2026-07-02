@@ -162,7 +162,7 @@ const Inventory = () => {
       } else {
         const { error } = await supabase
           .from("inventory")
-          .insert([{ ...itemData, created_by: session.user.id }]);
+          .insert([{ tenant_id: undefined as any, ...itemData, created_by: session.user.id }]);
 
         if (error) throw error;
         toast({ title: "Success", description: "Item added successfully" });

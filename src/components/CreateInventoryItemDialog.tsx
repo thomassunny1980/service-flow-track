@@ -67,7 +67,7 @@ const CreateInventoryItemDialog = ({ onItemCreated }: CreateInventoryItemDialogP
 
       const { data, error } = await supabase
         .from("inventory")
-        .insert([{
+        .insert([{ tenant_id: undefined as any,
           item_name: formData.item_name,
           item_code: formData.item_code || null,
           description: formData.description || null,

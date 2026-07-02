@@ -139,7 +139,7 @@ const ProductDetail = () => {
       
       const { data: { user } } = await supabase.auth.getUser();
       
-      const { error } = await supabase.from("remarks").insert({
+      const { error } = await supabase.from("remarks").insert({ tenant_id: undefined as any,
         product_id: id,
         content: validated.content,
         created_by: user?.id,
