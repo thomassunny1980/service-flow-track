@@ -98,6 +98,7 @@ const QuotationForm = () => {
     customer_state: "Kerala",
     validity_date: format(addDays(new Date(), 15), "yyyy-MM-dd"),
     quotation_date: format(new Date(), "yyyy-MM-dd"),
+    subject: "",
     notes: "",
     price_inclusive_tax: false,
   });
@@ -269,6 +270,7 @@ const QuotationForm = () => {
           customer_state: (data as any).customer_state || "Kerala",
           validity_date: data.validity_date,
           quotation_date: data.created_at ? format(new Date(data.created_at), "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
+          subject: (data as any).subject || "",
           notes: data.notes || "",
           price_inclusive_tax: inclusive,
         });
@@ -530,6 +532,7 @@ const QuotationForm = () => {
         customer_address: formData.customer_address || null,
         customer_state: formData.customer_state || null,
         validity_date: formData.validity_date,
+        subject: formData.subject || null,
         notes: formData.notes || null,
         tax_rate: avgTaxRate,
         items: JSON.parse(JSON.stringify(itemsForStorage)),
@@ -873,6 +876,19 @@ const QuotationForm = () => {
                   </div>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Subject</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Input
+                value={formData.subject}
+                onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                placeholder="Subject of this document"
+              />
             </CardContent>
           </Card>
 

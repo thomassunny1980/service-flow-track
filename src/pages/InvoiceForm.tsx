@@ -100,6 +100,7 @@ const InvoiceForm = () => {
     customer_state: "Kerala",
     invoice_date: format(new Date(), "yyyy-MM-dd"),
     due_date: format(addDays(new Date(), 30), "yyyy-MM-dd"),
+    subject: "",
     notes: "",
     status: "unpaid",
     amount_paid: 0,
@@ -310,6 +311,7 @@ const InvoiceForm = () => {
           customer_state: (data as any).customer_state || "Kerala",
           invoice_date: format(new Date(), "yyyy-MM-dd"),
           due_date: format(addDays(new Date(), 30), "yyyy-MM-dd"),
+          subject: (data as any).subject || "",
           notes: data.notes || "",
           status: advancePaid > 0 ? "partial" : "unpaid",
           amount_paid: advancePaid,
@@ -357,6 +359,7 @@ const InvoiceForm = () => {
           customer_state: (data as any).customer_state || "Kerala",
           invoice_date: data.created_at ? format(new Date(data.created_at), "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
           due_date: data.due_date || format(addDays(new Date(), 30), "yyyy-MM-dd"),
+          subject: (data as any).subject || "",
           notes: data.notes || "",
           status: data.status || "unpaid",
           amount_paid: Number(data.amount_paid || 0),
@@ -584,6 +587,7 @@ const InvoiceForm = () => {
         customer_address: formData.customer_address || null,
         customer_state: formData.customer_state || null,
         due_date: formData.due_date,
+        subject: formData.subject || null,
         notes: formData.notes || null,
         status: formData.status,
         items: JSON.parse(JSON.stringify(itemsForStorage)),
@@ -945,6 +949,19 @@ const InvoiceForm = () => {
                   </div>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Subject</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Input
+                value={formData.subject}
+                onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                placeholder="Subject of this document"
+              />
             </CardContent>
           </Card>
 
