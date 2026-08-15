@@ -73,6 +73,7 @@ interface PrintTemplateProps {
   validityDate?: string;
   dueDate?: string | null;
   status: string;
+  subject?: string | null;
   notes: string | null;
   shopSettings: ShopSettings | null;
 }
@@ -204,6 +205,12 @@ export const getPrintStyles = () => `
   .customer-label {
     font-size: 10px;
     margin-bottom: 2px;
+  }
+  
+  .subject-section {
+    border-top: 1px solid #000;
+    padding: 6px 8px;
+    font-size: 10px;
   }
   
   .items-table { 
@@ -366,6 +373,7 @@ const PrintTemplate = ({
   validityDate,
   dueDate,
   status,
+  subject,
   notes,
   shopSettings
 }: PrintTemplateProps) => {
@@ -521,6 +529,12 @@ const PrintTemplate = ({
           {customerContact && <p>{customerContact}</p>}
           {customerState && <p>State Name{' '}{' '}{' '}{' '}: {customerState}, Code : {customerStateCode}</p>}
         </div>
+
+        {subject && (
+          <div className="subject-section">
+            <p><b>Subject:</b> {subject}</p>
+          </div>
+        )}
 
         {/* Items Table */}
         <table className="items-table">
