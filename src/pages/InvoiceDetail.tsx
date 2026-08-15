@@ -39,6 +39,7 @@ interface Invoice {
   amount_paid: number;
   due_date: string | null;
   status: string;
+  subject: string | null;
   notes: string | null;
   created_at: string;
 }
@@ -287,6 +288,7 @@ const InvoiceDetail = () => {
                 createdDate={format(parseISO(invoice.created_at), "d-MMM-yyyy")}
                 dueDate={invoice.due_date ? format(parseISO(invoice.due_date), "d-MMM-yyyy") : null}
                 status={invoice.status}
+                subject={(invoice as any).subject}
                 notes={invoice.notes}
                 shopSettings={shopSettings}
               />

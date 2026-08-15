@@ -40,6 +40,7 @@ interface Quotation {
   total_amount: number;
   validity_date: string;
   status: 'pending' | 'approved' | 'rejected';
+  subject: string | null;
   notes: string | null;
   created_at: string;
   advance_paid: number;
@@ -387,6 +388,7 @@ const QuotationDetail = () => {
                 createdDate={format(parseISO(quotation.created_at), "d-MMM-yyyy")}
                 validityDate={format(parseISO(quotation.validity_date), "d-MMM-yyyy")}
                 status={quotation.status}
+                subject={(quotation as any).subject}
                 notes={quotation.notes}
                 shopSettings={shopSettings}
               />
