@@ -239,6 +239,7 @@ export type Database = {
           payment_mode: string | null
           quotation_id: string | null
           status: string
+          subject: string | null
           subtotal: number
           tax_amount: number | null
           tenant_id: string
@@ -262,6 +263,7 @@ export type Database = {
           payment_mode?: string | null
           quotation_id?: string | null
           status?: string
+          subject?: string | null
           subtotal?: number
           tax_amount?: number | null
           tenant_id: string
@@ -285,6 +287,7 @@ export type Database = {
           payment_mode?: string | null
           quotation_id?: string | null
           status?: string
+          subject?: string | null
           subtotal?: number
           tax_amount?: number | null
           tenant_id?: string
@@ -593,6 +596,7 @@ export type Database = {
           notes: string | null
           quotation_number: string | null
           status: Database["public"]["Enums"]["quotation_status"]
+          subject: string | null
           subtotal: number
           tax_amount: number | null
           tax_rate: number | null
@@ -615,6 +619,7 @@ export type Database = {
           notes?: string | null
           quotation_number?: string | null
           status?: Database["public"]["Enums"]["quotation_status"]
+          subject?: string | null
           subtotal?: number
           tax_amount?: number | null
           tax_rate?: number | null
@@ -637,6 +642,7 @@ export type Database = {
           notes?: string | null
           quotation_number?: string | null
           status?: Database["public"]["Enums"]["quotation_status"]
+          subject?: string | null
           subtotal?: number
           tax_amount?: number | null
           tax_rate?: number | null
