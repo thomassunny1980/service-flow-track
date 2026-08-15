@@ -790,6 +790,15 @@ const InvoiceForm = () => {
                   </SelectContent>
                 </Select>
               </div>
+              <div className="space-y-2 md:col-span-2 lg:col-span-4">
+                <Label htmlFor="subject">Subject</Label>
+                <Input
+                  id="subject"
+                  value={formData.subject}
+                  onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                  placeholder="Subject of this document"
+                />
+              </div>
             </CardContent>
           </Card>
 
@@ -952,18 +961,6 @@ const InvoiceForm = () => {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Subject</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Input
-                value={formData.subject}
-                onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                placeholder="Subject of this document"
-              />
-            </CardContent>
-          </Card>
 
           <Card>
             <CardHeader>
